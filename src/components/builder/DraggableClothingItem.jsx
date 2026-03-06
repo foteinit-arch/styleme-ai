@@ -7,6 +7,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   const startPos = useRef({ x: 0, y: 0 });
   const startItem = useRef({ x: 0, y: 0 });
   const itemRef = useRef(null);
+  // Pinch-to-zoom tracking
+  const pinchRef = useRef({ active: false, startDist: 0, startScale: 1 });
 
   const img = item.processed_image_url || item.original_image_url;
   const size = 100 * (item.scale || 1);
