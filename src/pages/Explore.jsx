@@ -1,0 +1,114 @@
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+
+const OCCASIONS = ["all","casual","formal","wedding","party","sport","work","beach","other"];
+
+export default function Explore() {
+  const [user, setUser] = useState(null);
+  const [outfits, setOutfits] = useState([]);
+  const [likes, setLikes] = useState({});
+  const [search, setSearch] = useState("");
+  const [occasion, setOccasion] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    base44.auth.me().then(u => setUser(u)).catch(() => {});
+    loadOutfits();
+  }, []);
+
+  const loadOutfits = async () => {
+    const all = await base44.entities.Outfit.filter({ is_public: true }, "-created_date", 50);
+    setOutfits(all);
+    setLoading(false);
+  };
+
+  const handleLike = async (outfit) => {
+    if (!user) { base44.auth.redirectToLogin(window.location.href); return; }
+    if (likes[outfit.id]) return;
+
+    setLikes(prev => ({ ...prev, [outfit.id]: true }));
+    setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, likes_count: (o.likes_count || 0) + 1 } : o));
+
+    await base44.entities.OutfitLike.create({ outfit_id: outfit.id, user_email: user.email });
+    await base44.entities.Outfit.update(outfit.id, { likes_count: (outfit.likes_count || 0) + 1 });
+  };
+
+  const filtered = outfits.filter(o =>
+    (occasion === "all" || o.occasion === occasion) &&
+    (!search || o.name.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Explore Outfits</h1>
+          <p className="text-gray-500 mt-1">Discover and get inspired by outfits from the community</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search outfits..." className="pl-9" />
+          </div>
+          <Select value={occasion} onValueChange={setOccasion}>
+            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {OCCASIONS.map(o => <SelectItem key={o} value={o}>{o.charAt(0).toUpperCase() + o.slice(1)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {Array(12).fill(0).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl h-64 animate-pulse border border-rose-100" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-5xl mb-4">🔍</p>
+            <p className="text-gray-500 text-lg">No outfits found</p>
+            <p className="text-gray-400 text-sm">Be the first to share your outfit!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {filtered.map(outfit => (
+              <div key={outfit.id} className="bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden hover:shadow-md transition">
+                <div className="h-44 bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
+                  {outfit.outfit_snapshot_url ? (
+                    <img src={outfit.outfit_snapshot_url} className="h-full w-full object-cover" alt={outfit.name} />
+                  ) : (
+                    <span className="text-5xl">👗</span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h3 className="font-semibold text-gray-800 text-sm truncate">{outfit.name}</h3>
+                  {outfit.occasion && (
+                    <Badge className="bg-rose-50 text-rose-500 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
+                  )}
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-gray-400">{format(new Date(outfit.created_date), "MMM d")}</p>
+                    <button
+                      onClick={() => handleLike(outfit)}
+                      className={`flex items-center gap-1 text-xs transition ${likes[outfit.id] ? "text-rose-500" : "text-gray-400 hover:text-rose-400"}`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${likes[outfit.id] ? "fill-rose-500 text-rose-500" : ""}`} />
+                      {outfit.likes_count || 0}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
