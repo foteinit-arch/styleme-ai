@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Shirt, User, Sparkles, Globe, LogOut, Menu, X, BookOpen } from "lucide-react";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 const NAV = [
   { label: "Wardrobe", page: "Wardrobe", icon: Shirt },
   { label: "Builder", page: "OutfitBuilder", icon: Sparkles },
-  { label: "My Outfits", page: "MyOutfits", icon: Shirt },
+  { label: "My Outfits", page: "MyOutfits", icon: BookOpen },
   { label: "Explore", page: "Explore", icon: Globe },
   { label: "My Avatar", page: "Avatar", icon: User },
 ];
