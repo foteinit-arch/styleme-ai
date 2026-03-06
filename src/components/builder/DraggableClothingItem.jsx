@@ -72,14 +72,52 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     onUpdate(item.placedId, { x: newX, y: newY });
   }, [item.placedId, size, containerRef, onUpdate]);
 
-  const handleTouchEnd = () => { dragging.current = false; };
+  const handleTouchEnd = (e) => {
+    if (e.touches.length < 2) {
+      pinchRef.current.active = false;
+    }
+    if (e.touches.length === 0) {
+      dragging.current = false;
+    }
+  };
+
+  const handleTouchStartWithPinch = (e) => {
+    if (e.touches.length === 2) {
+      // Start pinch
+      e.preventDefault();
+      dragging.current = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = {
+        active: true,
+        startDist: Math.sqrt(dx * dx + dy * dy),
+        startScale: item.scale || 1,
+      };
+      setSelected(true);
+    } else {
+      handleTouchStart(e);
+    }
+  };
+
+  const handleTouchMoveWithPinch = useCallback((e) => {
+    if (e.touches.length === 2 && pinchRef.current.active) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const newScale = Math.max(0.3, Math.min(3, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
+      onUpdate(item.placedId, { scale: newScale });
+    } else {
+      handleTouchMove(e);
+    }
+  }, [handleTouchMove, item.placedId, item.scale, onUpdate]);
 
   useEffect(() => {
     const el = itemRef.current;
     if (!el) return;
-    el.addEventListener("touchmove", handleTouchMove, { passive: false });
-    return () => el.removeEventListener("touchmove", handleTouchMove);
-  }, [handleTouchMove]);
+    el.addEventListener("touchmove", handleTouchMoveWithPinch, { passive: false });
+    return () => el.removeEventListener("touchmove", handleTouchMoveWithPinch);
+  }, [handleTouchMoveWithPinch]);
 
   const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(3, (item.scale || 1) + delta)) });
   const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
