@@ -136,7 +136,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         touchAction: "none",
       }}
       onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
+      onTouchStart={handleTouchStartWithPinch}
       onTouchEnd={handleTouchEnd}
       onClick={() => setSelected(s => !s)}
     >
