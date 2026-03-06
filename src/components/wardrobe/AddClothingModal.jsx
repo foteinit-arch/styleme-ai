@@ -58,31 +58,20 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     if (tab === "upload" && file) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       originalUrl = file_url;
-    } else if (tab === "url" && url) {
-      // For URL imports, try to generate a clean version via AI
-      try {
-        const { url: generated } = await base44.integrations.Core.GenerateImage({
-          prompt: `A clean product photo of a ${category} clothing item on a pure white background, no model, no shadows, professionally lit, PNG style cutout`,
-          existing_image_urls: [url]
-        });
-        processedUrl = generated;
-        originalUrl = url;
-      } catch {
-        originalUrl = url;
-      }
-    }
-
-    // If we have an original URL and no processed URL yet, try AI background removal style
-    if (originalUrl && !processedUrl) {
+      // Try AI background removal for uploads
       try {
         const { url: cleaned } = await base44.integrations.Core.GenerateImage({
-          prompt: `Same clothing item on a perfectly clean white background, product photo style, no wrinkles, no model, pure white background`,
+          prompt: `Same clothing item on a perfectly clean white background, product photo style, no model, pure white background`,
           existing_image_urls: [originalUrl]
         });
         processedUrl = cleaned;
       } catch {
         processedUrl = originalUrl;
       }
+    } else if (tab === "url" && url) {
+      // Use the URL directly as-is, no AI generation
+      originalUrl = url;
+      processedUrl = url;
     }
 
     const item = await base44.entities.ClothingItem.create({
