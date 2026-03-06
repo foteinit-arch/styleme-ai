@@ -58,10 +58,10 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     if (tab === "upload" && file) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       originalUrl = file_url;
-      // Try AI background removal for uploads
+      // AI background removal
       try {
         const { url: cleaned } = await base44.integrations.Core.GenerateImage({
-          prompt: `Same clothing item on a perfectly clean white background, product photo style, no model, pure white background`,
+          prompt: `Extract only the clothing item from this image and place it on a pure transparent/white background. Show just the garment, no person, no background, no shadows. Clean product photo cutout.`,
           existing_image_urls: [originalUrl]
         });
         processedUrl = cleaned;
@@ -69,9 +69,22 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         processedUrl = originalUrl;
       }
     } else if (tab === "url" && url) {
-      // Use the URL directly as-is, no AI generation
       originalUrl = url;
-      processedUrl = url;
+      // Fetch the image as a blob, upload it, then do AI background removal
+      try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const fileFromUrl = new File([blob], "clothing.jpg", { type: blob.type || "image/jpeg" });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: fileFromUrl });
+        const { url: cleaned } = await base44.integrations.Core.GenerateImage({
+          prompt: `Extract only the clothing item from this image and place it on a pure transparent/white background. Show just the garment, no person, no background, no shadows. Clean product photo cutout.`,
+          existing_image_urls: [file_url]
+        });
+        processedUrl = cleaned;
+        originalUrl = file_url;
+      } catch {
+        processedUrl = url;
+      }
     }
 
     const item = await base44.entities.ClothingItem.create({
