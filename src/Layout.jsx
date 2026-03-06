@@ -21,14 +21,12 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Don't show nav on home page
   if (currentPageName === "Home") {
     return <>{children}</>;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top nav */}
       <nav className="bg-white border-b border-rose-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
@@ -36,7 +34,6 @@ export default function Layout({ children, currentPageName }) {
             <span className="text-xl font-bold text-rose-500">DressMe</span>
           </Link>
 
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
             {NAV.map(({ label, page, icon: Icon }) => (
               <Link key={page} to={createPageUrl(page)}>
@@ -68,13 +65,11 @@ export default function Layout({ children, currentPageName }) {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <button className="md:hidden p-2" onClick={() => setMobileOpen(o => !o)}>
             {mobileOpen ? <X className="w-5 h-5 text-gray-600" /> : <Menu className="w-5 h-5 text-gray-600" />}
           </button>
         </div>
 
-        {/* Mobile nav */}
         {mobileOpen && (
           <div className="md:hidden border-t border-rose-100 bg-white px-4 py-3 flex flex-col gap-1">
             {NAV.map(({ label, page, icon: Icon }) => (
