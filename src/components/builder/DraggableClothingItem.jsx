@@ -48,6 +48,16 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (itemRef.current && !itemRef.current.contains(e.target)) {
+        setSelected(false);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
   // Touch support
   const handleTouchStart = (e) => {
     if (e.target.closest("[data-control]")) return;
