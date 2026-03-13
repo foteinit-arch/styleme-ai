@@ -32,10 +32,6 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
       className="relative bg-white rounded-3xl shadow-lg border-2 border-rose-100 overflow-hidden select-none"
       style={{ width: 320, height: 560 }}
     >
-      {/* Background grid */}
-      <div className="absolute inset-0 opacity-30"
-        style={{ backgroundImage: "radial-gradient(circle, #f9a8d4 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-
       {/* Avatar */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <AvatarPreview profile={profile || {}} />
