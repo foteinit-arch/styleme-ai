@@ -69,15 +69,12 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       }
     } else if (tab === "url" && url) {
       originalUrl = url;
-      // Fetch the image as a blob, upload it, then do AI background removal
       try {
-        const resp = await fetch(url);
-        const blob = await resp.blob();
-        const fileFromUrl = new File([blob], "clothing.jpg", { type: blob.type || "image/jpeg" });
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: fileFromUrl });
-        const { image_url: cleanedUrl } = await base44.integrations.Core.RemoveImageBackground({ image_url: file_url });
-        processedUrl = cleanedUrl;
-        originalUrl = file_url;
+        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
+          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
+          existing_image_urls: [originalUrl]
+        });
+        processedUrl = generatedUrl;
       } catch {
         processedUrl = url;
       }
