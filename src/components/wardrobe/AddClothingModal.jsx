@@ -73,11 +73,8 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         const blob = await resp.blob();
         const fileFromUrl = new File([blob], "clothing.jpg", { type: blob.type || "image/jpeg" });
         const { file_url } = await base44.integrations.Core.UploadFile({ file: fileFromUrl });
-        const { url: cleaned } = await base44.integrations.Core.GenerateImage({
-          prompt: `Extract only the clothing item from this image and place it on a pure transparent/white background. Show just the garment, no person, no background, no shadows. Clean product photo cutout.`,
-          existing_image_urls: [file_url]
-        });
-        processedUrl = cleaned;
+        const { image_url: cleanedUrl } = await base44.integrations.Core.RemoveImageBackground({ image_url: file_url });
+        processedUrl = cleanedUrl;
         originalUrl = file_url;
       } catch {
         processedUrl = url;
