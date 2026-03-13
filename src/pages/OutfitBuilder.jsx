@@ -47,7 +47,7 @@ export default function OutfitBuilder() {
       placedId: Date.now() + Math.random(),
       x: pos.x,
       y: pos.y,
-      scale: 0.9,
+      scale: pos.scale ?? 0.9,
       rotation: 0,
       z_index: prev.length,
     }]);
