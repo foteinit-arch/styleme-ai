@@ -29,7 +29,7 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
       ref={canvasRef}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="relative bg-white rounded-3xl shadow-lg border-2 border-rose-100 overflow-hidden select-none"
+      className="relative rounded-3xl shadow-lg border-2 border-rose-100 overflow-hidden select-none"
       style={{ width: 320, height: 560 }}
     >
       {/* Avatar */}
