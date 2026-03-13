@@ -60,11 +60,8 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       originalUrl = file_url;
       // AI background removal
       try {
-        const { url: cleaned } = await base44.integrations.Core.GenerateImage({
-          prompt: `Extract only the clothing item from this image and place it on a pure transparent/white background. Show just the garment, no person, no background, no shadows. Clean product photo cutout.`,
-          existing_image_urls: [originalUrl]
-        });
-        processedUrl = cleaned;
+        const { image_url: cleanedUrl } = await base44.integrations.Core.RemoveImageBackground({ image_url: originalUrl });
+        processedUrl = cleanedUrl;
       } catch {
         processedUrl = originalUrl;
       }
