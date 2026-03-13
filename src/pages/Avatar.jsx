@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Save, User, Ruler } from "lucide-react";
+import { Upload, Save, User, Ruler, Sparkles } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 
