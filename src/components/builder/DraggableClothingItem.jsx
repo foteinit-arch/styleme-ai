@@ -135,7 +135,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   return (
     <div
       ref={itemRef}
-      className={`absolute cursor-grab active:cursor-grabbing ${selected ? "ring-2 ring-rose-400 ring-offset-1 rounded-xl" : ""}`}
+      className="absolute cursor-grab active:cursor-grabbing"
       style={{
         left: item.x,
         top: item.y,
@@ -144,6 +144,9 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         zIndex: (item.z_index || 0) + 10,
         transform: `rotate(${item.rotation || 0}deg)`,
         touchAction: "none",
+        backgroundColor: 'transparent',
+        mixBlendMode: 'multiply',
+        outline: selected ? '2px solid #fb7185' : 'none',
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStartWithPinch}
