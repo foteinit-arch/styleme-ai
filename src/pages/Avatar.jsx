@@ -13,6 +13,7 @@ export default function Avatar() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
