@@ -25,7 +25,7 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
         alt="avatar"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
       />
-      {placed.map(item => (
+      {placed && placed.map(item => (
         <DraggableClothingItem
           key={item.placedId}
           item={item}
@@ -37,10 +37,3 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
     </div>
   );
 }
-```
-
----
-
-**Then open `DraggableClothingItem.jsx` and find the `<img>` tag and change its className to:**
-```
-"w-full h-full object-contain pointer-events-none"
