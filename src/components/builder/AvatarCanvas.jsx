@@ -29,15 +29,16 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
       ref={canvasRef}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="relative rounded-3xl shadow-lg border-2 border-rose-100 overflow-hidden select-none"
-      style={{ width: 320, height: 560 }}
+      style={{ position: "relative", width: "100%", maxWidth: 320, height: 600, overflow: "hidden", borderRadius: 24 }}
     >
-      {/* Avatar */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <AvatarPreview profile={profile || {}} />
-      </div>
+      {profile?.avatar_photo_url && (
+        <img
+          src={profile.avatar_photo_url}
+          alt="avatar"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+        />
+      )}
 
-      {/* Placed clothing items */}
       {placed.map(item => (
         <DraggableClothingItem
           key={item.placedId}
@@ -47,12 +48,6 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
           onRemove={onRemove}
         />
       ))}
-
-      {placed.length === 0 && (
-        <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
-          <p className="text-gray-400 text-sm">← Drag clothes here or click them</p>
-        </div>
-      )}
     </div>
   );
 }
