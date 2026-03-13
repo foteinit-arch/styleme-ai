@@ -72,7 +72,7 @@ export default function AvatarPreview({ profile = {}, overlayItems = [] }) {
   const cx = 60;
 
   return (
-    <svg viewBox="0 0 120 320" className="w-40" style={{ maxHeight: 380 }}>
+    <svg viewBox={`0 0 120 ${Math.ceil(footY + 20)}`} className="w-40" style={{ maxHeight: 420 }}>
       <defs>
         <radialGradient id="faceGrad" cx="50%" cy="45%" r="55%">
           <stop offset="0%" stopColor={skin} />
