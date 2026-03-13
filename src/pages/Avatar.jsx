@@ -103,6 +103,23 @@ export default function Avatar() {
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>
               {uploading && <p className="text-sm text-rose-400 mt-2 text-center">Uploading...</p>}
+              {form.avatar_photo_url && (
+                <Button
+                  onClick={handleGenerateAvatar}
+                  disabled={generating}
+                  variant="outline"
+                  className="w-full mt-3 border-rose-300 text-rose-500 hover:bg-rose-50"
+                >
+                  <Sparkles className={`mr-2 w-4 h-4 ${generating ? "animate-spin" : ""}`} />
+                  {generating ? "Generating avatar..." : "Generate My Avatar"}
+                </Button>
+              )}
+              {form.avatar_generated_url && (
+                <div className="mt-3">
+                  <p className="text-xs text-gray-500 mb-1 text-center">Generated Avatar</p>
+                  <img src={form.avatar_generated_url} className="h-40 mx-auto object-contain rounded-lg border border-rose-100" alt="generated avatar" />
+                </div>
+              )}
             </div>
 
             {/* Measurements */}
