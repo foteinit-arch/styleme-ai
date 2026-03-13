@@ -59,7 +59,7 @@ export default function Avatar() {
       setProfile(created);
     }
     setSaving(false);
-    toast({ title: "Avatar saved!", description: "Your profile has been updated." });
+    toast({ title: "Avatar saved!", description: "Your profile has been updated.", duration: 3000 });
   };
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
