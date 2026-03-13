@@ -63,6 +63,17 @@ export default function Avatar() {
     toast({ title: "Avatar saved!", description: "Your profile has been updated.", duration: 3000 });
   };
 
+  const handleGenerateAvatar = async () => {
+    if (!form.avatar_photo_url) return;
+    setGenerating(true);
+    const { url } = await base44.integrations.Core.GenerateImage({
+      prompt: "Full body fashion illustration of this exact person, neutral standing pose, arms at sides, plain white background, stylized but realistic proportions, facing forward, full body visible from head to toe, fashion app avatar style",
+      existing_image_urls: [form.avatar_photo_url]
+    });
+    setForm((f) => ({ ...f, avatar_generated_url: url }));
+    setGenerating(false);
+  };
+
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   return (
