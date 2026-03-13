@@ -30,13 +30,24 @@ export default function OutfitBuilder() {
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
 
+  const categoryPositions = {
+    top:       { x: 80, y: 180 },
+    bottom:    { x: 80, y: 320 },
+    dress:     { x: 80, y: 180 },
+    shoes:     { x: 90, y: 480 },
+    outerwear: { x: 70, y: 160 },
+    accessory: { x: 110, y: 100 },
+    bag:       { x: 20, y: 300 },
+  };
+
   const handleDrop = (item) => {
+    const pos = categoryPositions[item.category] || { x: 80, y: 200 };
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
-      x: 80,
-      y: 80,
-      scale: 1,
+      x: pos.x,
+      y: pos.y,
+      scale: 0.9,
       rotation: 0,
       z_index: prev.length,
     }]);
