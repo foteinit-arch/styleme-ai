@@ -130,57 +130,56 @@ export default function AvatarPreview({ profile = {}, overlayItems = [] }) {
       <rect x={cx - 6} y={51} width={12} height={13} rx={4} fill={skin} />
 
       {/* ── SHOULDERS / TORSO ── */}
-      {/* torso shape */}
       <path
-        d={`M ${cx - 22} 68 
-            Q ${cx - 24} 100 ${cx - 16} 128 
-            Q ${cx - 10} 138 ${cx} 138 
-            Q ${cx + 10} 138 ${cx + 16} 128 
-            Q ${cx + 24} 100 ${cx + 22} 68 
-            Q ${cx + 14} 63 ${cx} 63 
-            Q ${cx - 14} 63 ${cx - 22} 68 Z`}
+        d={`M ${cx - armStartX} ${torsoTop + 5}
+            Q ${cx - armStartX - 2} ${(torsoTop + torsoBottom) / 2} ${cx - waistHW} ${torsoBottom - 5}
+            Q ${cx - waistHW + 2} ${torsoBottom + 5} ${cx} ${torsoBottom + 5}
+            Q ${cx + waistHW - 2} ${torsoBottom + 5} ${cx + waistHW} ${torsoBottom - 5}
+            Q ${cx + armStartX + 2} ${(torsoTop + torsoBottom) / 2} ${cx + armStartX} ${torsoTop + 5}
+            Q ${cx + shoulderHW} ${torsoTop} ${cx} ${torsoTop}
+            Q ${cx - shoulderHW} ${torsoTop} ${cx - armStartX} ${torsoTop + 5} Z`}
         fill="url(#bodyGrad)"
       />
       {/* collar bone hint */}
-      <path d={`M ${cx - 13} 65 Q ${cx} 68 ${cx + 13} 65`} stroke={shadow} strokeWidth="0.7" fill="none" opacity="0.5" />
+      <path d={`M ${cx - shoulderHW + 4} ${torsoTop + 2} Q ${cx} ${torsoTop + 5} ${cx + shoulderHW - 4} ${torsoTop + 2}`} stroke={shadow} strokeWidth="0.7" fill="none" opacity="0.5" />
 
       {/* ── ARMS ── */}
       {/* left upper arm */}
-      <path d={`M ${cx - 22} 68 Q ${cx - 34} 82 ${cx - 30} 108`} stroke={skin} strokeWidth="13" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx - armStartX} ${torsoTop + 5} Q ${cx - armStartX - 12} ${torsoTop + 19} ${cx - armStartX - 8} ${torsoTop + 45}`} stroke={skin} strokeWidth="13" fill="none" strokeLinecap="round" />
       {/* left forearm */}
-      <path d={`M ${cx - 30} 108 Q ${cx - 28} 128 ${cx - 26} 140`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx - armStartX - 8} ${torsoTop + 45} Q ${cx - armStartX - 6} ${torsoTop + 65} ${cx - armStartX - 4} ${torsoTop + 77}`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
       {/* left hand */}
-      <ellipse cx={cx - 26} cy={143} rx={5} ry={6} fill={skin} />
+      <ellipse cx={cx - armStartX - 4} cy={torsoTop + 80} rx={5} ry={6} fill={skin} />
 
       {/* right upper arm */}
-      <path d={`M ${cx + 22} 68 Q ${cx + 34} 82 ${cx + 30} 108`} stroke={skin} strokeWidth="13" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx + armStartX} ${torsoTop + 5} Q ${cx + armStartX + 12} ${torsoTop + 19} ${cx + armStartX + 8} ${torsoTop + 45}`} stroke={skin} strokeWidth="13" fill="none" strokeLinecap="round" />
       {/* right forearm */}
-      <path d={`M ${cx + 30} 108 Q ${cx + 28} 128 ${cx + 26} 140`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx + armStartX + 8} ${torsoTop + 45} Q ${cx + armStartX + 6} ${torsoTop + 65} ${cx + armStartX + 4} ${torsoTop + 77}`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
       {/* right hand */}
-      <ellipse cx={cx + 26} cy={143} rx={5} ry={6} fill={skin} />
+      <ellipse cx={cx + armStartX + 4} cy={torsoTop + 80} rx={5} ry={6} fill={skin} />
 
       {/* ── HIPS / PELVIS ── */}
       <path
-        d={`M ${cx - 16} 128 Q ${cx - 20} 148 ${cx - 18} 158 Q ${cx - 8} 162 ${cx} 162 Q ${cx + 8} 162 ${cx + 18} 158 Q ${cx + 20} 148 ${cx + 16} 128 Z`}
+        d={`M ${cx - waistHW} ${torsoBottom - 5} Q ${cx - hipHW - 2} ${(torsoBottom + hipBottom) / 2} ${cx - hipHW + 2} ${hipBottom} Q ${cx - 8} ${hipBottom + 4} ${cx} ${hipBottom + 4} Q ${cx + 8} ${hipBottom + 4} ${cx + hipHW - 2} ${hipBottom} Q ${cx + hipHW + 2} ${(torsoBottom + hipBottom) / 2} ${cx + waistHW} ${torsoBottom - 5} Z`}
         fill={skin}
       />
 
       {/* ── LEGS ── */}
       {/* left thigh */}
-      <path d={`M ${cx - 18} 158 Q ${cx - 18} 202 ${cx - 14} 220`} stroke={skin} strokeWidth="14" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx - hipHW + 2} ${hipBottom} Q ${cx - hipHW + 2} ${(hipBottom + thighEnd) / 2} ${cx - hipHW + 6} ${thighEnd}`} stroke={skin} strokeWidth="14" fill="none" strokeLinecap="round" />
       {/* left shin */}
-      <path d={`M ${cx - 14} 220 Q ${cx - 12} 250 ${cx - 11} 268`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx - hipHW + 6} ${thighEnd} Q ${cx - hipHW + 8} ${(thighEnd + shinEnd) / 2} ${cx - hipHW + 9} ${shinEnd}`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
 
       {/* right thigh */}
-      <path d={`M ${cx + 18} 158 Q ${cx + 18} 202 ${cx + 14} 220`} stroke={skin} strokeWidth="14" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx + hipHW - 2} ${hipBottom} Q ${cx + hipHW - 2} ${(hipBottom + thighEnd) / 2} ${cx + hipHW - 6} ${thighEnd}`} stroke={skin} strokeWidth="14" fill="none" strokeLinecap="round" />
       {/* right shin */}
-      <path d={`M ${cx + 14} 220 Q ${cx + 12} 250 ${cx + 11} 268`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
+      <path d={`M ${cx + hipHW - 6} ${thighEnd} Q ${cx + hipHW - 8} ${(thighEnd + shinEnd) / 2} ${cx + hipHW - 9} ${shinEnd}`} stroke={skin} strokeWidth="11" fill="none" strokeLinecap="round" />
 
       {/* ── FEET ── */}
-      <ellipse cx={cx - 11} cy={272} rx={8} ry={5} fill={skin} />
-      <ellipse cx={cx - 14} cy={274} rx={5} ry={3.5} fill={shadow} opacity="0.4" />
-      <ellipse cx={cx + 11} cy={272} rx={8} ry={5} fill={skin} />
-      <ellipse cx={cx + 14} cy={274} rx={5} ry={3.5} fill={shadow} opacity="0.4" />
+      <ellipse cx={cx - hipHW + 9} cy={footY} rx={8} ry={5} fill={skin} />
+      <ellipse cx={cx - hipHW + 6} cy={footY + 2} rx={5} ry={3.5} fill={shadow} opacity="0.4" />
+      <ellipse cx={cx + hipHW - 9} cy={footY} rx={8} ry={5} fill={skin} />
+      <ellipse cx={cx + hipHW - 6} cy={footY + 2} rx={5} ry={3.5} fill={shadow} opacity="0.4" />
     </svg>
   );
 }
