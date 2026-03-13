@@ -68,7 +68,7 @@ export default function Avatar() {
     if (!form.avatar_photo_url) return;
     setGenerating(true);
     const { url } = await base44.integrations.Core.GenerateImage({
-      prompt: `Full body fashion avatar illustration based on this person's photo. Match their face features, hair and skin tone exactly. Body proportions: height ${form.height_cm}cm, bust ${form.bust_cm}cm, waist ${form.waist_cm}cm, hips ${form.hips_cm}cm, weight ${form.weight_kg}kg. Body shape: ${form.body_shape}. Draw the FULL body from head to toe in a neutral standing pose, arms relaxed at sides, facing forward. Plain white background. Do NOT make her taller or thinner than the measurements specify. Realistic fashion illustration style, not anime, not cartoon.`,
+      prompt: `Full body fashion avatar of this exact person. She is wearing a plain skin-toned seamless bodysuit, no patterns, no clothing details. Neutral standing pose, arms relaxed at sides, facing forward, full body head to toe visible, plain white background. Match her face, hair colour and skin tone from the photo exactly.`,
       existing_image_urls: [form.avatar_photo_url]
     });
     setForm((f) => ({ ...f, avatar_generated_url: url }));
