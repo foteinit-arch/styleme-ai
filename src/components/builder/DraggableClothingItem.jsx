@@ -143,7 +143,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       {img ? (
         <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none rounded-lg mix-blend-multiply" draggable={false} />
       ) : (
-        <div className="w-full h-full bg-rose-100 rounded-lg flex items-center justify-center text-2xl">👗</div>
+        <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
       )}
 
       {/* Controls */}
