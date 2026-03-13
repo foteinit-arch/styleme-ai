@@ -151,7 +151,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       onClick={() => setSelected(s => !s)}
     >
       {img ? (
-        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" draggable={false} />
+        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none mix-blend-multiply" draggable={false} />
       ) : (
         <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
       )}
