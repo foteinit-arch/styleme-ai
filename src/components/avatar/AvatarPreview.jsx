@@ -15,6 +15,33 @@ export default function AvatarPreview({ profile = {}, overlayItems = [] }) {
   const skin = skinColors[skin_tone] || skinColors.medium;
   const shadow = skinColors[skin_tone] === skinColors.light ? "#e8b48a" : "#8a5030";
 
+  // ── Body proportion calculations ──
+  const { bust_cm = 90, waist_cm = 70, hips_cm = 96, height_cm = 168 } = profile;
+
+  // Linear interpolation helper
+  const lerp = (val, inMin, inMax, outMin, outMax) => {
+    const t = Math.max(0, Math.min(1, (val - inMin) / (inMax - inMin)));
+    return outMin + t * (outMax - outMin);
+  };
+
+  const shoulderHW = lerp(bust_cm, 60, 140, 15, 25);   // half-width at shoulders
+  const waistHW    = lerp(waist_cm, 50, 130, 10, 30);  // half-width at waist
+  const hipHW      = lerp(hips_cm,  70, 150, 18, 36);  // half-width at hips
+
+  // Leg length based on height (legs start at y=158, end at y=268 by default → span 110px)
+  const legSpan = lerp(height_cm, 140, 210, 85, 130);
+  const thighEnd  = 158 + legSpan * 0.55;  // ~60% thigh
+  const shinEnd   = 158 + legSpan;         // full leg end
+  const footY     = shinEnd + 4;
+
+  // Torso bottom y stays fixed relative to waist/hip; torso starts at y=63
+  const torsoTop = 63;
+  const torsoBottom = 128; // where torso meets hip
+  const hipBottom   = 158;
+
+  // Arm start follows shoulder width
+  const armStartX = shoulderHW + 2;
+
   if (avatar_photo_url) {
     return (
       <div className="relative flex flex-col items-center">
