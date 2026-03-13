@@ -58,10 +58,12 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     if (tab === "upload" && file) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       originalUrl = file_url;
-      // AI background removal
       try {
-        const { image_url: cleanedUrl } = await base44.integrations.Core.RemoveImageBackground({ image_url: originalUrl });
-        processedUrl = cleanedUrl;
+        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
+          prompt: "product photo of this exact clothing item, pure white background, no shadows, no person, flat lay",
+          existing_image_urls: [originalUrl]
+        });
+        processedUrl = generatedUrl;
       } catch {
         processedUrl = originalUrl;
       }
