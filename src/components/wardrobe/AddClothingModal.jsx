@@ -60,7 +60,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       originalUrl = file_url;
       try {
         const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-          prompt: "product photo of this exact clothing item, pure white background, no shadows, no person, flat lay",
+          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
           existing_image_urls: [originalUrl]
         });
         processedUrl = generatedUrl;
