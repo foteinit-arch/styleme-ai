@@ -26,6 +26,7 @@ export default function Avatar() {
     hair_color: "#3b1f0a",
     body_shape: "hourglass",
     avatar_photo_url: "",
+    avatar_generated_url: "",
   });
 
   useEffect(() => {
