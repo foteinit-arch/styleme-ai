@@ -30,15 +30,15 @@ export default function OutfitBuilder() {
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
 
-  const categoryPositions = {
-    top:       { x: 60,  y: 160, scale: 1.4 },
-    bottom:    { x: 55,  y: 310, scale: 1.5 },
-    dress:     { x: 50,  y: 140, scale: 1.6 },
-    shoes:     { x: 80,  y: 490, scale: 1.0 },
-    outerwear: { x: 50,  y: 130, scale: 1.5 },
-    accessory: { x: 105, y: 30,  scale: 0.7 },
-    bag:       { x: 10,  y: 320, scale: 0.9 },
-  };
+const categoryPositions = {
+  top:       { x: 90,  y: 160, scale: 1.4 },
+  bottom:    { x: 85,  y: 310, scale: 1.5 },
+  dress:     { x: 80,  y: 140, scale: 1.6 },
+  shoes:     { x: 110, y: 490, scale: 1.0 },
+  outerwear: { x: 85,  y: 130, scale: 1.5 },
+  accessory: { x: 125, y: 30,  scale: 0.7 },
+  bag:       { x: 115, y: 320, scale: 0.9 },
+};
 
   const handleDrop = (item) => {
     const pos = categoryPositions[item.category] || { x: 80, y: 200 };
