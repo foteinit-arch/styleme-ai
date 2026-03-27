@@ -129,8 +129,15 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     return () => el.removeEventListener("touchmove", handleTouchMoveWithPinch);
   }, [handleTouchMoveWithPinch]);
 
-const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
-  const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
+const scaleBy = (delta) => {
+  const newScale = Math.max(0.3, Math.min(5, (item.scale || 1) + delta));
+  const sizeDiff = 100 * (newScale - (item.scale || 1));
+  onUpdate(item.placedId, {
+    scale: newScale,
+    x: item.x - sizeDiff / 2,
+    y: item.y - sizeDiff / 2,
+  });
+};
 
   return (
     <div
