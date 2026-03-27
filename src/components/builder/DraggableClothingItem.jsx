@@ -77,7 +77,6 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     if (!container) return;
     const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
     const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
-    onUpdate(item.placedId, { x: newX, y: newY });
   }, [item.placedId, size, containerRef, onUpdate]);
 
   const handleTouchEnd = (e) => {
