@@ -149,7 +149,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStartWithPinch}
       onTouchEnd={handleTouchEnd}
-      onClick={() => setSelected(s => !s)}
+      onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
     >
       {img ? (
         <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" style={{ mixBlendMode: 'multiply' }} draggable={false} />
