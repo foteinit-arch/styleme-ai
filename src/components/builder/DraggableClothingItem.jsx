@@ -139,8 +139,8 @@ const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.m
       ref={itemRef}
       className="absolute cursor-grab active:cursor-grabbing"
       style={{
-        left: item.x - size / 2,
-        top: item.y - size / 2
+        left: item.x,
+        top: item.y,
         width: size,
         height: size,
         zIndex: (item.z_index || 0) + 10,
