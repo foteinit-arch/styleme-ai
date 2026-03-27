@@ -132,12 +132,15 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
 const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
 
 const scaleBy = (delta) => {
-  const newScale = Math.max(0.3, Math.min(5, (item.scale || 1) + delta));
-  const sizeDiff = 100 * (newScale - (item.scale || 1));
+  const oldScale = item.scale || 1;
+  const newScale = Math.max(0.3, Math.min(5, oldScale + delta));
+  const oldSize = 100 * oldScale;
+  const newSize = 100 * newScale;
+  const diff = newSize - oldSize;
   onUpdate(item.placedId, {
     scale: newScale,
-    x: item.x - sizeDiff / 2,
-    y: item.y - sizeDiff / 2,
+    x: item.x - diff / 2,
+    y: item.y - diff / 2,
   });
 };
 
