@@ -170,7 +170,14 @@ const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.m
           </button>
           <button data-control="true" onClick={rotate} className="p-1 rounded-full hover:bg-rose-50">
             <RotateCw className="w-3.5 h-3.5 text-gray-600" />
-          </button>
+          </button> 
+             <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: (item.z_index || 0) + 1 })} className="p-1 rounded-full hover:bg-rose-50">
+  <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
+</button>
+<button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Math.max(0, (item.z_index || 0) - 1) })} className="p-1 rounded-full hover:bg-rose-50">
+  <ChevronDown className="w-3.5 h-3.5 text-gray-600" />
+</button>
+
           <button data-control="true" onClick={() => onRemove(item.placedId)} className="p-1 rounded-full hover:bg-red-50">
             <X className="w-3.5 h-3.5 text-red-400" />
           </button>
