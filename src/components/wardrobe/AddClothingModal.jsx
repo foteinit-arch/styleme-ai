@@ -40,22 +40,24 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       originalUrl = file_url;
       try {
-        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
-          existing_image_urls: [originalUrl]
-        });
-        processedUrl = generatedUrl;
+        const { removeBackground } = await import("@imgly/background-removal");
+        const blob = await removeBackground(file);
+        const processedFile = new File([blob], "processed.png", { type: "image/png" });
+        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
+        processedUrl = pUrl;
       } catch {
         processedUrl = originalUrl;
       }
     } else if (tab === "url" && url) {
       originalUrl = url;
       try {
-        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
-          existing_image_urls: [originalUrl]
-        });
-        processedUrl = generatedUrl;
+        const { removeBackground } = await import("@imgly/background-removal");
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const processedBlob = await removeBackground(blob);
+        const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
+        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
+        processedUrl = pUrl;
       } catch {
         processedUrl = url;
       }
@@ -77,7 +79,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     setError("Something went wrong. Please try again.");
   }
   setProcessing(false);
-  };
+};
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
