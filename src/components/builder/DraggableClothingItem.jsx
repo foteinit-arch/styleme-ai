@@ -144,8 +144,6 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         zIndex: (item.z_index || 0) + 10,
         transform: `rotate(${item.rotation || 0}deg)`,
         touchAction: "none",
-        backgroundColor: 'transparent',
-        mixBlendMode: 'multiply',
         outline: selected ? '2px solid #fb7185' : 'none',
       }}
       onMouseDown={handleMouseDown}
@@ -154,7 +152,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       onClick={() => setSelected(s => !s)}
     >
       {img ? (
-        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" style={{ mixBlendMode: 'darken', backgroundColor: 'transparent' }} draggable={false} />
+        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" style={{}}
+ draggable={false} />
       ) : (
         <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
       )}
