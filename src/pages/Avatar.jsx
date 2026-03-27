@@ -68,8 +68,7 @@ export default function Avatar() {
     if (!form.avatar_photo_url) return;
     setGenerating(true);
     const { url } = await base44.integrations.Core.GenerateImage({
-      prompt: `Full body fashion avatar of this exact person. She is wearing a plain skin-toned seamless bodysuit, no patterns, no clothing details. Relaxed standing pose, arms relaxed at sides, facing forward, subtle natural smile, full body head to toe visible, plain white background. Match her face, hair colour and skin tone from the photo exactly.`,
-
+      prompt: `Full body fashion avatar of this exact person. She is wearing a plain skin-toned seamless bodysuit, no patterns, no clothing details. Relaxed standing pose, arms relaxed at sides, facing forward, she is SMILING warmly and naturally, happy friendly expression, full body head to toe visible, plain white background. Match her face, hair colour and skin tone from the photo exactly.`,
       existing_image_urls: [form.avatar_photo_url]
     });
     setForm((f) => ({ ...f, avatar_generated_url: url }));
