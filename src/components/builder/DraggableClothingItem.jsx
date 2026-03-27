@@ -28,10 +28,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     const dy = e.clientY - startPos.current.y;
     const container = containerRef.current;
     if (!container) return;
-    const maxX = container.clientWidth - size;
-    const maxY = container.clientHeight - size;
-    const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
-    const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
+   const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
+   const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
     onUpdate(item.placedId, { x: newX, y: newY });
   }, [item.placedId, item.x, item.y, size, containerRef, onUpdate]);
 
