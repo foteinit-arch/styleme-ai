@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { X, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import { X, ZoomIn, ZoomOut, RotateCw, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function DraggableClothingItem({ item, containerRef, onUpdate, onRemove }) {
