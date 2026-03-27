@@ -115,7 +115,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const newScale = Math.max(0.3, Math.min(3, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
+      const newScale = Math.max(0.3, Math.min(5, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
       onUpdate(item.placedId, { scale: newScale });
     } else {
       handleTouchMove(e);
