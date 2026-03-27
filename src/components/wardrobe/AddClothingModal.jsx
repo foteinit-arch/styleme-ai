@@ -27,54 +27,37 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     setPreview(URL.createObjectURL(f));
   };
 
-  const processWithAI = async (imageUrl) => {
-    // Use AI to remove background and clean up the clothing image
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a fashion image processor. The image at this URL contains a clothing item. 
-               Describe it briefly and confirm it's a clothing item. Return JSON with: 
-               { "is_clothing": boolean, "suggested_name": string, "suggested_category": string }
-               Categories: top, bottom, dress, outerwear, shoes, accessory, underwear, bag`,
-      file_urls: [imageUrl],
-      response_json_schema: {
-        type: "object",
-        properties: {
-          is_clothing: { type: "boolean" },
-          suggested_name: { type: "string" },
-          suggested_category: { type: "string" }
-        }
-      }
-    });
-    return result;
-  };
-
   const handleSubmit = async () => {
-    if (!name || !category) { setError("Please fill in name and category."); return; }
-    setProcessing(true);
-    setError("");
+  if (!name || !category) { setError("Please fill in name and category."); return; }
+  setProcessing(true);
+  setError("");
 
-    let originalUrl = "";
-    let processedUrl = "";
+  let originalUrl = "";
+  let processedUrl = "";
 
+  try {
     if (tab === "upload" && file) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       originalUrl = file_url;
       try {
-        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
-          existing_image_urls: [originalUrl]
-        });
-        processedUrl = generatedUrl;
+        const { removeBackground } = await import("@imgly/background-removal");
+        const blob = await removeBackground(file);
+        const processedFile = new File([blob], "processed.png", { type: "image/png" });
+        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
+        processedUrl = pUrl;
       } catch {
         processedUrl = originalUrl;
       }
     } else if (tab === "url" && url) {
       originalUrl = url;
       try {
-        const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-          prompt: "This exact clothing item as a clean product photo, isolated on pure white background, no person, no shadows, no mannequin, flat lay or ghost mannequin style",
-          existing_image_urls: [originalUrl]
-        });
-        processedUrl = generatedUrl;
+        const { removeBackground } = await import("@imgly/background-removal");
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const processedBlob = await removeBackground(blob);
+        const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
+        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
+        processedUrl = pUrl;
       } catch {
         processedUrl = url;
       }
@@ -91,82 +74,9 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       source_url: url || originalUrl,
     });
 
-    setProcessing(false);
     onAdded(item);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-lg font-bold text-gray-900">Add Clothing Item</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5" /></Button>
-        </div>
-
-        <div className="p-5 space-y-4">
-          <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="w-full">
-              <TabsTrigger value="upload" className="flex-1"><Upload className="w-4 h-4 mr-1" /> Upload Photo</TabsTrigger>
-              <TabsTrigger value="url" className="flex-1"><Link className="w-4 h-4 mr-1" /> From URL</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upload" className="mt-4">
-              <label className="block cursor-pointer">
-                <div className="border-2 border-dashed border-rose-200 rounded-xl p-6 text-center hover:bg-rose-50 transition">
-                  {preview ? (
-                    <img src={preview} className="h-32 mx-auto object-contain rounded-lg" alt="preview" />
-                  ) : (
-                    <>
-                      <Upload className="w-8 h-8 text-rose-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">Click to upload clothing photo</p>
-                    </>
-                  )}
-                </div>
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-              </label>
-            </TabsContent>
-            <TabsContent value="url" className="mt-4">
-              <div>
-                <Label>Image URL (from any website, Pinterest, etc.)</Label>
-                <Input value={url} onChange={e => setUrl(e.target.value)}
-                  placeholder="https://..." className="mt-1" />
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> AI will clean up the background automatically
-                </p>
-                {url && <img src={url} className="h-24 mt-2 object-contain rounded-lg border" alt="preview" onError={() => {}} />}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Item Name</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. White blouse" className="mt-1" />
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label>Brand (optional)</Label>
-            <Input value={brand} onChange={e => setBrand(e.target.value)} placeholder="e.g. Zara" className="mt-1" />
-          </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
-
-          <Button onClick={handleSubmit} disabled={processing} className="w-full bg-rose-500 hover:bg-rose-600 text-white">
-            {processing ? (
-              <><Sparkles className="mr-2 w-4 h-4 animate-spin" /> AI is processing...</>
-            ) : "Add to Wardrobe"}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+  } catch (e) {
+    setError("Something went wrong. Please try again.");
+  }
+  setProcessing(false);
+};
