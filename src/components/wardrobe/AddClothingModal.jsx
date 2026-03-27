@@ -36,32 +36,26 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   let processedUrl = "";
 
   try {
-    if (tab === "upload" && file) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      originalUrl = file_url;
-      try {
-        const { removeBackground } = await import("@imgly/background-removal");
-        const blob = await removeBackground(file);
-        const processedFile = new File([blob], "processed.png", { type: "image/png" });
-        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
-        processedUrl = pUrl;
-      } catch {
-        processedUrl = originalUrl;
-      }
-    } else if (tab === "url" && url) {
-      originalUrl = url;
-      try {
-        const { removeBackground } = await import("@imgly/background-removal");
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const processedBlob = await removeBackground(blob);
-        const processedFile = new File([processedBlob], "processed.png", { type: "image/png" });
-        const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
-        processedUrl = pUrl;
-      } catch {
-        processedUrl = url;
-      }
-    }
+  if (tab === "upload" && file) {
+  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+  originalUrl = file_url;
+  try {
+    const formData = new FormData();
+    formData.append("image_url", file_url);
+    formData.append("size", "auto");
+    const res = await fetch("https://api.remove.bg/v1.0/removebg", {
+      method: "POST",
+      headers: { "X-Api-Key": "dx2dhWT2m31UEp3NvgxYMivt" },
+      body: formData,
+    });
+    const blob = await res.blob();
+    const processedFile = new File([blob], "processed.png", { type: "image/png" });
+    const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processedFile });
+    processedUrl = pUrl;
+  } catch {
+    processedUrl = originalUrl;
+  }
+}
 
     const item = await base44.entities.ClothingItem.create({
       user_email: userEmail,
