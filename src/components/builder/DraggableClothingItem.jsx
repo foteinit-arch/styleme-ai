@@ -144,6 +144,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         zIndex: (item.z_index || 0) + 10,
         transform: `rotate(${item.rotation || 0}deg)`,
         touchAction: "none",
+        mixBlendMode: 'multiply',
         outline: selected ? '2px solid #fb7185' : 'none',
       }}
       onMouseDown={handleMouseDown}
@@ -152,7 +153,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
     >
       {img ? (
-        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" style={{ mixBlendMode: 'multiply' }} draggable={false} />
+        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none"  draggable={false} />
 
       ) : (
         <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
