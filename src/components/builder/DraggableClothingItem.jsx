@@ -30,8 +30,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     if (!container) return;
     const maxX = container.clientWidth - size;
     const maxY = container.clientHeight - size;
-    const newX = Math.max(0, Math.min(maxX, startItem.current.x + dx));
-    const newY = Math.max(0, Math.min(maxY, startItem.current.y + dy));
+    const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
+    const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
     onUpdate(item.placedId, { x: newX, y: newY });
   }, [item.placedId, item.x, item.y, size, containerRef, onUpdate]);
 
@@ -77,8 +77,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     const dy = touch.clientY - startPos.current.y;
     const container = containerRef.current;
     if (!container) return;
-    const newX = Math.max(0, Math.min(container.clientWidth - size, startItem.current.x + dx));
-    const newY = Math.max(0, Math.min(container.clientHeight - size, startItem.current.y + dy));
+    const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
+    const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
     onUpdate(item.placedId, { x: newX, y: newY });
   }, [item.placedId, size, containerRef, onUpdate]);
 
@@ -140,7 +140,7 @@ const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.m
       className="absolute cursor-grab active:cursor-grabbing"
       style={{
         left: item.x - size / 2,
-        top: item.y - size / 2
+        top: item.y - size / 2,
         width: size,
         height: size,
         zIndex: (item.z_index || 0) + 10,
