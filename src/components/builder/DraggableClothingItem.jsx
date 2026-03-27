@@ -134,13 +134,13 @@ const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) +
 const scaleBy = (delta) => {
   const oldScale = item.scale || 1;
   const newScale = Math.max(0.3, Math.min(5, oldScale + delta));
-  const oldSize = 100 * oldScale;
-  const newSize = 100 * newScale;
-  const diff = newSize - oldSize;
+  if (newScale === oldScale) return;
+  const centerX = item.x + (100 * oldScale) / 2;
+  const centerY = item.y + (100 * oldScale) / 2;
   onUpdate(item.placedId, {
     scale: newScale,
-    x: item.x - diff / 2,
-    y: item.y - diff / 2,
+    x: centerX - (100 * newScale) / 2,
+    y: centerY - (100 * newScale) / 2,
   });
 };
 
