@@ -174,6 +174,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           data-control="true"
           style={{ pointerEvents: 'auto' }}
         >
+         <span className="text-xs font-medium text-rose-400 px-1">{item.name}</span>
           <button data-control="true" onClick={() => scaleBy(-0.15)} className="p-1 rounded-full hover:bg-rose-50">
             <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
           </button>
