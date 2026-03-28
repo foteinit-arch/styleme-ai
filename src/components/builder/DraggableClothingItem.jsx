@@ -50,8 +50,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         setSelected(false);
       }
     };
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleTouchStart = (e) => {
@@ -121,31 +121,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
   const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
 
-  // Calculate fixed toolbar position
-  const getToolbarStyle = () => {
-    const canvasRect = containerRef.current?.getBoundingClientRect();
-    if (!canvasRect) return {};
-    const itemScreenX = canvasRect.left + item.x;
-    const itemScreenY = canvasRect.top + (item.y - size / 2);
-    const toolbarTop = Math.max(8, itemScreenY - 36);
-    return {
-      position: 'fixed',
-      top: toolbarTop,
-      left: itemScreenX,
-      transform: 'translateX(-50%)',
-      zIndex: 99999,
-      pointerEvents: 'auto',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-      background: 'white',
-      borderRadius: '9999px',
-      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-      padding: '4px 8px',
-      border: '1px solid #ffe4e6',
-      whiteSpace: 'nowrap',
-    };
-  };
+  // Show toolbar below item when near top, above otherwise
+  const nearTop = item.y - size / 2 < 60;
 
   return (
     <div
@@ -175,7 +152,6 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
-          onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
           draggable={false}
         />
       ) : (
@@ -189,30 +165,40 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
-          onClick={() => setSelected(true)}
         >👗</div>
       )}
 
       {selected && (
-        <div data-control="true" style={getToolbarStyle()}>
-          <span style={{ fontSize: '11px', fontWeight: 600, color: '#fb7185', paddingRight: '4px' }}>{item.name}</span>
-          <button data-control="true" onClick={() => scaleBy(-0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ZoomOut size={14} color="#4b5563" />
+        <div
+          className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100`}
+          style={{
+            pointerEvents: 'auto',
+            zIndex: 99999,
+            top: nearTop ? size + 4 : undefined,
+            bottom: nearTop ? undefined : '100%',
+            marginBottom: nearTop ? undefined : '4px',
+            whiteSpace: 'nowrap',
+          }}
+          data-control="true"
+        >
+          <span className="text-xs font-medium text-rose-400 px-1">{item.name}</span>
+          <button data-control="true" onClick={() => scaleBy(-0.15)} className="p-1 rounded-full hover:bg-rose-50">
+            <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={() => scaleBy(0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ZoomIn size={14} color="#4b5563" />
+          <button data-control="true" onClick={() => scaleBy(0.15)} className="p-1 rounded-full hover:bg-rose-50">
+            <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={rotate} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <RotateCw size={14} color="#4b5563" />
+          <button data-control="true" onClick={rotate} className="p-1 rounded-full hover:bg-rose-50">
+            <RotateCw className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Date.now() })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ChevronUp size={14} color="#4b5563" />
+          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Date.now() })} className="p-1 rounded-full hover:bg-rose-50">
+            <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: 0 })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ChevronDown size={14} color="#4b5563" />
+          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: 0 })} className="p-1 rounded-full hover:bg-rose-50">
+            <ChevronDown className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={() => onRemove(item.placedId)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <X size={14} color="#f87171" />
+          <button data-control="true" onClick={() => onRemove(item.placedId)} className="p-1 rounded-full hover:bg-red-50">
+            <X className="w-3.5 h-3.5 text-red-400" />
           </button>
         </div>
       )}
