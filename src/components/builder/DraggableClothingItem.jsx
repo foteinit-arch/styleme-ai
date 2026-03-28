@@ -124,31 +124,48 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   return (
     <div
       ref={itemRef}
-      className="absolute cursor-grab active:cursor-grabbing"
+      className="absolute"
       style={{
-       left: item.x - size / 2,
-       top: item.y - size / 2,
-       width: size,
-       height: size,
-       zIndex: (item.z_index || 0) + 10,
-       transform: `rotate(${(item.rotation || 0) + (item.category === 'shoes' ? -35 : 0)}deg)`,
-       touchAction: "none",
-       outline: selected ? '2px solid #fb7185' : 'none',
-       pointerEvents: 'none',
+        left: item.x - size / 2,
+        top: item.y - size / 2,
+        width: size,
+        height: size,
+        zIndex: (item.z_index || 0) + 10,
+        transform: `rotate(${(item.rotation || 0) + (item.category === 'shoes' ? -35 : 0)}deg)`,
+        touchAction: "none",
+        outline: selected ? '2px solid #fb7185' : 'none',
+        pointerEvents: 'none',
       }}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStartWithPinch}
-      onTouchEnd={handleTouchEnd}
-      onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
     >
       {img ? (
-        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" draggable={false} />
+        <img
+          src={img}
+          alt={item.name}
+          className="w-full h-full object-contain"
+          style={{ pointerEvents: 'auto', cursor: 'grab' }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStartWithPinch}
+          onTouchEnd={handleTouchEnd}
+          onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
+          draggable={false}
+        />
       ) : (
-        <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
+        <div
+          className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl"
+          style={{ pointerEvents: 'auto', cursor: 'grab' }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStartWithPinch}
+          onTouchEnd={handleTouchEnd}
+          onClick={() => setSelected(true)}
+        >👗</div>
       )}
 
       {selected && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100" data-control="true">
+        <div
+          className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100"
+          data-control="true"
+          style={{ pointerEvents: 'auto' }}
+        >
           <button data-control="true" onClick={() => scaleBy(-0.15)} className="p-1 rounded-full hover:bg-rose-50">
             <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
           </button>
