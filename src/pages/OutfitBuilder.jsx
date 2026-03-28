@@ -98,7 +98,7 @@ const categoryPositions = {
         </div>
 
         {/* Center: avatar canvas */}
-        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+        <div className="flex-1 flex items-center justify-center p-4 overflow-visible">
           <AvatarCanvas
             profile={profile}
             placed={placed}
