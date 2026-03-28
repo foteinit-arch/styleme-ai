@@ -131,7 +131,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         width: size,
         height: size,
         zIndex: (item.z_index || 0) + 10,
-        transform: `rotate(${(item.rotation || 0) + (item.category === 'shoes' ? -35 : 0)}deg)`,
+        transform: `rotate(${item.rotation || 0}deg)`,
         touchAction: "none",
         pointerEvents: 'none',
       }}
