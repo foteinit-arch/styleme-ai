@@ -7,7 +7,6 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   const startPos = useRef({ x: 0, y: 0 });
   const startItem = useRef({ x: 0, y: 0 });
   const itemRef = useRef(null);
-  // Pinch-to-zoom tracking
   const pinchRef = useRef({ active: false, startDist: 0, startScale: 1 });
 
   const img = item.processed_image_url || item.original_image_url;
@@ -26,12 +25,11 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     if (!dragging.current) return;
     const dx = e.clientX - startPos.current.x;
     const dy = e.clientY - startPos.current.y;
-    const container = containerRef.current;
-    if (!container) return;
-   const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
-   const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
-    onUpdate(item.placedId, { x: newX, y: newY });
-  }, [item.placedId, item.x, item.y, size, containerRef, onUpdate]);
+    onUpdate(item.placedId, {
+      x: startItem.current.x + dx,
+      y: startItem.current.y + dy,
+    });
+  }, [item.placedId, onUpdate]);
 
   const handleMouseUp = useCallback(() => {
     dragging.current = false;
@@ -56,7 +54,6 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Touch support
   const handleTouchStart = (e) => {
     if (e.target.closest("[data-control]")) return;
     e.preventDefault();
@@ -73,24 +70,19 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     const touch = e.touches[0];
     const dx = touch.clientX - startPos.current.x;
     const dy = touch.clientY - startPos.current.y;
-    const container = containerRef.current;
-    if (!container) return;
-    const newX = Math.max(size / 2, Math.min(container.clientWidth - size / 2, startItem.current.x + dx));
-    const newY = Math.max(size / 2, Math.min(container.clientHeight - size / 2, startItem.current.y + dy));
-  }, [item.placedId, size, containerRef, onUpdate]);
+    onUpdate(item.placedId, {
+      x: startItem.current.x + dx,
+      y: startItem.current.y + dy,
+    });
+  }, [item.placedId, onUpdate]);
 
   const handleTouchEnd = (e) => {
-    if (e.touches.length < 2) {
-      pinchRef.current.active = false;
-    }
-    if (e.touches.length === 0) {
-      dragging.current = false;
-    }
+    if (e.touches.length < 2) pinchRef.current.active = false;
+    if (e.touches.length === 0) dragging.current = false;
   };
 
   const handleTouchStartWithPinch = (e) => {
     if (e.touches.length === 2) {
-      // Start pinch
       e.preventDefault();
       dragging.current = false;
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -117,7 +109,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     } else {
       handleTouchMove(e);
     }
-  }, [handleTouchMove, item.placedId, item.scale, onUpdate]);
+  }, [handleTouchMove, item.placedId, onUpdate]);
 
   useEffect(() => {
     const el = itemRef.current;
@@ -126,10 +118,8 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
     return () => el.removeEventListener("touchmove", handleTouchMoveWithPinch);
   }, [handleTouchMoveWithPinch]);
 
-const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
-
-const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
-
+  const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
+  const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
 
   return (
     <div
@@ -151,13 +141,11 @@ const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.m
       onClick={(e) => { if (e.target.closest("[data-control]")) return; setSelected(true); }}
     >
       {img ? (
-        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none"  draggable={false} />
-
+        <img src={img} alt={item.name} className="w-full h-full object-contain pointer-events-none" draggable={false} />
       ) : (
         <div className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl">👗</div>
       )}
 
-      {/* Controls */}
       {selected && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100" data-control="true">
           <button data-control="true" onClick={() => scaleBy(-0.15)} className="p-1 rounded-full hover:bg-rose-50">
@@ -168,14 +156,13 @@ const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.m
           </button>
           <button data-control="true" onClick={rotate} className="p-1 rounded-full hover:bg-rose-50">
             <RotateCw className="w-3.5 h-3.5 text-gray-600" />
-          </button> 
-             <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: (item.z_index || 0) + 10 })} className="p-1 rounded-full hover:bg-rose-50">
-  <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
-</button>
-<button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Math.max(0, (item.z_index || 0) - 10) })} className="p-1 rounded-full hover:bg-rose-50">
-  <ChevronDown className="w-3.5 h-3.5 text-gray-600" />
-</button>
-
+          </button>
+          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: (item.z_index || 0) + 10 })} className="p-1 rounded-full hover:bg-rose-50">
+            <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
+          </button>
+          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Math.max(0, (item.z_index || 0) - 10) })} className="p-1 rounded-full hover:bg-rose-50">
+            <ChevronDown className="w-3.5 h-3.5 text-gray-600" />
+          </button>
           <button data-control="true" onClick={() => onRemove(item.placedId)} className="p-1 rounded-full hover:bg-red-50">
             <X className="w-3.5 h-3.5 text-red-400" />
           </button>
