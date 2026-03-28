@@ -1,222 +1,209 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { X, ZoomIn, ZoomOut, RotateCw, ChevronUp, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 
 export default function DraggableClothingItem({ item, containerRef, onUpdate, onRemove }) {
-  const [selected, setSelected] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
   const dragging = useRef(false);
+  const hasMoved = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
   const startItem = useRef({ x: 0, y: 0 });
-  const itemRef = useRef(null);
   const pinchRef = useRef({ active: false, startDist: 0, startScale: 1 });
-  const itemId = `item-${item.placedId}`;
+  const longPressTimer = useRef(null);
+  const tapCount = useRef(0);
+  const tapTimer = useRef(null);
+  const deleteTimer = useRef(null);
 
   const img = item.processed_image_url || item.original_image_url;
   const size = 100 * (item.scale || 1);
 
-  const handleMouseDown = (e) => {
-    if (e.target.closest("[data-control]")) return;
-    e.preventDefault();
-    setSelected(true);
-    dragging.current = true;
-    startPos.current = { x: e.clientX, y: e.clientY };
-    startItem.current = { x: item.x, y: item.y };
-  };
-
-  const handleMouseMove = useCallback((e) => {
-    if (!dragging.current) return;
-    const dx = e.clientX - startPos.current.x;
-    const dy = e.clientY - startPos.current.y;
-    onUpdate(item.placedId, {
-      x: startItem.current.x + dx,
-      y: startItem.current.y + dy,
-    });
-  }, [item.placedId, onUpdate]);
-
-  const handleMouseUp = useCallback(() => {
-    dragging.current = false;
+  // Show red X for 3 seconds then auto-hide
+  const revealDelete = useCallback(() => {
+    setShowDelete(true);
+    if (deleteTimer.current) clearTimeout(deleteTimer.current);
+    deleteTimer.current = setTimeout(() => setShowDelete(false), 3000);
   }, []);
 
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp]);
+  // Single tap → toggle layer (front / back)
+  const toggleLayer = useCallback(() => {
+    const currentZ = item.z_index || 1;
+    const newZ = currentZ > 10 ? 1 : Date.now();
+    onUpdate({ ...item, z_index: newZ });
+  }, [item, onUpdate]);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (e.target.closest(`[data-item-id="${itemId}"]`)) return;
-      setSelected(false);
-    };
-    window.addEventListener("mousedown", handleClickOutside);
-    return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, [itemId]);
+  const handleTap = useCallback(() => {
+    tapCount.current += 1;
+    if (tapTimer.current) clearTimeout(tapTimer.current);
 
-  const handleTouchStart = (e) => {
-    if (e.target.closest("[data-control]")) return;
-    e.preventDefault();
-    setSelected(true);
-    const touch = e.touches[0];
+    if (tapCount.current >= 3) {
+      tapCount.current = 0;
+      revealDelete();
+      return;
+    }
+
+    tapTimer.current = setTimeout(() => {
+      if (tapCount.current === 1) toggleLayer();
+      tapCount.current = 0;
+    }, 320);
+  }, [toggleLayer, revealDelete]);
+
+  // ── Pointer helpers ──────────────────────────────────────────────────────
+  const getPos = (e) =>
+    e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+               : { x: e.clientX,           y: e.clientY           };
+
+  const onDown = (e) => {
+    if (e.target.closest("[data-del]")) return;
+    hasMoved.current = false;
     dragging.current = true;
-    startPos.current = { x: touch.clientX, y: touch.clientY };
+    const pos = getPos(e);
+    startPos.current = pos;
     startItem.current = { x: item.x, y: item.y };
-  };
 
-  const handleTouchMove = useCallback((e) => {
-    if (!dragging.current) return;
+    // Long-press → reveal delete
+    longPressTimer.current = setTimeout(() => {
+      if (!hasMoved.current) revealDelete();
+    }, 600);
+
     e.preventDefault();
-    const touch = e.touches[0];
-    const dx = touch.clientX - startPos.current.x;
-    const dy = touch.clientY - startPos.current.y;
-    onUpdate(item.placedId, {
-      x: startItem.current.x + dx,
-      y: startItem.current.y + dy,
-    });
-  }, [item.placedId, onUpdate]);
-
-  const handleTouchEnd = (e) => {
-    if (e.touches.length < 2) pinchRef.current.active = false;
-    if (e.touches.length === 0) dragging.current = false;
   };
 
-  const handleTouchStartWithPinch = (e) => {
+  const onMove = (e) => {
+    if (!dragging.current) return;
+    const pos = getPos(e);
+    const dx = pos.x - startPos.current.x;
+    const dy = pos.y - startPos.current.y;
+
+    if (!hasMoved.current && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      hasMoved.current = true;
+      clearTimeout(longPressTimer.current);
+    }
+
+    if (hasMoved.current) {
+      onUpdate({ ...item, x: startItem.current.x + dx, y: startItem.current.y + dy });
+    }
+    e.preventDefault();
+  };
+
+  const onUp = (e) => {
+    clearTimeout(longPressTimer.current);
+    if (!hasMoved.current) handleTap();
+    dragging.current = false;
+    e.preventDefault();
+  };
+
+  // ── Pinch-to-zoom (touch only) ───────────────────────────────────────────
+  const onTouchStart = (e) => {
     if (e.touches.length === 2) {
-      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = { active: true, startDist: Math.hypot(dx, dy), startScale: item.scale || 1 };
       dragging.current = false;
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      pinchRef.current = {
-        active: true,
-        startDist: Math.sqrt(dx * dx + dy * dy),
-        startScale: item.scale || 1,
-      };
-      setSelected(true);
-    } else {
-      handleTouchStart(e);
-    }
-  };
-
-  const handleTouchMoveWithPinch = useCallback((e) => {
-    if (e.touches.length === 2 && pinchRef.current.active) {
+      clearTimeout(longPressTimer.current);
       e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const newScale = Math.max(0.3, Math.min(5, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
-      onUpdate(item.placedId, { scale: newScale });
     } else {
-      handleTouchMove(e);
+      onDown(e);
     }
-  }, [handleTouchMove, item.placedId, onUpdate]);
-
-  useEffect(() => {
-    const el = itemRef.current;
-    if (!el) return;
-    el.addEventListener("touchmove", handleTouchMoveWithPinch, { passive: false });
-    return () => el.removeEventListener("touchmove", handleTouchMoveWithPinch);
-  }, [handleTouchMoveWithPinch]);
-
-  const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
-  const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
-
-  const getToolbarPos = () => {
-    const canvasRect = containerRef.current?.getBoundingClientRect();
-    if (!canvasRect) return { top: 8, left: 0 };
-    const screenX = canvasRect.left + item.x;
-    const screenY = canvasRect.top + (item.y - size / 2);
-    const toolbarTop = screenY < 60 ? screenY + size + 4 : Math.max(8, screenY - 36);
-    return { top: toolbarTop, left: screenX };
   };
 
-  const toolbarPos = selected ? getToolbarPos() : null;
+  const onTouchMove = (e) => {
+    if (pinchRef.current.active && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const ratio = Math.hypot(dx, dy) / pinchRef.current.startDist;
+      const newScale = Math.max(0.3, Math.min(4, pinchRef.current.startScale * ratio));
+      onUpdate({ ...item, scale: newScale });
+      e.preventDefault();
+    } else if (!pinchRef.current.active) {
+      onMove(e);
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    if (pinchRef.current.active) { pinchRef.current.active = false; return; }
+    onUp(e);
+  };
+
+  // ── Mouse-wheel zoom (desktop) ───────────────────────────────────────────
+  const onWheel = (e) => {
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.max(0.3, Math.min(4, (item.scale || 1) * delta));
+    onUpdate({ ...item, scale: newScale });
+    e.preventDefault();
+  };
+
+  useEffect(() => () => {
+    clearTimeout(longPressTimer.current);
+    clearTimeout(tapTimer.current);
+    clearTimeout(deleteTimer.current);
+  }, []);
 
   return (
     <div
-      ref={itemRef}
-      data-item-id={itemId}
-      className="absolute"
       style={{
+        position: "absolute",
         left: item.x - size / 2,
         top: item.y - size / 2,
         width: size,
         height: size,
-        zIndex: (item.z_index || 0) + 10,
-        transform: `rotate(${item.rotation || 0}deg)`,
+        zIndex: item.z_index || 1,
+        pointerEvents: "none",
+        userSelect: "none",
         touchAction: "none",
-        pointerEvents: 'none',
       }}
     >
-      {img ? (
-        <img
-          src={img}
-          alt={item.name}
-          data-item-id={itemId}
-          className="w-full h-full object-contain"
-          style={{
-            pointerEvents: 'auto',
-            cursor: 'grab',
-            filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStartWithPinch}
-          onTouchEnd={handleTouchEnd}
-          draggable={false}
-        />
-      ) : (
-        <div
-          data-item-id={itemId}
-          className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl"
-          style={{ pointerEvents: 'auto', cursor: 'grab', filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none' }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStartWithPinch}
-          onTouchEnd={handleTouchEnd}
-        >👗</div>
-      )}
+      <img
+        src={img}
+        alt=""
+        draggable={false}
+        onMouseDown={onDown}
+        onMouseMove={onMove}
+        onMouseUp={onUp}
+        onMouseLeave={onUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onWheel={onWheel}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          pointerEvents: "auto",
+          cursor: "grab",
+          transform: `rotate(${item.rotation || 0}deg)`,
+          filter: showDelete
+            ? "drop-shadow(0 0 8px rgba(239,68,68,0.9))"
+            : "none",
+          display: "block",
+        }}
+      />
 
-      {selected && toolbarPos && (
-        <div
-          data-item-id={itemId}
-          data-control="true"
+      {showDelete && (
+        <button
+          data-del="true"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); onRemove(item.placedId); }}
           style={{
-            position: 'fixed',
-            top: toolbarPos.top,
-            left: toolbarPos.left,
-            transform: 'translateX(-50%)',
+            position: "absolute",
+            top: -14,
+            right: -14,
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            background: "#ef4444",
+            color: "white",
+            border: "2px solid white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
             zIndex: 999999,
-            pointerEvents: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            background: 'white',
-            borderRadius: '9999px',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-            padding: '4px 8px',
-            border: '1px solid #ffe4e6',
-            whiteSpace: 'nowrap',
+            pointerEvents: "auto",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
           }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 600, color: '#fb7185', paddingRight: '4px' }}>{item.name}</span>
-          <button data-control="true" data-item-id={itemId} onClick={() => scaleBy(-0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ZoomOut size={14} color="#4b5563" />
-          </button>
-          <button data-control="true" data-item-id={itemId} onClick={() => scaleBy(0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ZoomIn size={14} color="#4b5563" />
-          </button>
-          <button data-control="true" data-item-id={itemId} onClick={rotate} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <RotateCw size={14} color="#4b5563" />
-          </button>
-          <button data-control="true" data-item-id={itemId} onClick={() => onUpdate(item.placedId, { z_index: Date.now() })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ChevronUp size={14} color="#4b5563" />
-          </button>
-          <button data-control="true" data-item-id={itemId} onClick={() => onUpdate(item.placedId, { z_index: 0 })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <ChevronDown size={14} color="#4b5563" />
-          </button>
-          <button data-control="true" data-item-id={itemId} onClick={() => onRemove(item.placedId)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
-            <X size={14} color="#f87171" />
-          </button>
-        </div>
+          <X size={14} />
+        </button>
       )}
     </div>
   );
