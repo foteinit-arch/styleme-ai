@@ -34,7 +34,7 @@ const categoryPositions = {
   top:       { x: 160, y: 260, scale: 1.4 },
   bottom:    { x: 160, y: 430, scale: 1.5 },
   dress:     { x: 160, y: 250, scale: 1.6 },
-  shoes:     { x: 160, y: 630, scale: 1.0 },
+  shoes:     { x: 160, y: 480, scale: 1.2 },
   outerwear: { x: 160, y: 235, scale: 1.5 },
   accessory: { x: 160, y: 75,  scale: 0.7 },
   bag:       { x: 160, y: 410, scale: 0.9 },
@@ -98,7 +98,7 @@ const categoryPositions = {
         </div>
 
         {/* Center: avatar canvas */}
-        <div className="flex-1 flex items-center justify-center p-4 overflow-visible">
+        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
           <AvatarCanvas
             profile={profile}
             placed={placed}
