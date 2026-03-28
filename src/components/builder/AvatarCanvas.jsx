@@ -29,13 +29,13 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
       ref={canvasRef}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-     style={{ position: "relative", width: "100%", maxWidth: 320, height: 680, overflow: "visible", borderRadius: 24 }}
+     style={{ position: "relative", width: "100%", maxWidth: 320, height: 600, overflow: "visible", borderRadius: 24 }}
     >
       {(profile?.avatar_generated_url || profile?.avatar_photo_url) && (
         <img
           src={profile.avatar_generated_url || profile.avatar_photo_url}
           alt="avatar"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", objectPosition: "center" }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
         />
       )}
 
