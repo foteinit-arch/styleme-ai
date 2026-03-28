@@ -170,7 +170,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
 
       {selected && (
         <div
-          className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100"
+          className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100 ${item.y < 150 ? '-bottom-8' : '-top-8'}`}
           data-control="true"
           style={{ pointerEvents: 'auto' }}
         >
