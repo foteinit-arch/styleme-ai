@@ -34,7 +34,7 @@ const categoryPositions = {
   top:       { x: 160, y: 230, scale: 1.4 },
   bottom:    { x: 160, y: 385, scale: 1.5 },
   dress:     { x: 160, y: 220, scale: 1.6 },
-  shoes:     { x: 160, y: 540, scale: 1.0 },
+  shoes:     { x: 160, y: 570, scale: 1.0 },
   outerwear: { x: 160, y: 205, scale: 1.5 },
   accessory: { x: 160, y: 65,  scale: 0.7 },
   bag:       { x: 160, y: 365, scale: 0.9 },
