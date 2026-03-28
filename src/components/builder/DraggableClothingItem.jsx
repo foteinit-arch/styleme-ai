@@ -157,7 +157,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           <button data-control="true" onClick={rotate} className="p-1 rounded-full hover:bg-rose-50">
             <RotateCw className="w-3.5 h-3.5 text-gray-600" />
           </button>
-          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: (item.z_index || 0) + 10 })} className="p-1 rounded-full hover:bg-rose-50">
+          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: 999 })} className="p-1 rounded-full hover:bg-rose-50">
             <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
           </button>
           <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Math.max(0, (item.z_index || 0) - 10) })} className="p-1 rounded-full hover:bg-rose-50">
