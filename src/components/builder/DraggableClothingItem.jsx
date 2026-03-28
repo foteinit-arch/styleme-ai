@@ -141,7 +141,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           src={img}
           alt={item.name}
           className="w-full h-full object-contain"
-          style={{ pointerEvents: 'auto', cursor: 'grab' }}
+          style={{ pointerEvents: 'auto', cursor: 'grab', outline: selected ? '2px solid #fb7185' : 'none' }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
@@ -151,7 +151,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       ) : (
         <div
           className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl"
-          style={{ pointerEvents: 'auto', cursor: 'grab' }}
+          style={{ pointerEvents: 'auto', cursor: 'grab', outline: selected ? '2px solid #fb7185' : 'none' }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
