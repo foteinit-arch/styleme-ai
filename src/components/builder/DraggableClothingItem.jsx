@@ -145,7 +145,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
            pointerEvents: 'auto', 
            cursor: 'grab',
           filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
-}}
+        }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
@@ -155,7 +155,12 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
       ) : (
         <div
           className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl"
-          style={{ pointerEvents: 'auto', cursor: 'grab', outline: selected ? '2px solid #fb7185' : 'none' }}
+          style={{ 
+            pointerEvents: 'auto', 
+            cursor: 'grab',
+           filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
+        }}
+
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
