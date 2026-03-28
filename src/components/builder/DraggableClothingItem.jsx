@@ -8,6 +8,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   const startItem = useRef({ x: 0, y: 0 });
   const itemRef = useRef(null);
   const pinchRef = useRef({ active: false, startDist: 0, startScale: 1 });
+  const itemId = `item-${item.placedId}`;
 
   const img = item.processed_image_url || item.original_image_url;
   const size = 100 * (item.scale || 1);
@@ -46,13 +47,12 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (itemRef.current && !itemRef.current.contains(e.target)) {
-        setSelected(false);
-      }
+      if (e.target.closest(`[data-item-id="${itemId}"]`)) return;
+      setSelected(false);
     };
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [itemId]);
 
   const handleTouchStart = (e) => {
     if (e.target.closest("[data-control]")) return;
@@ -121,12 +121,21 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
   const rotate = () => onUpdate(item.placedId, { rotation: ((item.rotation || 0) + 45) % 360 });
   const scaleBy = (delta) => onUpdate(item.placedId, { scale: Math.max(0.3, Math.min(5, (item.scale || 1) + delta)) });
 
-  // Show toolbar below item when near top, above otherwise
-  const nearTop = item.y - size / 2 < 60;
+  const getToolbarPos = () => {
+    const canvasRect = containerRef.current?.getBoundingClientRect();
+    if (!canvasRect) return { top: 8, left: 0 };
+    const screenX = canvasRect.left + item.x;
+    const screenY = canvasRect.top + (item.y - size / 2);
+    const toolbarTop = screenY < 60 ? screenY + size + 4 : Math.max(8, screenY - 36);
+    return { top: toolbarTop, left: screenX };
+  };
+
+  const toolbarPos = selected ? getToolbarPos() : null;
 
   return (
     <div
       ref={itemRef}
+      data-item-id={itemId}
       className="absolute"
       style={{
         left: item.x - size / 2,
@@ -143,6 +152,7 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         <img
           src={img}
           alt={item.name}
+          data-item-id={itemId}
           className="w-full h-full object-contain"
           style={{
             pointerEvents: 'auto',
@@ -156,49 +166,55 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
         />
       ) : (
         <div
+          data-item-id={itemId}
           className="w-full h-full bg-transparent rounded-lg flex items-center justify-center text-2xl"
-          style={{
-            pointerEvents: 'auto',
-            cursor: 'grab',
-            filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
-          }}
+          style={{ pointerEvents: 'auto', cursor: 'grab', filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none' }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
           onTouchEnd={handleTouchEnd}
         >👗</div>
       )}
 
-      {selected && (
+      {selected && toolbarPos && (
         <div
-          className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-full shadow-lg px-2 py-1 border border-rose-100`}
+          data-item-id={itemId}
+          data-control="true"
           style={{
+            position: 'fixed',
+            top: toolbarPos.top,
+            left: toolbarPos.left,
+            transform: 'translateX(-50%)',
+            zIndex: 999999,
             pointerEvents: 'auto',
-            zIndex: 99999,
-            top: nearTop ? size + 4 : undefined,
-            bottom: nearTop ? undefined : '100%',
-            marginBottom: nearTop ? undefined : '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'white',
+            borderRadius: '9999px',
+            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+            padding: '4px 8px',
+            border: '1px solid #ffe4e6',
             whiteSpace: 'nowrap',
           }}
-          data-control="true"
         >
-          <span className="text-xs font-medium text-rose-400 px-1">{item.name}</span>
-          <button data-control="true" onClick={() => scaleBy(-0.15)} className="p-1 rounded-full hover:bg-rose-50">
-            <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
+          <span style={{ fontSize: '11px', fontWeight: 600, color: '#fb7185', paddingRight: '4px' }}>{item.name}</span>
+          <button data-control="true" data-item-id={itemId} onClick={() => scaleBy(-0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <ZoomOut size={14} color="#4b5563" />
           </button>
-          <button data-control="true" onClick={() => scaleBy(0.15)} className="p-1 rounded-full hover:bg-rose-50">
-            <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
+          <button data-control="true" data-item-id={itemId} onClick={() => scaleBy(0.15)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <ZoomIn size={14} color="#4b5563" />
           </button>
-          <button data-control="true" onClick={rotate} className="p-1 rounded-full hover:bg-rose-50">
-            <RotateCw className="w-3.5 h-3.5 text-gray-600" />
+          <button data-control="true" data-item-id={itemId} onClick={rotate} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <RotateCw size={14} color="#4b5563" />
           </button>
-          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: Date.now() })} className="p-1 rounded-full hover:bg-rose-50">
-            <ChevronUp className="w-3.5 h-3.5 text-gray-600" />
+          <button data-control="true" data-item-id={itemId} onClick={() => onUpdate(item.placedId, { z_index: Date.now() })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <ChevronUp size={14} color="#4b5563" />
           </button>
-          <button data-control="true" onClick={() => onUpdate(item.placedId, { z_index: 0 })} className="p-1 rounded-full hover:bg-rose-50">
-            <ChevronDown className="w-3.5 h-3.5 text-gray-600" />
+          <button data-control="true" data-item-id={itemId} onClick={() => onUpdate(item.placedId, { z_index: 0 })} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <ChevronDown size={14} color="#4b5563" />
           </button>
-          <button data-control="true" onClick={() => onRemove(item.placedId)} className="p-1 rounded-full hover:bg-red-50">
-            <X className="w-3.5 h-3.5 text-red-400" />
+          <button data-control="true" data-item-id={itemId} onClick={() => onRemove(item.placedId)} style={{ padding: '4px', borderRadius: '9999px', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+            <X size={14} color="#f87171" />
           </button>
         </div>
       )}
