@@ -142,9 +142,9 @@ export default function DraggableClothingItem({ item, containerRef, onUpdate, on
           alt={item.name}
           className="w-full h-full object-contain"
           style={{ 
-  pointerEvents: 'auto', 
-  cursor: 'grab',
-  filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
+           pointerEvents: 'auto', 
+           cursor: 'grab',
+          filter: selected ? 'drop-shadow(0 0 4px #fb7185)' : 'none'
 }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStartWithPinch}
