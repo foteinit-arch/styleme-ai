@@ -35,7 +35,7 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
         <img
           src={profile.avatar_generated_url || profile.avatar_photo_url}
           alt="avatar"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", objectPosition: "center" }}
         />
       )}
 
