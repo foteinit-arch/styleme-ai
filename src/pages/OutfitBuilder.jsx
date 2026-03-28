@@ -31,13 +31,13 @@ export default function OutfitBuilder() {
   }, []);
 
 const categoryPositions = {
-  top:       { x: 160, y: 230, scale: 1.4 },
-  bottom:    { x: 160, y: 385, scale: 1.5 },
-  dress:     { x: 160, y: 220, scale: 1.6 },
-  shoes:     { x: 160, y: 570, scale: 1.0 },
-  outerwear: { x: 160, y: 205, scale: 1.5 },
-  accessory: { x: 160, y: 65,  scale: 0.7 },
-  bag:       { x: 160, y: 365, scale: 0.9 },
+  top:       { x: 160, y: 260, scale: 1.4 },
+  bottom:    { x: 160, y: 430, scale: 1.5 },
+  dress:     { x: 160, y: 250, scale: 1.6 },
+  shoes:     { x: 160, y: 630, scale: 1.0 },
+  outerwear: { x: 160, y: 235, scale: 1.5 },
+  accessory: { x: 160, y: 75,  scale: 0.7 },
+  bag:       { x: 160, y: 410, scale: 0.9 },
 };
 
   const handleDrop = (item) => {
