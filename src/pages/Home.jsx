@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Shirt, Sparkles, Users, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -13,66 +13,71 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <Shirt className="w-7 h-7 text-orange-500" />
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">StyleMe</span>
-        </div>
-        <div className="flex gap-3">
-          {user ? (
-            <Link to={createPageUrl("Wardrobe")}>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">My Wardrobe</Button>
-            </Link>
-          ) : (
-            <Button onClick={() => base44.auth.redirectToLogin(createPageUrl("Wardrobe"))} className="bg-orange-500 hover:bg-orange-600 text-white">
-              Get Started
-            </Button>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen bg-black flex flex-col">
+      {/* Hero - full bleed fashion photo */}
+      <div className="relative w-full h-screen overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1400&q=80"
+          alt="Fashion hero"
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+        {/* Subtle dark overlay for text legibility */}
+        <div className="absolute inset-0 bg-black/30" />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="max-w-3xl text-left">
-          <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" /> Virtual Try-On, Reimagined
+        {/* Nav */}
+        <div className="absolute top-0 left-0 right-0 px-8 py-6 flex items-center justify-between z-10">
+          <span className="text-white text-sm font-body tracking-widest uppercase font-medium">StyleMe</span>
+          <div className="flex gap-6">
+            <Link to={createPageUrl("Explore")} className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors">Explore</Link>
+            {user ? (
+              <Link to={createPageUrl("Wardrobe")} className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors">Wardrobe</Link>
+            ) : (
+              <button
+                onClick={() => base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
+                className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors"
+              >
+                Sign In
+              </button>
+            )}
           </div>
-          <h1 className="text-6xl md:text-7xl font-bold text-gray-900 leading-none mb-6 font-heading tracking-tight text-left">
-            Try on any outfit<br /><span className="italic font-light">before you wear it</span>
+        </div>
+
+        {/* Hero text */}
+        <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 z-10">
+          <h1
+            className="font-heading font-bold uppercase leading-none text-orange-400"
+            style={{ fontSize: "clamp(4rem, 14vw, 13rem)", letterSpacing: "-0.02em" }}
+          >
+            Style<br />Me
           </h1>
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl">
-            Build your perfect avatar, upload your clothes or pull them from the web, and drag & drop to create stunning outfits — no fitting room needed.
+          <p className="text-white/90 font-body text-lg md:text-xl mt-4 max-w-sm tracking-wide">
+            Virtual wardrobe styling for every woman
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-orange-500 hover:bg-orange-600 text-white text-lg px-8"
-              onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
-            >
-              Start Styling <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Link to={createPageUrl("Explore")}>
-              <Button size="lg" variant="outline" className="text-lg px-8 border-gray-200 text-gray-700 hover:bg-gray-50">
-                <Users className="mr-2 w-5 h-5" /> Explore Community
-              </Button>
-            </Link>
-          </div>
+          <button
+            onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
+            className="mt-8 w-fit text-orange-400 font-body text-base tracking-widest uppercase underline underline-offset-4 hover:text-white transition-colors"
+          >
+            Start Styling →
+          </button>
         </div>
+      </div>
 
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl w-full">
+      {/* Feature strip */}
+      <div className="bg-white py-20 px-8 md:px-16">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
           {[
-            { icon: "📸", title: "Upload Your Photo", desc: "Take a full-body photo and enter your measurements to create an accurate avatar." },
-            { icon: "👗", title: "Build Your Wardrobe", desc: "Upload clothes, paste image URLs, or import from anywhere. AI removes backgrounds instantly." },
-            { icon: "✨", title: "Mix & Match", desc: "Drag clothing onto your avatar, resize, rotate. Save your favourite outfits & share them." },
+            { icon: "📸", title: "Upload Your Photo", desc: "Enter your measurements and create an accurate avatar." },
+            { icon: "👗", title: "Build Your Wardrobe", desc: "Upload clothes or paste URLs. AI removes backgrounds instantly." },
+            { icon: "✨", title: "Mix & Match", desc: "Drag clothing onto your avatar, save and share your outfits." },
           ].map((f) => (
-            <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-left">
-              <div className="text-4xl mb-3">{f.icon}</div>
-              <h3 className="font-bold text-gray-900 text-lg mb-1">{f.title}</h3>
-              <p className="text-gray-400 text-sm">{f.desc}</p>
+            <div key={f.title}>
+              <div className="text-3xl mb-4">{f.icon}</div>
+              <h3 className="font-heading font-bold text-gray-900 text-2xl mb-2 uppercase tracking-tight">{f.title}</h3>
+              <p className="text-gray-500 font-body text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
