@@ -57,7 +57,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
       const snapshot = {
         snapshot_url: imageUrl,
         placed_items: placed.map(p => ({
-          clothing_item_id: p.id,
+          clothing_item_id: p.clothing_item_id || p.id,
           x: p.x,
           y: p.y,
           scale: p.scale,
