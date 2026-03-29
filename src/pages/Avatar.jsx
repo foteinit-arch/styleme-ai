@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Save, User, Ruler, Sparkles, AlertCircle } from "lucide-react";
+import { Upload, Save, User, Ruler, Sparkles, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 
@@ -76,6 +76,10 @@ export default function Avatar() {
   };
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleClearAvatar = () => {
+    setForm((f) => ({ ...f, avatar_photo_url: "", avatar_generated_url: "" }));
+  };
 
   const measurementsAreFresh = profile && (
     profile.bust_cm !== 88 || profile.waist_cm !== 68 || profile.hips_cm !== 94
@@ -171,9 +175,17 @@ export default function Avatar() {
                 </Button>
               )}
               {form.avatar_generated_url && (
-                <div className="mt-3">
+                <div className="mt-3 space-y-2">
                   <p className="text-xs text-white/30 mb-1 text-center">Generated Avatar</p>
                   <img src={form.avatar_generated_url} className="h-40 mx-auto object-contain rounded-lg border border-white/10" alt="generated avatar" />
+                  <Button
+                    onClick={handleClearAvatar}
+                    variant="outline"
+                    className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
+                  >
+                    <Trash2 className="mr-2 w-4 h-4" />
+                    Clear & Start Over
+                  </Button>
                 </div>
               )}
             </div>
