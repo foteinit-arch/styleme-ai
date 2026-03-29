@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, X, RefreshCw, Download } from "lucide-react";
 
-export default function ItemTryOnButton({ item, profile, variant = "button" }) {
+export default function ItemTryOnButton({ item, profile, variant = "button", buttonRef }) {
   const [isOpen, setIsOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const myRef = useRef(null);
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
+
+  useEffect(() => {
+    if (myRef.current) {
+      const rect = myRef.current.getBoundingClientRect();
+      setPos({ x: rect.left, y: rect.top });
+    }
+  }, []);
 
   const generate = async () => {
     setLoading(true);
@@ -52,35 +62,37 @@ export default function ItemTryOnButton({ item, profile, variant = "button" }) {
 
   return (
     <>
-      <button
-        data-ctrl="true"
-        type="button"
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        onTouchStart={(e) => e.stopPropagation()}
-        onClick={handleClick}
-        title="AI Try-On"
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 14,
-          background: "#e8b820",
-          color: "black",
-          border: "2px solid white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-          pointerEvents: "auto",
-        }}
-      >
-        <Sparkles className="w-4 h-4" />
-      </button>
+      <div ref={myRef} data-ctrl="true" style={{ display: "contents" }}>
+        <button
+          data-ctrl="true"
+          type="button"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onClick={handleClick}
+          title="AI Try-On"
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            background: "#e8b820",
+            color: "black",
+            border: "2px solid white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            pointerEvents: "auto",
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+        </button>
+      </div>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 p-4" style={{ zIndex: 99999 }} onClick={e => e.target === e.currentTarget && setIsOpen(false)}>
           <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl">
             {/* Header */}
@@ -135,8 +147,10 @@ export default function ItemTryOnButton({ item, profile, variant = "button" }) {
               )}
             </div>
           </div>
-        </div>
-      )}
-    </>
-  );
-}
+          </div>
+          ,
+          document.body
+          )}
+          </>
+          );
+          }
