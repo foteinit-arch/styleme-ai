@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight, FlipHorizontal } from "lucide-react";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
 function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1, sy1, sx2, sy2) {
@@ -21,9 +21,14 @@ function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1
   ctx.restore();
 }
 
-function drawWarped(canvas, imgEl, corners, imgSize) {
+function drawWarped(canvas, imgEl, corners, imgSize, flipX) {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (flipX) {
+    // Mirror each corner around the centroid X before drawing
+    const cx = corners.reduce((s, c) => s + c.x, 0) / corners.length;
+    corners = corners.map(p => ({ x: 2 * cx - p.x, y: p.y }));
+  }
   const [tl, tr, br, bl] = corners, s = imgSize;
   if (corners.length >= 6) {
     // 6-point mesh (4 triangles): TL TR BR BL ML MR
@@ -69,7 +74,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
   const shoeImgStyle = {
-    transform: `rotate(${item.rotation||0}deg)`,
+    transform: `rotate(${item.rotation||0}deg) scaleX(${item.flipX ? -1 : 1})`,
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 8px 16px rgba(0,0,0,0.5))" : "none",
@@ -103,9 +108,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     warpCanvas.current.width  = cw;
     warpCanvas.current.height = ch;
     loadImg().then(el => {
-      if (el && warpCanvas.current && item.corners) drawWarped(warpCanvas.current, el, item.corners, size);
+      if (el && warpCanvas.current && item.corners) drawWarped(warpCanvas.current, el, item.corners, size, item.flipX);
     });
-  }, [warped, item.corners, size, loadImg, containerRef]);
+  }, [warped, item.corners, size, loadImg, containerRef, item.flipX]);
 
   // ── Timers ────────────────────────────────────────────────────────────────
   const resetHide = useCallback((ms = 5000) => {
@@ -281,6 +286,12 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
   const exitFit = useCallback(() => { setFitMode(false); resetHide(); }, [resetHide]);
 
+  const flipH = useCallback(() => {
+    const c = itemRef.current;
+    updateRef.current({ ...c, flipX: !c.flipX });
+    resetHide();
+  }, [resetHide]);
+
   useEffect(() => () => { clearTimeout(longTimer.current); clearTimeout(hideTimer.current); }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -302,7 +313,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           />
           {showControls && (
             <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} fitMode={false}
+              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={false}
               style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
           )}
         </div>
@@ -355,7 +366,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           {/* Controls bar */}
           {showControls && (
             <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} fitMode={fitMode}
+              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
               style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
           )}
         </>
@@ -365,7 +376,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 }
 
 // ── Controls bar ──────────────────────────────────────────────────────────────
-function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, fitMode, style }) {
+function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, fitMode, style }) {
   return (
     <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
       {fitMode ? (
@@ -375,6 +386,7 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
           <Btn bg="#111"    onClick={onScaleDown} title="Smaller"><ZoomOut   size={13}/></Btn>
           <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
           <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
+          <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
           <Btn bg="#111"    onClick={onBack}      title="Send to back"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
           <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
           <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
