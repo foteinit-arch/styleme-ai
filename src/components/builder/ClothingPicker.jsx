@@ -20,8 +20,8 @@ export default function ClothingPicker({ clothes, onDrop }) {
 
   return (
     <div className="p-3 flex flex-col h-full">
-      <p className="text-sm font-semibold text-gray-800 mb-1">Your Clothes</p>
-      <p className="text-xs text-gray-400 mb-3">Tap or drag items onto your avatar</p>
+      <p className="text-sm font-semibold text-white mb-1">Your Clothes</p>
+      <p className="text-xs text-white/60 mb-3">Tap or drag items onto your avatar</p>
 
       <div className="relative mb-3">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
