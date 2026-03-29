@@ -33,27 +33,13 @@ export default function OutfitBuilder() {
     top:       { x: 160, y: 260, scale: 1.4 },
     bottom:    { x: 160, y: 355, scale: 1.5 },
     dress:     { x: 160, y: 250, scale: 1.6 },
-    shoes:     { x: 160, y: 592, scale: 0.85 },
+    shoes:     { x: 160, y: 596, scale: 0.6  },
     outerwear: { x: 160, y: 235, scale: 1.5 },
     accessory: { x: 160, y: 75,  scale: 0.7 },
     bag:       { x: 160, y: 410, scale: 0.9 },
   };
 
   const handleDrop = (item) => {
-    if (item.category === "shoes") {
-      // Both instances show the front (whole) shoe — the right side of the pair photo.
-      // Left foot: mirrored so the shoe faces left, tilted inward.
-      // Right foot: normal orientation, tilted inward.
-      const shoeScale = 1.4 * ((profile?.height_cm || 165) / 165);
-      const now = Date.now();
-      setPlaced(prev => [
-        ...prev,
-        { ...item, placedId: now+0.1, x:135, y:592, scale:shoeScale, rotation:-8, z_index:prev.length+1, shoeClip:"right", shoeFlip:true  },
-        { ...item, placedId: now+0.2, x:185, y:592, scale:shoeScale, rotation: 8, z_index:prev.length+2, shoeClip:"right", shoeFlip:false },
-      ]);
-      return;
-    }
-
     const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
 
     const measurementRatio = {
@@ -61,6 +47,7 @@ export default function OutfitBuilder() {
       outerwear: (profile?.bust_cm   || 88)  / 88,
       dress:     (profile?.bust_cm   || 88)  / 88,
       bottom:    (profile?.hips_cm   || 94)  / 94,
+      shoes:     (profile?.height_cm || 165) / 165,
       accessory: 1,
       bag:       1,
     }[item.category] ?? 1;
