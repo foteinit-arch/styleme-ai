@@ -32,15 +32,15 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="max-w-3xl">
+      <main className="flex-1 flex flex-col items-center justify-center px-6">
+        <div className="max-w-3xl text-left">
           <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" /> Virtual Try-On, Reimagined
           </div>
-          <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 leading-tight mb-6 font-heading uppercase tracking-widest">
+          <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 leading-tight mb-6 font-heading uppercase tracking-wide text-left">
             Try on any outfit <span className="text-orange-500">before you wear it</span>
           </h1>
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-400 mb-10 max-w-2xl">
             Build your perfect avatar, upload your clothes or pull them from the web, and drag & drop to create stunning outfits — no fitting room needed.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
