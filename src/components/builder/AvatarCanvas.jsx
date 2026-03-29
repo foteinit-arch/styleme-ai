@@ -2,7 +2,7 @@ import { useRef, useState, useCallback } from "react";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 import DraggableClothingItem from "@/components/builder/DraggableClothingItem";
 
-export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
+export default function AvatarCanvas({ profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront }) {
   const canvasRef = useRef(null);
 
   const handleDragOver = (e) => {
@@ -46,6 +46,8 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove }) {
           containerRef={canvasRef}
           onUpdate={onUpdate}
           onRemove={onRemove}
+          onSendToBack={onSendToBack}
+          onBringToFront={onBringToFront}
         />
       ))}
     </div>

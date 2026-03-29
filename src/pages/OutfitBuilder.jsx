@@ -73,6 +73,29 @@ export default function OutfitBuilder() {
     setPlaced(prev => prev.filter(p => p.placedId !== placedId));
   };
 
+  // Layer control via DOM order (last in array = rendered on top)
+  const handleSendToBack = (placedId) => {
+    setPlaced(prev => {
+      const idx = prev.findIndex(p => p.placedId === placedId);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      next.unshift(item);
+      return next;
+    });
+  };
+
+  const handleBringToFront = (placedId) => {
+    setPlaced(prev => {
+      const idx = prev.findIndex(p => p.placedId === placedId);
+      if (idx === prev.length - 1) return prev;
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      next.push(item);
+      return next;
+    });
+  };
+
   const handleClear = () => setPlaced([]);
 
   if (loading) {
@@ -116,6 +139,8 @@ export default function OutfitBuilder() {
             placed={placed}
             onUpdate={handleUpdate}
             onRemove={handleRemovePlaced}
+            onSendToBack={handleSendToBack}
+            onBringToFront={handleBringToFront}
           />
         </div>
       </div>

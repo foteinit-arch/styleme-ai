@@ -39,7 +39,7 @@ function drawWarped(canvas, imgEl, corners, imgSize) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef }) {
+export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef, onSendToBack, onBringToFront }) {
   const [showControls, setShowControls] = useState(false);
   const [fitMode,      setFitMode]      = useState(false);
 
@@ -117,18 +117,16 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     resetHide();
   }, [resetHide]);
 
-  // Single tap → always send to back (lets you "click through" to the item below)
+  // Layer via DOM order — parent reorders the placed[] array
   const sendToBack = useCallback(() => {
-    const c = itemRef.current;
-    updateRef.current({ ...c, z_index: 1 });
-  }, []);
-
-  // Controls button → bring to absolute front
-  const bringToFront = useCallback(() => {
-    const c = itemRef.current;
-    updateRef.current({ ...c, z_index: Date.now() });
+    onSendToBack?.(itemRef.current.placedId);
     resetHide();
-  }, [resetHide]);
+  }, [onSendToBack, resetHide]);
+
+  const bringToFront = useCallback(() => {
+    onBringToFront?.(itemRef.current.placedId);
+    resetHide();
+  }, [onBringToFront, resetHide]);
 
   // ── Wheel zoom ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -258,7 +256,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   useEffect(() => () => { clearTimeout(longTimer.current); clearTimeout(hideTimer.current); }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
-  const zIdx = item.z_index || 1;
+  // When controls are visible, boost z-index so buttons are never covered by another item.
+  // Layer order is managed via DOM position in placed[] array (last = on top).
+  const zIdx = showControls || fitMode ? 9999 : (item.z_index || 1);
 
   return (
     <>
