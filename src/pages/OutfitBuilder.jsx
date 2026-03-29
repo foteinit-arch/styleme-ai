@@ -113,13 +113,13 @@ export default function OutfitBuilder() {
           <Link to={createPageUrl("Wardrobe")}>
             <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10"><ArrowLeft className="w-5 h-5" /></Button>
           </Link>
-          <h1 className="font-heading font-bold uppercase text-yellow-300 text-xl tracking-tight">Outfit Builder</h1>
+          <h1 className="font-heading font-bold uppercase text-white text-xl tracking-tight">Outfit Builder</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowSave(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold" size="sm">
+          <Button onClick={() => setShowSave(true)} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save Outfit
           </Button>
         </div>
