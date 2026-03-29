@@ -55,7 +55,7 @@ export default function Home() {
           </p>
           <button
             onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
-            className="mt-8 w-fit text-orange-400 font-body text-base tracking-widest uppercase underline underline-offset-4 hover:text-white transition-colors"
+            className="mt-8 w-fit text-white font-body text-base tracking-widest uppercase underline underline-offset-4 hover:text-white/70 transition-colors"
           >
             Start Styling →
           </button>
