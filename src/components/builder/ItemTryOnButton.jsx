@@ -56,9 +56,12 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
   const handleSaveAsAvatar = async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({ avatar_generated_url: imageUrl });
-      // Trigger a re-fetch of the profile in the parent component
-      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: imageUrl } }));
+      const user = await base44.auth.me();
+      const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+      if (profiles.length > 0) {
+        await base44.entities.UserProfile.update(profiles[0].id, { avatar_generated_url: imageUrl });
+        window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: imageUrl } }));
+      }
       setIsOpen(false);
     } catch (err) {
       setError("Failed to save avatar. Please try again.");
