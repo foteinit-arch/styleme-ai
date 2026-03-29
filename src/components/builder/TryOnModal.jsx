@@ -17,15 +17,14 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     setImageUrl(null);
 
     try {
-      // Build a description of the outfit
-      const categories = ["outerwear", "top", "dress", "bottom", "shoes", "bag", "accessory"];
-      const sorted = [...placed].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
-      const outfitDesc = sorted.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""}`).join(", ");
-      const itemUrls = sorted.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
+      // Build description of shoes only
+      const shoes = placed.filter(p => p.category === 'shoes');
+      const shoeDesc = shoes.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""}`).join(", ");
 
-      const prompt = `Professional fashion photography. A person wearing the following outfit items: ${outfitDesc}. Full body view, standing pose, studio lighting, clean white background. Fashion editorial style photography.`;
+      const prompt = `Fashion editorial photo. Reproduce the exact same person from the reference photo — same body, same face, same pose, same background. The ONLY change: the person is now wearing ${shoeDesc} on their feet. The shoes must be ON the feet, not floating. Photorealistic, full body, studio lighting.`;
 
-      const refUrls = avatarUrl ? [avatarUrl, ...itemUrls] : itemUrls;
+      // Only pass avatar as reference — shoe product shots confuse the model
+      const refUrls = avatarUrl ? [avatarUrl] : [];
 
       const { url } = await base44.integrations.Core.GenerateImage({
         prompt,
@@ -109,7 +108,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
                   <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                 </Button>
                 <Button onClick={handleSaveSnapshot} disabled={saving} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
-                  {saving ? "Saving..." : <>Save Snapshot</>}
+                  {saving ? "Saving..." : "Use as Avatar"}
                 </Button>
               </div>
               {!avatarUrl && (

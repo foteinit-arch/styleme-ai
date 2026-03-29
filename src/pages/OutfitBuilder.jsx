@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Save, RotateCcw, ArrowLeft, Sparkles } from "lucide-react";
+import { Save, RotateCcw, ArrowLeft, Sparkles, X, Check } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
-import TryOnModal from "@/components/builder/TryOnModal";
 import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -16,14 +15,18 @@ export default function OutfitBuilder() {
   const [clothes, setClothes] = useState([]);
   const [placed, setPlaced]   = useState([]);
   const [showSave, setShowSave] = useState(false);
-  const [showTryOn, setShowTryOn] = useState(false);
   const [snapshots, setSnapshots] = useState([]);
   const [savingSnapshot, setSavingSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingOutfitId, setEditingOutfitId] = useState(null);
 
+  // Shoe try-on (canvas capture)
+  const [shoePreview, setShoePreview] = useState(null);
+  const [capturingPreview, setCapturingPreview] = useState(false);
+  const [captureError, setCaptureError] = useState(false);
+  const avatarCanvasRef = useRef(null);
+
   useEffect(() => {
-    // Get outfitId from URL if editing
     const params = new URLSearchParams(window.location.search);
     const outfitId = params.get("outfitId");
     if (outfitId) setEditingOutfitId(outfitId);
@@ -37,21 +40,18 @@ export default function OutfitBuilder() {
       if (profiles.length > 0) setProfile(profiles[0]);
       setClothes(items);
 
-      // If editing an outfit, load it
       if (outfitId) {
         const outfit = await base44.entities.Outfit.filter({ id: outfitId });
         if (outfit.length > 0) {
           const loadedOutfit = outfit[0];
-          // Reset to original avatar (not generated) when editing
           if (profiles.length > 0) {
             const originalProfile = { ...profiles[0], avatar_generated_url: null };
             setProfile(originalProfile);
           }
-          // Reconstruct placed items from outfit data
           if (loadedOutfit.items && loadedOutfit.items.length > 0) {
             const reconstructed = loadedOutfit.items.map((itemData, idx) => {
               const clothingItem = items.find(c => c.id === itemData.clothing_item_id);
-              if (!clothingItem) return null; // Skip if item not found
+              if (!clothingItem) return null;
               return {
                 ...clothingItem,
                 x: itemData.x,
@@ -75,7 +75,6 @@ export default function OutfitBuilder() {
     const handleAvatarUpdate = async (e) => {
       const updatedProfile = e.detail;
       setProfile(updatedProfile);
-      // Optionally refresh from server to ensure consistency
       if (user?.email) {
         const fresh = await base44.entities.UserProfile.filter({ user_email: user.email });
         if (fresh.length > 0) setProfile(fresh[0]);
@@ -97,7 +96,6 @@ export default function OutfitBuilder() {
 
   const handleDrop = (item) => {
     const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
-
     const measurementRatio = {
       top:       (profile?.bust_cm   || 88)  / 88,
       outerwear: (profile?.bust_cm   || 88)  / 88,
@@ -119,7 +117,6 @@ export default function OutfitBuilder() {
     }]);
   };
 
-  // DraggableClothingItem calls onUpdate(updatedItem) — full item object
   const handleUpdate = (updatedItem) => {
     setPlaced(prev => prev.map(p => p.placedId === updatedItem.placedId ? updatedItem : p));
   };
@@ -128,7 +125,6 @@ export default function OutfitBuilder() {
     setPlaced(prev => prev.filter(p => p.placedId !== placedId));
   };
 
-  // Layer control via DOM order (last in array = rendered on top)
   const handleSendToBack = (placedId) => {
     setPlaced(prev => {
       const idx = prev.findIndex(p => p.placedId === placedId);
@@ -153,14 +149,37 @@ export default function OutfitBuilder() {
 
   const handleClear = () => setPlaced([]);
 
+  // ── Shoe try-on via canvas capture ────────────────────────────────────────
+  const handleTryShoes = async () => {
+    setCaptureError(false);
+    setCapturingPreview(true);
+    setShoePreview(null);
+    const url = await avatarCanvasRef.current?.captureSnapshot();
+    setCapturingPreview(false);
+    if (url) {
+      setShoePreview(url);
+    } else {
+      setCaptureError(true);
+    }
+  };
+
+  const handleUseAsAvatar = () => {
+    // Bake the try-on result into the avatar; remove shoes from canvas
+    setProfile(prev => ({ ...prev, avatar_generated_url: shoePreview }));
+    setPlaced(prev => prev.filter(p => p.category !== 'shoes'));
+    setShoePreview(null);
+  };
+
+  // ── Snapshots ─────────────────────────────────────────────────────────────
   const handleSnapshotSaved = (snapshot) => {
     setSnapshots(prev => [...prev, snapshot]);
+    setProfile(prev => ({ ...prev, avatar_generated_url: snapshot.snapshot_url }));
+    setPlaced(prev => prev.filter(p => p.category !== 'shoes'));
   };
 
   const handleSaveOutfitFromSnapshot = (snapshot) => {
     setSavingSnapshot(snapshot);
     setShowSave(true);
-    // Temporarily restore placed items from snapshot for saving
     const restored = (snapshot.placed_items || []).map((item, idx) => ({
       ...item,
       placedId: item.placedId || Date.now() + idx,
@@ -173,7 +192,6 @@ export default function OutfitBuilder() {
   };
 
   const handleOutfitSaved = async () => {
-    // Refresh profile to show updated avatar
     if (user?.email) {
       const fresh = await base44.entities.UserProfile.filter({ user_email: user.email });
       if (fresh.length > 0) setProfile(fresh[0]);
@@ -199,8 +217,14 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowTryOn(true)} disabled={!placed.some(p => p.category === 'shoes') || placed.some(p => p.category !== 'shoes')} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed" size="sm">
-            <Sparkles className="w-4 h-4 mr-1" /> Try Shoes
+          <Button
+            onClick={handleTryShoes}
+            disabled={!placed.some(p => p.category === 'shoes') || capturingPreview}
+            className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            size="sm"
+          >
+            <Sparkles className="w-4 h-4 mr-1" />
+            {capturingPreview ? "Capturing…" : "Try Shoes"}
           </Button>
           <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -218,26 +242,54 @@ export default function OutfitBuilder() {
         <div className="flex-1 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
             <AvatarCanvas
+              ref={avatarCanvasRef}
               profile={profile}
               placed={placed}
               onUpdate={handleUpdate}
               onRemove={handleRemovePlaced}
               onSendToBack={handleSendToBack}
               onBringToFront={handleBringToFront}
-              showItemTryOn={true}
             />
           </div>
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
         </div>
       </div>
 
-      {showTryOn && (
-        <TryOnModal
-          profile={profile}
-          placed={placed.filter(p => p.category === 'shoes')}
-          onClose={() => setShowTryOn(false)}
-          onSnapshotSaved={handleSnapshotSaved}
-        />
+      {/* Shoe preview modal */}
+      {(shoePreview || captureError) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={e => e.target === e.currentTarget && setShoePreview(null)}>
+          <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#e8b820]" />
+                <span className="font-heading font-bold text-white text-lg">Shoe Try-On</span>
+              </div>
+              <button onClick={() => { setShoePreview(null); setCaptureError(false); }} className="text-white/40 hover:text-white transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {captureError ? (
+                <div className="text-center py-8">
+                  <p className="text-red-400 text-sm mb-3">Could not capture snapshot — image CORS restriction.</p>
+                  <Button onClick={handleTryShoes} variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10" size="sm">Try again</Button>
+                </div>
+              ) : (
+                <>
+                  <img src={shoePreview} alt="Shoe try-on" className="w-full rounded-xl object-cover max-h-[60vh]" />
+                  <div className="flex gap-2">
+                    <Button onClick={handleTryShoes} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10" size="sm">
+                      Retake
+                    </Button>
+                    <Button onClick={handleUseAsAvatar} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
+                      <Check className="w-4 h-4 mr-1" /> Use as Avatar
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {showSave && user && (

@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight, FlipHorizontal } from "lucide-react";
-import ItemTryOnButton from "./ItemTryOnButton";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
 function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1, sy1, sx2, sy2) {
@@ -407,7 +406,6 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
           </>
         )}
       </div>
-      {item && profile && createPortal(<ItemTryOnButton item={item} profile={profile} />, document.body)}
     </>
   );
 }
