@@ -391,22 +391,24 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 // ── Controls bar ──────────────────────────────────────────────────────────────
 function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, fitMode, style, item, profile }) {
   return (
-    <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
-      {fitMode ? (
-        <Btn bg="#22c55e" onClick={onDone} wide><Check size={12}/><span style={{fontSize:11,fontWeight:600,marginLeft:4}}>Done</span></Btn>
-      ) : (
-        <>
-          <Btn bg="#111"    onClick={onScaleDown} title="Smaller"><ZoomOut   size={13}/></Btn>
-          <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
-          <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
-          <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
-          <Btn bg="#111"    onClick={onBack}      title="Send to back"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
-          <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
-          <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
-          {item && profile && <ItemTryOnButton item={item} profile={profile} />}
-        </>
-      )}
-    </div>
+    <>
+      <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
+        {fitMode ? (
+          <Btn bg="#22c55e" onClick={onDone} wide><Check size={12}/><span style={{fontSize:11,fontWeight:600,marginLeft:4}}>Done</span></Btn>
+        ) : (
+          <>
+            <Btn bg="#111"    onClick={onScaleDown} title="Smaller"><ZoomOut   size={13}/></Btn>
+            <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
+            <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
+            <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
+            <Btn bg="#111"    onClick={onBack}      title="Send to back"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
+            <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
+            <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
+          </>
+        )}
+      </div>
+      {item && profile && createPortal(<ItemTryOnButton item={item} profile={profile} />, document.body)}
+    </>
   );
 }
 
