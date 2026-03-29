@@ -242,7 +242,7 @@ export default function OutfitBuilder() {
       {showSave && user && (
         <SaveOutfitModal
           userEmail={user.email}
-          placed={savingSnapshot ? savingSnapshot.placed_items : placed}
+          placed={placed}
           snapshotUrl={savingSnapshot?.snapshot_url}
           onClose={() => {
             setShowSave(false);
