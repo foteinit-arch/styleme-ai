@@ -32,12 +32,18 @@ export default function OutfitBuilder() {
   }, []);
 
   useEffect(() => {
-    const handleAvatarUpdate = (e) => {
-      setProfile(prev => prev ? { ...prev, ...e.detail } : e.detail);
+    const handleAvatarUpdate = async (e) => {
+      const updatedProfile = e.detail;
+      setProfile(updatedProfile);
+      // Optionally refresh from server to ensure consistency
+      if (user?.email) {
+        const fresh = await base44.entities.UserProfile.filter({ user_email: user.email });
+        if (fresh.length > 0) setProfile(fresh[0]);
+      }
     };
     window.addEventListener('avatar-updated', handleAvatarUpdate);
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
-  }, []);
+  }, [user]);
 
   const categoryPositions = {
     top:       { x: 160, y: 260, scale: 1.4 },
