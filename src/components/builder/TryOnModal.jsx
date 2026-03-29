@@ -56,14 +56,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     try {
       const snapshot = {
         snapshot_url: imageUrl,
-        placed_items: placed.map(p => ({
-          clothing_item_id: p.clothing_item_id || p.id,
-          x: p.x,
-          y: p.y,
-          scale: p.scale,
-          rotation: p.rotation,
-          z_index: p.z_index,
-        })),
+        placed_items: placed, // Store full placed items with all data
       };
       if (onSnapshotSaved) onSnapshotSaved(snapshot);
       onClose();
