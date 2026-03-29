@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, X, RefreshCw, Download } from "lucide-react";
+import { Sparkles, X, RefreshCw, Download, Check } from "lucide-react";
 
 export default function ItemTryOnButton({ item, profile, variant = "button", buttonRef }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +9,7 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [saving, setSaving] = useState(false);
   const myRef = useRef(null);
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
@@ -50,6 +51,20 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
     a.download = `${item.name || "item"}-tryon.png`;
     a.target = "_blank";
     a.click();
+  };
+
+  const handleSaveAsAvatar = async () => {
+    setSaving(true);
+    try {
+      await base44.auth.updateMe({ avatar_generated_url: imageUrl });
+      // Trigger a re-fetch of the profile in the parent component
+      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: imageUrl } }));
+      setIsOpen(false);
+    } catch (err) {
+      setError("Failed to save avatar. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleClick = (e) => {
@@ -130,12 +145,17 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
               {imageUrl && !loading && (
                 <div className="space-y-4">
                   <img src={imageUrl} alt="Item try-on" className="w-full rounded-xl object-cover max-h-[60vh]" />
-                  <div className="flex gap-2">
-                    <button onClick={generate} className="flex-1 px-3 py-2 border border-white/20 text-white bg-transparent hover:bg-white/10 rounded-md text-sm inline-flex items-center justify-center gap-1">
-                      <RefreshCw className="w-4 h-4" /> Regenerate
-                    </button>
-                    <button onClick={handleDownload} className="flex-1 px-3 py-2 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold rounded-md text-sm inline-flex items-center justify-center gap-1">
-                      <Download className="w-4 h-4" /> Save
+                  <div className="flex gap-2 flex-col">
+                    <div className="flex gap-2">
+                      <button onClick={generate} className="flex-1 px-3 py-2 border border-white/20 text-white bg-transparent hover:bg-white/10 rounded-md text-sm inline-flex items-center justify-center gap-1">
+                        <RefreshCw className="w-4 h-4" /> Regenerate
+                      </button>
+                      <button onClick={handleDownload} className="flex-1 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md text-sm inline-flex items-center justify-center gap-1">
+                        <Download className="w-4 h-4" /> Download
+                      </button>
+                    </div>
+                    <button onClick={handleSaveAsAvatar} disabled={saving} className="w-full px-3 py-2 bg-[#e8b820] hover:bg-[#d4a017] disabled:opacity-50 text-black font-semibold rounded-md text-sm inline-flex items-center justify-center gap-1">
+                      <Check className="w-4 h-4" /> {saving ? "Saving..." : "Save as Avatar"}
                     </button>
                   </div>
                   {!avatarUrl && (

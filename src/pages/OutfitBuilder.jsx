@@ -31,6 +31,14 @@ export default function OutfitBuilder() {
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
 
+  useEffect(() => {
+    const handleAvatarUpdate = (e) => {
+      setProfile(prev => ({ ...prev, avatar_generated_url: e.detail.avatar_generated_url }));
+    };
+    window.addEventListener('avatar-updated', handleAvatarUpdate);
+    return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
+  }, []);
+
   const categoryPositions = {
     top:       { x: 160, y: 260, scale: 1.4 },
     bottom:    { x: 160, y: 355, scale: 1.5 },
