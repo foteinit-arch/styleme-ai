@@ -67,11 +67,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
-  // Shoes: clip to left or right half so each instance shows only one shoe from the pair photo
+  // Shoes: clip to right half (whole/front shoe), flip left instance so it faces correctly
   const shoeClipPath = item.shoeClip === "left"  ? "inset(0 50% 0 0)" :
                        item.shoeClip === "right" ? "inset(0 0 0 50%)" : undefined;
+  // clip-path is applied first, then transform — so scaleX(-1) mirrors the already-clipped shoe
+  const shoeFlipScale = item.shoeFlip ? "scaleX(-1) " : "";
   const shoeImgStyle = {
-    transform: `rotate(${item.rotation||0}deg)`,
+    transform: `${shoeFlipScale}rotate(${item.rotation||0}deg)`,
+    transformOrigin: "center bottom",
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 6px 14px rgba(0,0,0,0.5))" : "none",

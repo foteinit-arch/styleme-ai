@@ -41,13 +41,15 @@ export default function OutfitBuilder() {
 
   const handleDrop = (item) => {
     if (item.category === "shoes") {
-      // Two instances: left foot shows left half of pair photo, right foot shows right half
+      // Both instances show the front (whole) shoe — the right side of the pair photo.
+      // Left foot: mirrored so the shoe faces left, tilted inward.
+      // Right foot: normal orientation, tilted inward.
       const shoeScale = 1.4 * ((profile?.height_cm || 165) / 165);
       const now = Date.now();
       setPlaced(prev => [
         ...prev,
-        { ...item, placedId: now + 0.1, x: 112, y: 592, scale: shoeScale, rotation: 0, z_index: prev.length + 1, shoeClip: "left"  },
-        { ...item, placedId: now + 0.2, x: 208, y: 592, scale: shoeScale, rotation: 0, z_index: prev.length + 2, shoeClip: "right" },
+        { ...item, placedId: now+0.1, x:135, y:592, scale:shoeScale, rotation:-8, z_index:prev.length+1, shoeClip:"right", shoeFlip:true  },
+        { ...item, placedId: now+0.2, x:185, y:592, scale:shoeScale, rotation: 8, z_index:prev.length+2, shoeClip:"right", shoeFlip:false },
       ]);
       return;
     }
