@@ -89,7 +89,7 @@ export default function OutfitBuilder() {
     top:       { x: 160, y: 260, scale: 1.4 },
     bottom:    { x: 160, y: 355, scale: 1.5 },
     dress:     { x: 160, y: 250, scale: 1.6 },
-    shoes:     { x: 160, y: 596, scale: 0.6  },
+    shoes:     { x: 160, y: 550, scale: 0.6  },
     outerwear: { x: 160, y: 235, scale: 1.5 },
     accessory: { x: 160, y: 75,  scale: 0.7 },
     bag:       { x: 160, y: 410, scale: 0.9 },
@@ -204,7 +204,7 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowTryOn(true)} disabled={!placed.some(p => p.category === 'shoes')} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
+          <Button onClick={() => setShowTryOn(true)} disabled={!placed.some(p => p.category === 'shoes') || placed.some(p => p.category !== 'shoes')} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed" size="sm">
             <Sparkles className="w-4 h-4 mr-1" /> Try Shoes
           </Button>
           <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
