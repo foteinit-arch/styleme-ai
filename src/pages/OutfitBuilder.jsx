@@ -204,8 +204,8 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowTryOn(true)} disabled={placed.length === 0} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
-            <Sparkles className="w-4 h-4 mr-1" /> Try On
+          <Button onClick={() => setShowTryOn(true)} disabled={!placed.some(p => p.category === 'shoes')} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
+            <Sparkles className="w-4 h-4 mr-1" /> Try Shoes
           </Button>
           <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -239,7 +239,7 @@ export default function OutfitBuilder() {
       {showTryOn && (
         <TryOnModal
           profile={profile}
-          placed={placed}
+          placed={placed.filter(p => p.category === 'shoes')}
           onClose={() => setShowTryOn(false)}
           onSnapshotSaved={handleSnapshotSaved}
         />
