@@ -12,13 +12,13 @@ import { createPageUrl } from "@/utils";
 const CATEGORIES = ["all", "top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 
 export default function Wardrobe() {
-  const [user, setUser] = useState(null);
-  const [items, setItems] = useState([]);
+  const [user, setUser]         = useState(null);
+  const [items, setItems]       = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [category, setCategory] = useState("all");
-  const [search, setSearch] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [search, setSearch]     = useState("");
+  const [showAdd, setShowAdd]   = useState(false);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
@@ -41,31 +41,27 @@ export default function Wardrobe() {
     setFiltered(result);
   }, [items, category, search]);
 
-  const handleAdded = (item) => {
-    setItems(prev => [item, ...prev]);
-    setShowAdd(false);
-  };
-
+  const handleAdded = (item) => { setItems(prev => [item, ...prev]); setShowAdd(false); };
   const handleDelete = async (id) => {
     await base44.entities.ClothingItem.delete(id);
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Wardrobe</h1>
-            <p className="text-gray-500 mt-1">{items.length} items in your closet</p>
+            <p className="text-gray-400 mt-1">{items.length} items in your closet</p>
           </div>
           <div className="flex gap-3">
             <Link to={createPageUrl("OutfitBuilder")}>
-              <Button variant="outline" className="border-rose-200 text-rose-500 hover:bg-rose-50">
+              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
                 Try On →
               </Button>
             </Link>
-            <Button onClick={() => setShowAdd(true)} className="bg-rose-500 hover:bg-rose-600 text-white">
+            <Button onClick={() => setShowAdd(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>
@@ -93,7 +89,7 @@ export default function Wardrobe() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Array(10).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-52 animate-pulse border border-rose-100" />
+              <div key={i} className="bg-white rounded-2xl h-52 animate-pulse border border-gray-100" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -101,7 +97,7 @@ export default function Wardrobe() {
             <p className="text-5xl mb-4">👗</p>
             <p className="text-gray-500 text-lg">Your wardrobe is empty</p>
             <p className="text-gray-400 text-sm mb-6">Add your first clothing item to get started</p>
-            <Button onClick={() => setShowAdd(true)} className="bg-rose-500 hover:bg-rose-600 text-white">
+            <Button onClick={() => setShowAdd(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>

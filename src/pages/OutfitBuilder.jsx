@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Save, Share2, Trash2, RotateCcw, ArrowLeft } from "lucide-react";
+import { Save, RotateCcw, ArrowLeft } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
@@ -10,10 +9,10 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function OutfitBuilder() {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
   const [profile, setProfile] = useState(null);
   const [clothes, setClothes] = useState([]);
-  const [placed, setPlaced] = useState([]); // items placed on avatar
+  const [placed, setPlaced]   = useState([]);
   const [showSave, setShowSave] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -30,31 +29,44 @@ export default function OutfitBuilder() {
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
 
-const categoryPositions = {
-  top:       { x: 160, y: 260, scale: 1.4 },
-  bottom:    { x: 160, y: 430, scale: 1.5 },
-  dress:     { x: 160, y: 250, scale: 1.6 },
-  shoes:     { x: 160, y: 480, scale: 1.2 },
-  outerwear: { x: 160, y: 235, scale: 1.5 },
-  accessory: { x: 160, y: 75,  scale: 0.7 },
-  bag:       { x: 160, y: 410, scale: 0.9 },
-};
+  const categoryPositions = {
+    top:       { x: 160, y: 260, scale: 1.4 },
+    bottom:    { x: 160, y: 430, scale: 1.5 },
+    dress:     { x: 160, y: 250, scale: 1.6 },
+    shoes:     { x: 160, y: 480, scale: 1.2 },
+    outerwear: { x: 160, y: 235, scale: 1.5 },
+    accessory: { x: 160, y: 75,  scale: 0.7 },
+    bag:       { x: 160, y: 410, scale: 0.9 },
+  };
 
   const handleDrop = (item) => {
-    const pos = categoryPositions[item.category] || { x: 80, y: 200 };
+    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
+
+    // Scale clothing proportionally to the avatar's measurements
+    const measurementRatio = {
+      top:       (profile?.bust_cm   || 88)  / 88,
+      outerwear: (profile?.bust_cm   || 88)  / 88,
+      dress:     (profile?.bust_cm   || 88)  / 88,
+      bottom:    (profile?.hips_cm   || 94)  / 94,
+      shoes:     (profile?.height_cm || 165) / 165,
+      accessory: 1,
+      bag:       1,
+    }[item.category] ?? 1;
+
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
       x: pos.x,
       y: pos.y,
-      scale: pos.scale ?? 0.9,
+      scale: (pos.scale ?? 1.0) * measurementRatio,
       rotation: 0,
-      z_index: prev.length,
+      z_index: prev.length + 1,
     }]);
   };
 
-  const handleUpdate = (placedId, updates) => {
-    setPlaced(prev => prev.map(p => p.placedId === placedId ? { ...p, ...updates } : p));
+  // DraggableClothingItem calls onUpdate(updatedItem) — full item object
+  const handleUpdate = (updatedItem) => {
+    setPlaced(prev => prev.map(p => p.placedId === updatedItem.placedId ? updatedItem : p));
   };
 
   const handleRemovePlaced = (placedId) => {
@@ -65,16 +77,16 @@ const categoryPositions = {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-400 text-lg">Loading your wardrobe...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-rose-100 px-4 py-3 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link to={createPageUrl("Wardrobe")}>
             <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
@@ -82,10 +94,10 @@ const categoryPositions = {
           <h1 className="text-xl font-bold text-gray-900">Outfit Builder</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleClear} className="text-gray-500">
+          <Button variant="outline" size="sm" onClick={handleClear} className="text-gray-500 border-gray-200">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowSave(true)} className="bg-rose-500 hover:bg-rose-600 text-white" size="sm">
+          <Button onClick={() => setShowSave(true)} className="bg-orange-500 hover:bg-orange-600 text-white" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save Outfit
           </Button>
         </div>
@@ -93,7 +105,7 @@ const categoryPositions = {
 
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
-        <div className="md:w-72 border-r border-rose-100 bg-white overflow-y-auto">
+        <div className="md:w-72 border-r border-gray-100 bg-white overflow-y-auto">
           <ClothingPicker clothes={clothes} onDrop={handleDrop} />
         </div>
 
