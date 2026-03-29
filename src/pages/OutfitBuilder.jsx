@@ -20,8 +20,14 @@ export default function OutfitBuilder() {
   const [snapshots, setSnapshots] = useState([]);
   const [savingSnapshot, setSavingSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingOutfitId, setEditingOutfitId] = useState(null);
 
   useEffect(() => {
+    // Get outfitId from URL if editing
+    const params = new URLSearchParams(window.location.search);
+    const outfitId = params.get("outfitId");
+    if (outfitId) setEditingOutfitId(outfitId);
+
     base44.auth.me().then(async (u) => {
       setUser(u);
       const [profiles, items] = await Promise.all([
@@ -30,6 +36,28 @@ export default function OutfitBuilder() {
       ]);
       if (profiles.length > 0) setProfile(profiles[0]);
       setClothes(items);
+
+      // If editing an outfit, load it
+      if (outfitId) {
+        const outfit = await base44.entities.Outfit.filter({ id: outfitId });
+        if (outfit.length > 0) {
+          const loadedOutfit = outfit[0];
+          // Reconstruct placed items from outfit data
+          if (loadedOutfit.items && loadedOutfit.items.length > 0) {
+            const reconstructed = loadedOutfit.items.map((itemData, idx) => {
+              const clothingItem = items.find(c => c.id === itemData.clothing_item_id);
+              return {
+                ...clothingItem,
+                ...itemData,
+                placedId: Date.now() + idx,
+                z_index: itemData.z_index || idx + 1,
+              };
+            });
+            setPlaced(reconstructed);
+          }
+        }
+      }
+
       setLoading(false);
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
@@ -114,16 +142,7 @@ export default function OutfitBuilder() {
     });
   };
 
-  const handleClear = async () => {
-    setPlaced([]);
-    // Reset avatar display to original photo
-    if (user?.email && profile) {
-      await base44.entities.UserProfile.update(profile.id, {
-        avatar_generated_url: null,
-      });
-      setProfile({ ...profile, avatar_generated_url: null });
-    }
-  };
+  const handleClear = () => setPlaced([]);
 
   const handleSnapshotSaved = (snapshot) => {
     setSnapshots(prev => [...prev, snapshot]);

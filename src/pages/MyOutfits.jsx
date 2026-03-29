@@ -86,7 +86,7 @@ export default function MyOutfits() {
                   )}
                   <p className="text-xs text-white/30">{format(new Date(outfit.created_date), "MMM d, yyyy")}</p>
                   <div className="flex gap-2 mt-3">
-                    <Link to={createPageUrl("OutfitBuilder")} className="flex-1">
+                    <Link to={`${createPageUrl("OutfitBuilder")}?outfitId=${outfit.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full text-xs border-white/20 text-white hover:bg-white/10 bg-transparent">
                         <Edit className="w-3 h-3 mr-1" /> Edit
                       </Button>
