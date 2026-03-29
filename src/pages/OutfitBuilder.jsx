@@ -114,7 +114,16 @@ export default function OutfitBuilder() {
     });
   };
 
-  const handleClear = () => setPlaced([]);
+  const handleClear = async () => {
+    setPlaced([]);
+    // Reset avatar to original photo
+    if (user?.email && profile) {
+      await base44.entities.UserProfile.update(profile.id, {
+        avatar_generated_url: null,
+      });
+      setProfile({ ...profile, avatar_generated_url: null });
+    }
+  };
 
   const handleSnapshotSaved = (snapshot) => {
     setSnapshots(prev => [...prev, snapshot]);
