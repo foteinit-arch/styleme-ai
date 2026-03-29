@@ -41,16 +41,6 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
         likes_count: 0,
       });
 
-      // Update profile avatar if snapshot provided
-      if (snapshotUrl) {
-        const profiles = await base44.entities.UserProfile.filter({ user_email: userEmail });
-        if (profiles.length > 0) {
-          await base44.entities.UserProfile.update(profiles[0].id, {
-            avatar_generated_url: snapshotUrl,
-          });
-        }
-      }
-
       setSaving(false);
       onSaved();
     } catch (err) {
