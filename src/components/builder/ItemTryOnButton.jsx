@@ -49,8 +49,9 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
     const a = document.createElement("a");
     a.href = imageUrl;
     a.download = `${item.name || "item"}-tryon.png`;
-    a.target = "_blank";
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   };
 
   const handleSaveAsAvatar = async () => {
