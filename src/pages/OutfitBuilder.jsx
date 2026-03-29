@@ -220,7 +220,7 @@ export default function OutfitBuilder() {
         </div>
 
         {/* Center: avatar canvas */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
             <AvatarCanvas
               profile={profile}
