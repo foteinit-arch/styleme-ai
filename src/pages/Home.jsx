@@ -37,8 +37,8 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" /> Virtual Try-On, Reimagined
           </div>
-          <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 leading-tight mb-6 font-heading uppercase tracking-wide text-left">
-            Try on any outfit <span className="text-orange-500">before you wear it</span>
+          <h1 className="text-6xl md:text-7xl font-bold text-gray-900 leading-none mb-6 font-heading tracking-tight text-left">
+            Try on any outfit<br /><span className="italic font-light">before you wear it</span>
           </h1>
           <p className="text-xl text-gray-400 mb-10 max-w-2xl">
             Build your perfect avatar, upload your clothes or pull them from the web, and drag & drop to create stunning outfits — no fitting room needed.
