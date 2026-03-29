@@ -207,6 +207,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
   // ── Touch ─────────────────────────────────────────────────────────────────
   const onTouchStart = useCallback((e) => {
+    if (cornerDrag.current) { e.preventDefault(); return; } // don't start item drag if corner drag active
     if (e.touches.length === 2) {
       const dx = e.touches[0].clientX-e.touches[1].clientX, dy = e.touches[0].clientY-e.touches[1].clientY;
       pinchRef.current = { active:true, dist:Math.hypot(dx,dy), scale:itemRef.current.scale||1 };
@@ -217,6 +218,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   }, [onPointerDown]);
 
   const onTouchMove = useCallback((e) => {
+    if (cornerDrag.current) { e.preventDefault(); return; } // corner drag handled by portal
     if (pinchRef.current.active && e.touches.length===2) {
       const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
       const s=Math.max(0.3,Math.min(4,pinchRef.current.scale*Math.hypot(dx,dy)/pinchRef.current.dist));
