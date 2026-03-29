@@ -67,6 +67,17 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
+  // Shoe visual treatment: flip for right foot, ankle-fade mask, grounding shadow
+  const shoeImgStyle = isShoe ? {
+    transform: `scaleX(${item.shoeFlip ? -1 : 1}) rotate(${item.rotation||0}deg)`,
+    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 30%)",
+    maskImage:        "linear-gradient(to bottom, transparent 0%, black 30%)",
+    filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
+                         : "drop-shadow(0 6px 14px rgba(0,0,0,0.55))",
+  } : {
+    transform: `rotate(${item.rotation||0}deg)`,
+    filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))" : "none",
+  };
 
   // Centroid + bounds (for controls and bounding-box hit area)
   const centX = warped ? item.corners.reduce((s, c) => s + c.x, 0) / item.corners.length : item.x;
@@ -281,9 +292,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             src={imgSrc} alt="" draggable={false}
             onMouseDown={onPointerDown}
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-            style={{ width:"100%", height:"100%", objectFit:"contain", pointerEvents:"auto", cursor:"grab", display:"block",
-              transform:`rotate(${item.rotation||0}deg)`,
-              filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))" : "none" }}
+            style={{ width:"100%", height:"100%", objectFit:"contain", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
           />
           {showControls && (
             <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
