@@ -160,6 +160,8 @@ export default function OutfitBuilder() {
   const handleSaveOutfitFromSnapshot = (snapshot) => {
     setSavingSnapshot(snapshot);
     setShowSave(true);
+    // Temporarily restore placed items from snapshot for saving
+    setPlaced(snapshot.placed_items || []);
   };
 
   const handleDeleteSnapshot = (idx) => {
