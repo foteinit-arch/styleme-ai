@@ -40,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "text-[#d4a017] bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}
+                  className={currentPageName === page ? "text-[#d4a017]" : "text-white/50 hover:text-white hover:bg-white/10"}
                 >
                   <Icon className="w-4 h-4 mr-1" />
                   {label}
