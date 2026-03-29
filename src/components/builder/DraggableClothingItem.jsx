@@ -158,8 +158,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       const c = itemRef.current;
       const cw = containerRef?.current?.offsetWidth  || 320;
       const ch = containerRef?.current?.offsetHeight || 600;
-      const newX = Math.max(0, Math.min(cw, sv.x + dx));
-      const newY = Math.max(0, Math.min(ch, sv.y + dy));
+      const PAD = 16; // keep handles fully inside the visible canvas
+      const newX = Math.max(PAD, Math.min(cw - PAD, sv.x + dx));
+      const newY = Math.max(PAD, Math.min(ch - PAD, sv.y + dy));
       updateRef.current({ ...c, corners: c.corners.map((p,i) => i===idx ? {x:newX, y:newY} : p) });
       return;
     }
@@ -238,10 +239,11 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // ── Fit mode ──────────────────────────────────────────────────────────────
   const enterFit = useCallback(() => {
     const c = itemRef.current;
-    const cw = containerRef?.current?.offsetWidth  || 320;
-    const ch = containerRef?.current?.offsetHeight || 600;
-    const clampX = (x) => Math.max(0, Math.min(cw, x));
-    const clampY = (y) => Math.max(0, Math.min(ch, y));
+    const cw  = containerRef?.current?.offsetWidth  || 320;
+    const ch  = containerRef?.current?.offsetHeight || 600;
+    const PAD = 16;
+    const clampX = (x) => Math.max(PAD, Math.min(cw - PAD, x));
+    const clampY = (y) => Math.max(PAD, Math.min(ch - PAD, y));
     if (!c.corners) {
       const s   = 100*(c.scale||1);
       // Shoes bottom-anchored; everything else centre-anchored
