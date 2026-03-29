@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, X, RefreshCw, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-export default function ItemTryOnButton({ item, profile }) {
+export default function ItemTryOnButton({ item, profile, variant = "button" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -45,17 +44,32 @@ export default function ItemTryOnButton({ item, profile }) {
 
   return (
     <>
-      <Button
-        size="icon"
-        onClick={() => {
+      <button
+        data-ctrl="true"
+        onClick={(e) => {
+          e.stopPropagation();
           setIsOpen(true);
           if (!imageUrl) generate();
         }}
-        className="bg-[#e8b820] hover:bg-[#d4a017] text-black"
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         title="AI Try-On"
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          background: "#e8b820",
+          color: "black",
+          border: "2px solid white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        }}
       >
         <Sparkles className="w-4 h-4" />
-      </Button>
+      </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={e => e.target === e.currentTarget && setIsOpen(false)}>
@@ -86,9 +100,9 @@ export default function ItemTryOnButton({ item, profile }) {
               {error && (
                 <div className="text-center py-10">
                   <p className="text-red-400 mb-3 text-sm">{error}</p>
-                  <Button onClick={generate} variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10">
-                    <RefreshCw className="w-4 h-4 mr-2" /> Try again
-                  </Button>
+                  <button onClick={generate} className="px-3 py-2 border border-white/20 text-white bg-transparent hover:bg-white/10 rounded-md text-sm inline-flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" /> Try again
+                  </button>
                 </div>
               )}
 
@@ -96,12 +110,12 @@ export default function ItemTryOnButton({ item, profile }) {
                 <div className="space-y-4">
                   <img src={imageUrl} alt="Item try-on" className="w-full rounded-xl object-cover max-h-[60vh]" />
                   <div className="flex gap-2">
-                    <Button onClick={generate} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10 text-sm">
-                      <RefreshCw className="w-4 h-4 mr-1" /> Regenerate
-                    </Button>
-                    <Button onClick={handleDownload} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold text-sm">
-                      <Download className="w-4 h-4 mr-1" /> Save
-                    </Button>
+                    <button onClick={generate} className="flex-1 px-3 py-2 border border-white/20 text-white bg-transparent hover:bg-white/10 rounded-md text-sm inline-flex items-center justify-center gap-1">
+                      <RefreshCw className="w-4 h-4" /> Regenerate
+                    </button>
+                    <button onClick={handleDownload} className="flex-1 px-3 py-2 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold rounded-md text-sm inline-flex items-center justify-center gap-1">
+                      <Download className="w-4 h-4" /> Save
+                    </button>
                   </div>
                   {!avatarUrl && (
                     <p className="text-xs text-white/30 text-center font-body">
