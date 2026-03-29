@@ -117,16 +117,19 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     resetHide();
   }, [resetHide]);
 
-  // Layer via DOM order — parent reorders the placed[] array
+  // Layer via DOM order — parent reorders the placed[] array.
+  // Hide controls immediately so the z-index boost drops and DOM order takes effect at once.
   const sendToBack = useCallback(() => {
     onSendToBack?.(itemRef.current.placedId);
-    resetHide();
-  }, [onSendToBack, resetHide]);
+    clearTimeout(hideTimer.current);
+    setShowControls(false);
+  }, [onSendToBack]);
 
   const bringToFront = useCallback(() => {
     onBringToFront?.(itemRef.current.placedId);
-    resetHide();
-  }, [onBringToFront, resetHide]);
+    clearTimeout(hideTimer.current);
+    setShowControls(false);
+  }, [onBringToFront]);
 
   // ── Wheel zoom ────────────────────────────────────────────────────────────
   useEffect(() => {
