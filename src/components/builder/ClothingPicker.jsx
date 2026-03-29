@@ -36,7 +36,7 @@ export default function ClothingPicker({ clothes, onDrop }) {
             onClick={() => setCat(c)}
             className={`px-2 py-0.5 rounded-full text-xs font-medium transition ${
               cat === c
-                ? "bg-orange-500 text-white"
+                ? "bg-[#e8b820] text-black"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
             }`}
           >
@@ -54,7 +54,7 @@ export default function ClothingPicker({ clothes, onDrop }) {
               draggable
               onDragStart={e => handleDragStart(e, item)}
               onClick={() => onDrop(item)}
-              className="bg-white border border-gray-100 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing hover:border-orange-300 hover:shadow transition flex flex-col"
+              className="bg-white border border-gray-100 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing hover:border-[#e8b820] hover:shadow transition flex flex-col"
               title="Tap or drag to add"
             >
               <div className="h-20 flex items-center justify-center bg-gray-50">

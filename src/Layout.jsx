@@ -40,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "text-[#d4a017]" : "text-white/50 hover:text-white hover:bg-white/10"}
+                  className={currentPageName === page ? "text-[#e8b820]" : "text-white/50 hover:text-white hover:bg-white/10"}
                 >
                   <Icon className="w-4 h-4" />
                   {label}
@@ -58,7 +58,7 @@ export default function Layout({ children, currentPageName }) {
                 </Button>
               </>
             ) : (
-              <Button size="sm" className="bg-[#d4a017] hover:bg-[#c09010] text-black font-semibold"
+              <Button size="sm" className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold"
                   onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>
@@ -77,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`w-full justify-start ${currentPageName === page ? "text-[#d4a017] bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}`}
+                  className={`w-full justify-start ${currentPageName === page ? "text-[#e8b820] bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {label}
@@ -89,7 +89,7 @@ export default function Layout({ children, currentPageName }) {
                 <LogOut className="w-4 h-4 mr-2" /> Sign Out
               </Button>
             ) : (
-              <Button size="sm" className="bg-[#d4a017] hover:bg-[#c09010] text-black font-semibold w-full"
+              <Button size="sm" className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold w-full"
                 onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>
