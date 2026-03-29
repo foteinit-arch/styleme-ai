@@ -79,6 +79,7 @@ export default function Avatar() {
 
   const handleClearAvatar = () => {
     setForm((f) => ({ ...f, avatar_generated_url: "" }));
+    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: "" } }));
   };
 
   const measurementsAreFresh = profile && (
