@@ -129,6 +129,16 @@ export default function OutfitBuilder() {
     setSnapshots(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const handleOutfitSaved = async () => {
+    // Refresh profile to show updated avatar
+    if (user?.email) {
+      const fresh = await base44.entities.UserProfile.filter({ user_email: user.email });
+      if (fresh.length > 0) setProfile(fresh[0]);
+    }
+    setShowSave(false);
+    setSavingSnapshot(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
@@ -201,10 +211,7 @@ export default function OutfitBuilder() {
             setShowSave(false);
             setSavingSnapshot(null);
           }}
-          onSaved={() => {
-            setShowSave(false);
-            setSavingSnapshot(null);
-          }}
+          onSaved={handleOutfitSaved}
         />
       )}
     </div>
