@@ -60,13 +60,17 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   useEffect(() => { itemRef.current  = item;     }, [item]);
   useEffect(() => { updateRef.current = onUpdate; }, [onUpdate]);
 
-  const imgSrc = item.processed_image_url || item.original_image_url;
-  const size   = 100 * (item.scale || 1);
-  const warped = !!item.corners;
+  const imgSrc  = item.processed_image_url || item.original_image_url;
+  const size    = 100 * (item.scale || 1);
+  const warped  = !!item.corners;
+  // Shoes are bottom-anchored: item.y = where the sole touches the ground.
+  // Everything else is centre-anchored.
+  const isShoe  = item.category === "shoes";
+  const itemTop = isShoe ? item.y - size : item.y - size / 2;
 
   // Centroid + bounds (for controls and bounding-box hit area)
   const centX = warped ? item.corners.reduce((s, c) => s + c.x, 0) / item.corners.length : item.x;
-  const topY  = warped ? Math.min(...item.corners.map(c => c.y))       : item.y - size / 2;
+  const topY  = warped ? Math.min(...item.corners.map(c => c.y))       : itemTop;
   const minX  = warped ? Math.min(...item.corners.map(c => c.x))       : 0;
   const minY  = warped ? Math.min(...item.corners.map(c => c.y))       : 0;
   const maxX  = warped ? Math.max(...item.corners.map(c => c.x))       : 0;
@@ -233,14 +237,18 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     const clampX = (x) => Math.max(0, Math.min(cw, x));
     const clampY = (y) => Math.max(0, Math.min(ch, y));
     if (!c.corners) {
-      const s = 100*(c.scale||1);
+      const s   = 100*(c.scale||1);
+      // Shoes bottom-anchored; everything else centre-anchored
+      const top = c.category === "shoes" ? c.y - s : c.y - s/2;
+      const bot = top + s;
+      const mid = top + s/2;
       updateRef.current({ ...c, corners:[
-        {x:clampX(c.x-s/2), y:clampY(c.y-s/2)}, // 0 TL — left shoulder / waist
-        {x:clampX(c.x+s/2), y:clampY(c.y-s/2)}, // 1 TR — right shoulder / waist
-        {x:clampX(c.x+s/2), y:clampY(c.y+s/2)}, // 2 BR — right ankle / hem
-        {x:clampX(c.x-s/2), y:clampY(c.y+s/2)}, // 3 BL — left ankle / hem
-        {x:clampX(c.x-s/2), y:clampY(c.y)},     // 4 ML — left knee / mid
-        {x:clampX(c.x+s/2), y:clampY(c.y)},     // 5 MR — right knee / mid
+        {x:clampX(c.x-s/2), y:clampY(top)}, // 0 TL
+        {x:clampX(c.x+s/2), y:clampY(top)}, // 1 TR
+        {x:clampX(c.x+s/2), y:clampY(bot)}, // 2 BR
+        {x:clampX(c.x-s/2), y:clampY(bot)}, // 3 BL
+        {x:clampX(c.x-s/2), y:clampY(mid)}, // 4 ML
+        {x:clampX(c.x+s/2), y:clampY(mid)}, // 5 MR
       ]});
     } else if (c.corners.length === 4) {
       // Upgrade legacy 4-corner to 6-point mesh
@@ -267,7 +275,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     <>
       {/* ── Normal mode ─────────────────────────────────────────────────── */}
       {!warped && (
-        <div style={{ position:"absolute", left:item.x-size/2, top:item.y-size/2, width:size, height:size, zIndex:zIdx, pointerEvents:"none", userSelect:"none", touchAction:"none" }}>
+        <div style={{ position:"absolute", left:item.x-size/2, top:itemTop, width:size, height:size, zIndex:zIdx, pointerEvents:"none", userSelect:"none", touchAction:"none" }}>
           <img
             ref={imgRef}
             src={imgSrc} alt="" draggable={false}

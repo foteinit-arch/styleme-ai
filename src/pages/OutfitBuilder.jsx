@@ -33,7 +33,7 @@ export default function OutfitBuilder() {
     top:       { x: 160, y: 260, scale: 1.4 },
     bottom:    { x: 160, y: 355, scale: 1.5 },
     dress:     { x: 160, y: 250, scale: 1.6 },
-    shoes:     { x: 160, y: 480, scale: 1.2 },
+    shoes:     { x: 160, y: 570, scale: 0.95 },
     outerwear: { x: 160, y: 235, scale: 1.5 },
     accessory: { x: 160, y: 75,  scale: 0.7 },
     bag:       { x: 160, y: 410, scale: 0.9 },
