@@ -60,6 +60,7 @@ export default function Avatar() {
       const created = await base44.entities.UserProfile.create(data);
       setProfile(created);
     }
+    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: form.avatar_generated_url } }));
     setSaving(false);
     toast.success("Avatar saved!");
   };
