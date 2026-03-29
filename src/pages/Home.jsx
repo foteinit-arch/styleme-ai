@@ -37,7 +37,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" /> Virtual Try-On, Reimagined
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+          <h1 className="text-5xl md:text-6xl font-semibold text-gray-900 leading-tight mb-6 font-heading uppercase tracking-widest">
             Try on any outfit <span className="text-orange-500">before you wear it</span>
           </h1>
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
