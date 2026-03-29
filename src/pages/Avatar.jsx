@@ -77,8 +77,11 @@ export default function Avatar() {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const handleClearAvatar = () => {
+  const handleClearAvatar = async () => {
     setForm((f) => ({ ...f, avatar_generated_url: "" }));
+    if (profile) {
+      await base44.entities.UserProfile.update(profile.id, { avatar_generated_url: "" });
+    }
     window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: "" } }));
   };
 
