@@ -24,8 +24,18 @@ function drawWarped(canvas, imgEl, corners, imgSize) {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const [tl, tr, br, bl] = corners, s = imgSize;
-  drawAffineTriangle(ctx, imgEl, s, tl, tr, bl,  0,0, s,0, 0,s);
-  drawAffineTriangle(ctx, imgEl, s, tr, br, bl,  s,0, s,s, 0,s);
+  if (corners.length >= 6) {
+    // 6-point mesh (4 triangles): TL TR BR BL ML MR
+    const ml = corners[4], mr = corners[5], sh = s / 2;
+    drawAffineTriangle(ctx, imgEl, s, tl, tr, ml,  0,0,  s,0,  0,sh);
+    drawAffineTriangle(ctx, imgEl, s, tr, mr, ml,  s,0,  s,sh, 0,sh);
+    drawAffineTriangle(ctx, imgEl, s, ml, mr, bl,  0,sh, s,sh, 0,s);
+    drawAffineTriangle(ctx, imgEl, s, mr, br, bl,  s,sh, s,s,  0,s);
+  } else {
+    // 4-point mesh (2 triangles) — legacy / short items
+    drawAffineTriangle(ctx, imgEl, s, tl, tr, bl,  0,0, s,0, 0,s);
+    drawAffineTriangle(ctx, imgEl, s, tr, br, bl,  s,0, s,s, 0,s);
+  }
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -55,7 +65,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   const warped = !!item.corners;
 
   // Centroid + bounds (for controls and bounding-box hit area)
-  const centX = warped ? item.corners.reduce((s, c) => s + c.x, 0) / 4 : item.x;
+  const centX = warped ? item.corners.reduce((s, c) => s + c.x, 0) / item.corners.length : item.x;
   const topY  = warped ? Math.min(...item.corners.map(c => c.y))       : item.y - size / 2;
   const minX  = warped ? Math.min(...item.corners.map(c => c.x))       : 0;
   const minY  = warped ? Math.min(...item.corners.map(c => c.y))       : 0;
@@ -98,8 +108,8 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     const c = itemRef.current;
     const s = Math.max(0.3, Math.min(4, (c.scale || 1) * f));
     if (c.corners) {
-      const cx = c.corners.reduce((a, p) => a + p.x, 0) / 4;
-      const cy = c.corners.reduce((a, p) => a + p.y, 0) / 4;
+      const cx = c.corners.reduce((a, p) => a + p.x, 0) / c.corners.length;
+      const cy = c.corners.reduce((a, p) => a + p.y, 0) / c.corners.length;
       updateRef.current({ ...c, scale: s, corners: c.corners.map(p => ({ x: cx+(p.x-cx)*f, y: cy+(p.y-cy)*f })) });
     } else {
       updateRef.current({ ...c, scale: s });
@@ -217,17 +227,27 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // ── Fit mode ──────────────────────────────────────────────────────────────
   const enterFit = useCallback(() => {
     const c = itemRef.current;
+    const cw = containerRef?.current?.offsetWidth  || 320;
+    const ch = containerRef?.current?.offsetHeight || 600;
+    const clampX = (x) => Math.max(0, Math.min(cw, x));
+    const clampY = (y) => Math.max(0, Math.min(ch, y));
     if (!c.corners) {
       const s = 100*(c.scale||1);
-      const cw = containerRef?.current?.offsetWidth  || 320;
-      const ch = containerRef?.current?.offsetHeight || 600;
-      const clampX = (x) => Math.max(0, Math.min(cw, x));
-      const clampY = (y) => Math.max(0, Math.min(ch, y));
       updateRef.current({ ...c, corners:[
-        {x:clampX(c.x-s/2), y:clampY(c.y-s/2)}, // TL — left shoulder
-        {x:clampX(c.x+s/2), y:clampY(c.y-s/2)}, // TR — right shoulder
-        {x:clampX(c.x+s/2), y:clampY(c.y+s/2)}, // BR — right hip
-        {x:clampX(c.x-s/2), y:clampY(c.y+s/2)}, // BL — left hip
+        {x:clampX(c.x-s/2), y:clampY(c.y-s/2)}, // 0 TL — left shoulder / waist
+        {x:clampX(c.x+s/2), y:clampY(c.y-s/2)}, // 1 TR — right shoulder / waist
+        {x:clampX(c.x+s/2), y:clampY(c.y+s/2)}, // 2 BR — right ankle / hem
+        {x:clampX(c.x-s/2), y:clampY(c.y+s/2)}, // 3 BL — left ankle / hem
+        {x:clampX(c.x-s/2), y:clampY(c.y)},     // 4 ML — left knee / mid
+        {x:clampX(c.x+s/2), y:clampY(c.y)},     // 5 MR — right knee / mid
+      ]});
+    } else if (c.corners.length === 4) {
+      // Upgrade legacy 4-corner to 6-point mesh
+      const [tl, tr, br, bl] = c.corners;
+      updateRef.current({ ...c, corners: [
+        tl, tr, br, bl,
+        {x:clampX((tl.x+bl.x)/2), y:clampY((tl.y+bl.y)/2)}, // ML
+        {x:clampX((tr.x+br.x)/2), y:clampY((tr.y+br.y)/2)}, // MR
       ]});
     }
     setFitMode(true); resetHide(15000);
@@ -277,7 +297,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           {/* Corner handles (only in fit mode) */}
           {fitMode && item.corners.map((corner, idx) => (
             <div key={idx} data-ctrl="true"
-              title={["Left shoulder","Right shoulder","Right hip","Left hip"][idx]}
+              title={["Left top","Right top","Right bottom","Left bottom","Left mid","Right mid"][idx]}
               onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);}}
               onTouchStart={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.touches[0].clientX,e.touches[0].clientY);}}
               onTouchMove={e=>{
@@ -294,7 +314,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
                 zIndex:zIdx+1000, pointerEvents:"auto", touchAction:"none",
                 boxShadow:"0 2px 10px rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center" }}
             >
-              <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙"][idx]}</span>
+              <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙","◀","▶"][idx]}</span>
             </div>
           ))}
 
