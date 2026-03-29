@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Upload, Save, User, Ruler, Sparkles, AlertCircle, Trash2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 
 export default function Avatar() {
@@ -61,7 +61,7 @@ export default function Avatar() {
       setProfile(created);
     }
     setSaving(false);
-    toast({ title: "Avatar saved!", description: "Your profile has been updated.", duration: 3000 });
+    toast.success("Avatar saved!");
   };
 
   const handleGenerateAvatar = async () => {
