@@ -42,6 +42,11 @@ export default function OutfitBuilder() {
         const outfit = await base44.entities.Outfit.filter({ id: outfitId });
         if (outfit.length > 0) {
           const loadedOutfit = outfit[0];
+          // Reset to original avatar (not generated) when editing
+          if (profiles.length > 0) {
+            const originalProfile = { ...profiles[0], avatar_generated_url: null };
+            setProfile(originalProfile);
+          }
           // Reconstruct placed items from outfit data
           if (loadedOutfit.items && loadedOutfit.items.length > 0) {
             const reconstructed = loadedOutfit.items.map((itemData, idx) => {
