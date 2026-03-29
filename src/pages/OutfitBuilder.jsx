@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Save, RotateCcw, ArrowLeft } from "lucide-react";
+import { Save, RotateCcw, ArrowLeft, Sparkles } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
+import TryOnModal from "@/components/builder/TryOnModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -14,6 +15,7 @@ export default function OutfitBuilder() {
   const [clothes, setClothes] = useState([]);
   const [placed, setPlaced]   = useState([]);
   const [showSave, setShowSave] = useState(false);
+  const [showTryOn, setShowTryOn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,8 +121,11 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowSave(true)} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
-            <Save className="w-4 h-4 mr-1" /> Save Outfit
+          <Button onClick={() => setShowTryOn(true)} disabled={placed.length === 0} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
+            <Sparkles className="w-4 h-4 mr-1" /> Try On
+          </Button>
+          <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
+            <Save className="w-4 h-4 mr-1" /> Save
           </Button>
         </div>
       </div>
@@ -143,6 +148,14 @@ export default function OutfitBuilder() {
           />
         </div>
       </div>
+
+      {showTryOn && (
+        <TryOnModal
+          profile={profile}
+          placed={placed}
+          onClose={() => setShowTryOn(false)}
+        />
+      )}
 
       {showSave && user && (
         <SaveOutfitModal
