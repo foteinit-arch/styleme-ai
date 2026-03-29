@@ -72,7 +72,7 @@ export default function ItemTryOnButton({ item, profile, variant = "button" }) {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={e => e.target === e.currentTarget && setIsOpen(false)}>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 p-4" style={{ zIndex: 99999 }} onClick={e => e.target === e.currentTarget && setIsOpen(false)}>
           <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
