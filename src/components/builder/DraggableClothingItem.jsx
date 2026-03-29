@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { X, ZoomIn, ZoomOut, Maximize2, Check } from "lucide-react";
+import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
 function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1, sy1, sx2, sy2) {
@@ -67,14 +67,12 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
-  // Shoe visual treatment: flip for right foot + grounding shadow
-  const shoeImgStyle = isShoe ? {
-    transform: `scaleX(${item.shoeFlip ? -1 : 1}) rotate(${item.rotation||0}deg)`,
-    filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
-                         : "drop-shadow(0 6px 14px rgba(0,0,0,0.55))",
-  } : {
+  // Shoes get a grounding drop-shadow; everything else no shadow by default
+  const shoeImgStyle = {
     transform: `rotate(${item.rotation||0}deg)`,
-    filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))" : "none",
+    filter: showControls
+      ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
+      : isShoe ? "drop-shadow(0 6px 14px rgba(0,0,0,0.5))" : "none",
   };
 
   // Centroid + bounds (for controls and bounding-box hit area)
@@ -332,7 +330,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
                 zIndex:zIdx+1000, pointerEvents:"auto", touchAction:"none",
                 boxShadow:"0 2px 10px rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center" }}
             >
-              <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙","◀","▶"][idx]}</span>
+              {idx === 4 ? <ChevronLeft  size={11} color="white" strokeWidth={3}/> :
+               idx === 5 ? <ChevronRight size={11} color="white" strokeWidth={3}/> :
+               <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙"][idx]}</span>}
             </div>
           ))}
 
