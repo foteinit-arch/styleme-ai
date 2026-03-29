@@ -30,8 +30,8 @@ export default function Layout({ children, currentPageName }) {
       <nav className="bg-[#373d47] border-b border-transparent sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
-            <Shirt className="w-5 h-5 text-[#d4a017]" />
-            <span className="font-heading font-bold uppercase text-[#d4a017] text-lg tracking-tight">StyleMe</span>
+            <Shirt className="w-5 h-5 text-white" />
+            <span className="font-heading font-bold uppercase text-white text-lg tracking-tight">StyleMe</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
