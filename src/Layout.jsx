@@ -26,8 +26,8 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1a1a1a]">
-      <nav className="bg-[#111] border-b border-white/10 sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-[#2a2310]">
+      <nav className="bg-[#1c1a0d] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
             <Shirt className="w-5 h-5 text-yellow-300" />
