@@ -85,7 +85,7 @@ export default function Avatar() {
     <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight mb-1 flex items-center gap-3">
-          <User className="text-[#d4a017]" /> My Avatar
+          <User className="text-[#d4a017] w-8 h-8 md:w-10 md:h-10 shrink-0" /> My Avatar
         </h1>
         <p className="text-white/50 mb-6 font-body">Fine-tune your measurements first — they control how clothes fit your avatar.</p>
 
