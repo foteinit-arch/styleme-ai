@@ -15,32 +15,28 @@ export default function TryOnModal({ profile, placed, onClose }) {
     setError(null);
     setImageUrl(null);
 
-    // Build a description of the outfit
-    const categories = ["outerwear", "top", "dress", "bottom", "shoes", "bag", "accessory"];
-    const sorted = [...placed].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
-    const outfitDesc = sorted.map(p => `${p.category}: ${p.name}${p.color ? ` (${p.color})` : ""}${p.brand ? ` by ${p.brand}` : ""}`).join(", ");
-    const itemUrls = sorted.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
+    try {
+      // Build a description of the outfit
+      const categories = ["outerwear", "top", "dress", "bottom", "shoes", "bag", "accessory"];
+      const sorted = [...placed].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
+      const outfitDesc = sorted.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""}`).join(", ");
+      const itemUrls = sorted.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
 
-    const bodyDesc = [
-      profile?.body_shape ? `${profile.body_shape} body shape` : "",
-      profile?.skin_tone  ? `${profile.skin_tone} skin tone` : "",
-      profile?.hair_color ? `hair color ${profile.hair_color}` : "",
-      profile?.height_cm  ? `${profile.height_cm}cm tall` : "",
-    ].filter(Boolean).join(", ");
+      const prompt = `Professional fashion photography. A person wearing the following outfit items: ${outfitDesc}. Full body view, standing pose, studio lighting, clean white background. Fashion editorial style photography.`;
 
-    const prompt = avatarUrl
-      ? `Fashion try-on photo. Show this exact person (match their face, hair, skin tone, and body proportions precisely) wearing this complete outfit: ${outfitDesc}. The person should be standing in a confident full-body pose on a clean white or light studio background. Render each garment faithfully — preserve the exact color, texture, and style of every piece. Professional fashion editorial quality.`
-      : `Full body fashion editorial photo of a model with ${bodyDesc || "medium build, medium skin tone"}. She is wearing: ${outfitDesc}. Standing confidently on a clean white studio background. Render each garment faithfully — preserve the exact color, texture, and style of every piece. Professional high-fashion photography.`;
+      const refUrls = avatarUrl ? [avatarUrl, ...itemUrls] : itemUrls;
 
-    const refUrls = avatarUrl ? [avatarUrl, ...itemUrls] : itemUrls;
+      const { url } = await base44.integrations.Core.GenerateImage({
+        prompt,
+        existing_image_urls: refUrls.slice(0, 5), // API limit
+      });
 
-    const { url } = await base44.integrations.Core.GenerateImage({
-      prompt,
-      existing_image_urls: refUrls.slice(0, 5), // API limit
-    });
-
-    setImageUrl(url);
-    setLoading(false);
+      setImageUrl(url);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message || "Failed to generate image. Please try again.");
+      setLoading(false);
+    }
   };
 
   useEffect(() => { generate(); }, []);
