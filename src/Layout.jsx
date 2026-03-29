@@ -26,12 +26,12 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#2a2310]">
-      <nav className="bg-[#1c1a0d] border-b border-white/10 sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-[#373d47]">
+      <nav className="bg-[#2c3140] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
-            <Shirt className="w-5 h-5 text-yellow-300" />
-            <span className="font-heading font-bold uppercase text-yellow-300 text-lg tracking-tight">StyleMe</span>
+            <Shirt className="w-5 h-5 text-[#d4a017]" />
+            <span className="font-heading font-bold uppercase text-[#d4a017] text-lg tracking-tight">StyleMe</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -40,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "text-yellow-300 bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}
+                  className={currentPageName === page ? "text-[#d4a017] bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}
                 >
                   <Icon className="w-4 h-4 mr-1" />
                   {label}
@@ -58,7 +58,7 @@ export default function Layout({ children, currentPageName }) {
                 </Button>
               </>
             ) : (
-              <Button size="sm" className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold"
+              <Button size="sm" className="bg-[#d4a017] hover:bg-[#c09010] text-black font-semibold"
                   onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>
@@ -77,7 +77,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`w-full justify-start ${currentPageName === page ? "text-yellow-300 bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}`}
+                  className={`w-full justify-start ${currentPageName === page ? "text-[#d4a017] bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {label}
@@ -89,7 +89,7 @@ export default function Layout({ children, currentPageName }) {
                 <LogOut className="w-4 h-4 mr-2" /> Sign Out
               </Button>
             ) : (
-              <Button size="sm" className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold w-full"
+              <Button size="sm" className="bg-[#d4a017] hover:bg-[#c09010] text-black font-semibold w-full"
                 onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>
