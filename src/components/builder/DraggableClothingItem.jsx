@@ -67,11 +67,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
-  // Shoe visual treatment: flip for right foot, ankle-fade mask, grounding shadow
+  // Shoe visual treatment: flip for right foot + grounding shadow
   const shoeImgStyle = isShoe ? {
     transform: `scaleX(${item.shoeFlip ? -1 : 1}) rotate(${item.rotation||0}deg)`,
-    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 30%)",
-    maskImage:        "linear-gradient(to bottom, transparent 0%, black 30%)",
     filter: showControls ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
                          : "drop-shadow(0 6px 14px rgba(0,0,0,0.55))",
   } : {
