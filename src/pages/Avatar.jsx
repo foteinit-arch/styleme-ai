@@ -74,7 +74,11 @@ export default function Avatar() {
       prompt: `Full body fashion avatar of this exact person. She is wearing a plain skin-toned seamless bodysuit, no patterns, no clothing details. Relaxed standing pose, arms relaxed at sides, facing forward, full body head to toe visible, plain white background. Match her face, hair colour and skin tone from the photo exactly.`,
       existing_image_urls: [form.avatar_photo_url],
     });
-    setForm((f) => ({ ...f, avatar_generated_url: url }));
+    const updatedForm = { ...form, avatar_generated_url: url };
+    setForm(updatedForm);
+    if (profile) {
+      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { ...profile, avatar_generated_url: url } }));
+    }
     setGenerating(false);
   };
 
