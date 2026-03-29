@@ -3,10 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { X, Download, Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function TryOnModal({ profile, placed, onClose }) {
+export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }) {
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
 
@@ -47,6 +48,29 @@ export default function TryOnModal({ profile, placed, onClose }) {
     a.download = "tryon.png";
     a.target = "_blank";
     a.click();
+  };
+
+  const handleSaveSnapshot = async () => {
+    if (!imageUrl) return;
+    setSaving(true);
+    try {
+      const snapshot = {
+        snapshot_url: imageUrl,
+        placed_items: placed.map(p => ({
+          clothing_item_id: p.id,
+          x: p.x,
+          y: p.y,
+          scale: p.scale,
+          rotation: p.rotation,
+          z_index: p.z_index,
+        })),
+      };
+      if (onSnapshotSaved) onSnapshotSaved(snapshot);
+      onClose();
+    } catch (err) {
+      setError("Failed to save snapshot. Please try again.");
+    }
+    setSaving(false);
   };
 
   return (
@@ -91,8 +115,8 @@ export default function TryOnModal({ profile, placed, onClose }) {
                 <Button onClick={generate} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10">
                   <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                 </Button>
-                <Button onClick={handleDownload} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
-                  <Download className="w-4 h-4 mr-2" /> Save
+                <Button onClick={handleSaveSnapshot} disabled={saving} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
+                  {saving ? "Saving..." : <>Save Snapshot</>}
                 </Button>
               </div>
               {!avatarUrl && (

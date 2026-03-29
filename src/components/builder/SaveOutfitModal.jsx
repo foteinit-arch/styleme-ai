@@ -9,7 +9,7 @@ import { X, Save } from "lucide-react";
 
 const OCCASIONS = ["casual","formal","wedding","party","sport","work","beach","other"];
 
-export default function SaveOutfitModal({ userEmail, placed, onClose, onSaved }) {
+export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClose, onSaved }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [occasion, setOccasion] = useState("casual");
@@ -21,7 +21,7 @@ export default function SaveOutfitModal({ userEmail, placed, onClose, onSaved })
     setSaving(true);
     try {
       const items = placed.map(p => ({
-        clothing_item_id: p.id,
+        clothing_item_id: p.clothing_item_id || p.id,
         x: p.x,
         y: p.y,
         scale: p.scale,
@@ -35,6 +35,7 @@ export default function SaveOutfitModal({ userEmail, placed, onClose, onSaved })
         occasion,
         is_public: isPublic,
         items,
+        outfit_snapshot_url: snapshotUrl,
         likes_count: 0,
       });
       setSaving(false);

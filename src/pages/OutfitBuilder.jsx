@@ -6,6 +6,7 @@ import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
 import TryOnModal from "@/components/builder/TryOnModal";
+import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -16,6 +17,8 @@ export default function OutfitBuilder() {
   const [placed, setPlaced]   = useState([]);
   const [showSave, setShowSave] = useState(false);
   const [showTryOn, setShowTryOn] = useState(false);
+  const [snapshots, setSnapshots] = useState([]);
+  const [savingSnapshot, setSavingSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,6 +116,19 @@ export default function OutfitBuilder() {
 
   const handleClear = () => setPlaced([]);
 
+  const handleSnapshotSaved = (snapshot) => {
+    setSnapshots(prev => [...prev, snapshot]);
+  };
+
+  const handleSaveOutfitFromSnapshot = (snapshot) => {
+    setSavingSnapshot(snapshot);
+    setShowSave(true);
+  };
+
+  const handleDeleteSnapshot = (idx) => {
+    setSnapshots(prev => prev.filter((_, i) => i !== idx));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
@@ -151,16 +167,19 @@ export default function OutfitBuilder() {
         </div>
 
         {/* Center: avatar canvas */}
-        <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-          <AvatarCanvas
-            profile={profile}
-            placed={placed}
-            onUpdate={handleUpdate}
-            onRemove={handleRemovePlaced}
-            onSendToBack={handleSendToBack}
-            onBringToFront={handleBringToFront}
-            showItemTryOn={true}
-          />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+            <AvatarCanvas
+              profile={profile}
+              placed={placed}
+              onUpdate={handleUpdate}
+              onRemove={handleRemovePlaced}
+              onSendToBack={handleSendToBack}
+              onBringToFront={handleBringToFront}
+              showItemTryOn={true}
+            />
+          </div>
+          <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
         </div>
       </div>
 
@@ -169,15 +188,23 @@ export default function OutfitBuilder() {
           profile={profile}
           placed={placed}
           onClose={() => setShowTryOn(false)}
+          onSnapshotSaved={handleSnapshotSaved}
         />
       )}
 
       {showSave && user && (
         <SaveOutfitModal
           userEmail={user.email}
-          placed={placed}
-          onClose={() => setShowSave(false)}
-          onSaved={() => setShowSave(false)}
+          placed={savingSnapshot ? savingSnapshot.placed_items : placed}
+          snapshotUrl={savingSnapshot?.snapshot_url}
+          onClose={() => {
+            setShowSave(false);
+            setSavingSnapshot(null);
+          }}
+          onSaved={() => {
+            setShowSave(false);
+            setSavingSnapshot(null);
+          }}
         />
       )}
     </div>
