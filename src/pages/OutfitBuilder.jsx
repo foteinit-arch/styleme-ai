@@ -113,7 +113,7 @@ export default function OutfitBuilder() {
           <Link to={createPageUrl("Wardrobe")}>
             <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10"><ArrowLeft className="w-5 h-5" /></Button>
           </Link>
-          <h1 className="font-heading font-bold uppercase text-white text-xl tracking-tight">Outfit Builder</h1>
+          <h1 className="font-heading font-bold text-white text-2xl tracking-tight">Outfit builder</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">

@@ -36,7 +36,7 @@ export default function MyOutfits() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">My Outfits</h1>
+            <h1 className="font-heading font-bold text-2xl text-white tracking-tight">My outfits</h1>
             <p className="text-white/50 mt-1 font-body">{outfits.length} saved outfits</p>
           </div>
           <Link to={createPageUrl("OutfitBuilder")}>

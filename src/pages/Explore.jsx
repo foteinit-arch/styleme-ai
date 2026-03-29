@@ -48,7 +48,7 @@ export default function Explore() {
     <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">Explore Outfits</h1>
+          <h1 className="font-heading font-bold text-2xl text-white tracking-tight">Explore outfits</h1>
           <p className="text-white/50 mt-1 font-body">Discover and get inspired by outfits from the community</p>
         </div>
 

@@ -52,7 +52,7 @@ export default function Wardrobe() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">My Wardrobe</h1>
+            <h1 className="font-heading font-bold text-2xl text-white tracking-tight">My wardrobe</h1>
             <p className="text-white/50 mt-1 font-body">{items.length} items in your closet</p>
           </div>
           <div className="flex gap-3">
