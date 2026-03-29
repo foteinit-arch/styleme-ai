@@ -194,12 +194,7 @@ export default function OutfitBuilder() {
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header */}
       <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link to={createPageUrl("Wardrobe")}>
-            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10"><ArrowLeft className="w-5 h-5" /></Button>
-          </Link>
-          <h1 className="font-heading font-bold text-white text-2xl tracking-tight">Outfit builder</h1>
-        </div>
+        <h1 className="font-heading font-bold text-white text-2xl tracking-tight">Outfit builder</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
