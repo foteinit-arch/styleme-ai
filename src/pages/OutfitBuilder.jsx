@@ -51,13 +51,17 @@ export default function OutfitBuilder() {
           if (loadedOutfit.items && loadedOutfit.items.length > 0) {
             const reconstructed = loadedOutfit.items.map((itemData, idx) => {
               const clothingItem = items.find(c => c.id === itemData.clothing_item_id);
+              if (!clothingItem) return null; // Skip if item not found
               return {
                 ...clothingItem,
-                ...itemData,
+                x: itemData.x,
+                y: itemData.y,
+                scale: itemData.scale,
+                rotation: itemData.rotation,
                 placedId: Date.now() + idx,
                 z_index: itemData.z_index || idx + 1,
               };
-            });
+            }).filter(Boolean);
             setPlaced(reconstructed);
           }
         }
