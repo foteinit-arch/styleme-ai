@@ -26,21 +26,21 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-[#1a1a1a]">
+      <nav className="bg-[#111] border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
-            <Shirt className="w-6 h-6 text-orange-500" />
-            <span className="text-xl font-bold text-orange-500">StyleMe</span>
+            <Shirt className="w-5 h-5 text-yellow-300" />
+            <span className="font-heading font-bold uppercase text-yellow-300 text-lg tracking-tight">StyleMe</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
             {NAV.map(({ label, page, icon: Icon }) => (
               <Link key={page} to={createPageUrl(page)}>
                 <Button
-                  variant={currentPageName === page ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-gray-600 hover:text-orange-500"}
+                  className={currentPageName === page ? "text-yellow-300 bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}
                 >
                   <Icon className="w-4 h-4 mr-1" />
                   {label}
@@ -52,13 +52,13 @@ export default function Layout({ children, currentPageName }) {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                <span className="text-sm text-gray-600">{user.full_name || user.email}</span>
-                <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="text-gray-500">
+                <span className="text-sm text-white/50 font-body">{user.full_name || user.email}</span>
+                <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="text-white/40 hover:text-white hover:bg-white/10">
                   <LogOut className="w-4 h-4" />
                 </Button>
               </>
             ) : (
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white"
+              <Button size="sm" className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold"
                   onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>
@@ -66,18 +66,18 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           <button className="md:hidden p-2" onClick={() => setMobileOpen(o => !o)}>
-            {mobileOpen ? <X className="w-5 h-5 text-gray-600" /> : <Menu className="w-5 h-5 text-gray-600" />}
+            {mobileOpen ? <X className="w-5 h-5 text-white/60" /> : <Menu className="w-5 h-5 text-white/60" />}
           </button>
         </div>
 
         {mobileOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-1">
+        <div className="md:hidden border-t border-white/10 bg-[#111] px-4 py-3 flex flex-col gap-1">
             {NAV.map(({ label, page, icon: Icon }) => (
               <Link key={page} to={createPageUrl(page)} onClick={() => setMobileOpen(false)}>
                 <Button
-                  variant={currentPageName === page ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
-                  className={`w-full justify-start ${currentPageName === page ? "bg-orange-500 text-white" : "text-gray-600"}`}
+                  className={`w-full justify-start ${currentPageName === page ? "text-yellow-300 bg-white/10" : "text-white/50 hover:text-white hover:bg-white/10"}`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {label}
@@ -85,11 +85,11 @@ export default function Layout({ children, currentPageName }) {
               </Link>
             ))}
             {user ? (
-              <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="w-full justify-start text-gray-500">
+              <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="w-full justify-start text-white/40 hover:text-white hover:bg-white/10">
                 <LogOut className="w-4 h-4 mr-2" /> Sign Out
               </Button>
             ) : (
-              <Button size="sm" className="bg-orange-500 text-white w-full"
+              <Button size="sm" className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold w-full"
                 onClick={() => base44.auth.redirectToLogin(window.location.href)}>
                 Sign In
               </Button>

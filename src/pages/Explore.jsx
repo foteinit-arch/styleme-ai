@@ -45,20 +45,20 @@ export default function Explore() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Explore Outfits</h1>
-          <p className="text-gray-500 mt-1">Discover and get inspired by outfits from the community</p>
+          <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight">Explore Outfits</h1>
+          <p className="text-white/50 mt-1 font-body">Discover and get inspired by outfits from the community</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search outfits..." className="pl-9" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search outfits..." className="pl-9 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-yellow-300" />
           </div>
           <Select value={occasion} onValueChange={setOccasion}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-44 bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
             <SelectContent>
               {OCCASIONS.map(o => <SelectItem key={o} value={o}>{o.charAt(0).toUpperCase() + o.slice(1)}</SelectItem>)}
             </SelectContent>
@@ -68,20 +68,20 @@ export default function Explore() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {Array(12).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-64 animate-pulse border border-gray-100" />
+              <div key={i} className="bg-white/10 rounded-2xl h-64 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🔍</p>
-            <p className="text-gray-500 text-lg">No outfits found</p>
-            <p className="text-gray-400 text-sm">Be the first to share your outfit!</p>
+            <p className="text-white/60 text-lg">No outfits found</p>
+            <p className="text-white/30 text-sm">Be the first to share your outfit!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {filtered.map(outfit => (
-              <div key={outfit.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition">
-                <div className="h-44 bg-gray-50 flex items-center justify-center">
+              <div key={outfit.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-yellow-300/40 transition">
+                <div className="h-44 bg-white/5 flex items-center justify-center">
                   {outfit.outfit_snapshot_url ? (
                     <img src={outfit.outfit_snapshot_url} className="h-full w-full object-cover" alt={outfit.name} />
                   ) : (
@@ -89,17 +89,17 @@ export default function Explore() {
                   )}
                 </div>
                 <div className="p-3">
-                  <h3 className="font-semibold text-gray-800 text-sm truncate">{outfit.name}</h3>
+                  <h3 className="font-heading font-bold text-white text-base uppercase truncate">{outfit.name}</h3>
                   {outfit.occasion && (
-                    <Badge className="bg-orange-50 text-orange-500 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
+                    <Badge className="bg-yellow-300/20 text-yellow-300 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
                   )}
                   <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-gray-400">{format(new Date(outfit.created_date), "MMM d")}</p>
+                    <p className="text-xs text-white/30">{format(new Date(outfit.created_date), "MMM d")}</p>
                     <button
                       onClick={() => handleLike(outfit)}
-                      className={`flex items-center gap-1 text-xs transition ${likes[outfit.id] ? "text-orange-500" : "text-gray-400 hover:text-orange-400"}`}
+                      className={`flex items-center gap-1 text-xs transition ${likes[outfit.id] ? "text-yellow-300" : "text-white/30 hover:text-yellow-300"}`}
                     >
-                      <Heart className={`w-3.5 h-3.5 ${likes[outfit.id] ? "fill-orange-500 text-orange-500" : ""}`} />
+                      <Heart className={`w-3.5 h-3.5 ${likes[outfit.id] ? "fill-yellow-300 text-yellow-300" : ""}`} />
                       {outfit.likes_count || 0}
                     </button>
                   </div>

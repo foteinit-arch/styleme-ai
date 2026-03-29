@@ -82,20 +82,20 @@ export default function Avatar() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <User className="text-orange-500" /> My Avatar
+        <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight mb-1 flex items-center gap-3">
+          <User className="text-yellow-300" /> My Avatar
         </h1>
-        <p className="text-gray-500 mb-6">Fine-tune your measurements first — they control how clothes fit your avatar.</p>
+        <p className="text-white/50 mb-6 font-body">Fine-tune your measurements first — they control how clothes fit your avatar.</p>
 
         {/* Prominent callout if measurements haven't been set */}
         {!measurementsAreFresh && (
-          <div className="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-5 py-4 mb-6">
-            <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5 shrink-0" />
+          <div className="flex items-start gap-3 bg-yellow-300/10 border border-yellow-300/30 rounded-2xl px-5 py-4 mb-6">
+            <AlertCircle className="w-5 h-5 text-yellow-300 mt-0.5 shrink-0" />
             <div>
-              <p className="font-semibold text-orange-800">Set your measurements before uploading your photo</p>
-              <p className="text-sm text-orange-600 mt-0.5">
+              <p className="font-semibold text-yellow-200">Set your measurements before uploading your photo</p>
+              <p className="text-sm text-white/50 mt-0.5">
                 Bust, waist, and hips tell the app how to scale clothes onto your body. Don't skip this step!
               </p>
             </div>
@@ -107,13 +107,13 @@ export default function Avatar() {
           <div className="space-y-6">
 
             {/* ① Measurements — shown first so users see it */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-orange-300">
-              <h2 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
-                <Ruler className="w-4 h-4 text-orange-500" />
+            <div className="bg-white/5 rounded-2xl p-6 border-2 border-yellow-300/50">
+              <h2 className="font-heading font-bold uppercase text-white text-xl mb-1 flex items-center gap-2">
+                <Ruler className="w-4 h-4 text-yellow-300" />
                 <span>Measurements</span>
-                <span className="ml-auto text-xs font-medium bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">Step 1</span>
+                <span className="ml-auto text-xs font-body font-medium bg-yellow-300/20 text-yellow-300 px-2 py-0.5 rounded-full">Step 1</span>
               </h2>
-              <p className="text-xs text-gray-400 mb-4">These numbers scale clothes to your body on the builder.</p>
+              <p className="text-xs text-white/40 mb-4 font-body">These numbers scale clothes to your body on the builder.</p>
               <div className="space-y-4">
                 <div>
                   <Label>Display Name</Label>
@@ -138,33 +138,33 @@ export default function Avatar() {
             </div>
 
             {/* ② Photo upload — shown second */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Upload className="w-4 h-4 text-gray-500" />
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <h2 className="font-heading font-bold uppercase text-white text-xl mb-4 flex items-center gap-2">
+                <Upload className="w-4 h-4 text-yellow-300" />
                 <span>Body Photo</span>
-                <span className="ml-auto text-xs font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Step 2</span>
+                <span className="ml-auto text-xs font-body font-medium bg-white/10 text-white/50 px-2 py-0.5 rounded-full">Step 2</span>
               </h2>
               <label className="block cursor-pointer">
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 transition">
+                <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:bg-white/5 transition">
                   {form.avatar_photo_url ? (
                     <img src={form.avatar_photo_url} className="h-40 mx-auto object-contain rounded-lg" alt="avatar" />
                   ) : (
                     <>
-                      <Upload className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">Click to upload a full-body photo</p>
-                      <p className="text-xs text-gray-400 mt-1">Best: stand straight, neutral background</p>
+                      <Upload className="w-10 h-10 text-white/20 mx-auto mb-2" />
+                      <p className="text-sm text-white/50">Click to upload a full-body photo</p>
+                      <p className="text-xs text-white/30 mt-1">Best: stand straight, neutral background</p>
                     </>
                   )}
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>
-              {uploading && <p className="text-sm text-orange-400 mt-2 text-center">Uploading...</p>}
+              {uploading && <p className="text-sm text-yellow-300 mt-2 text-center">Uploading...</p>}
               {form.avatar_photo_url && (
                 <Button
                   onClick={handleGenerateAvatar}
                   disabled={generating}
                   variant="outline"
-                  className="w-full mt-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="w-full mt-3 border-white/20 text-white hover:bg-white/10 bg-transparent"
                 >
                   <Sparkles className={`mr-2 w-4 h-4 ${generating ? "animate-spin" : ""}`} />
                   {generating ? "Generating avatar..." : "Generate My Avatar"}
@@ -172,15 +172,15 @@ export default function Avatar() {
               )}
               {form.avatar_generated_url && (
                 <div className="mt-3">
-                  <p className="text-xs text-gray-400 mb-1 text-center">Generated Avatar</p>
-                  <img src={form.avatar_generated_url} className="h-40 mx-auto object-contain rounded-lg border border-gray-100" alt="generated avatar" />
+                  <p className="text-xs text-white/30 mb-1 text-center">Generated Avatar</p>
+                  <img src={form.avatar_generated_url} className="h-40 mx-auto object-contain rounded-lg border border-white/10" alt="generated avatar" />
                 </div>
               )}
             </div>
 
             {/* ③ Appearance */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <h2 className="font-semibold text-gray-800 mb-4">Appearance</h2>
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <h2 className="font-heading font-bold uppercase text-white text-xl mb-4">Appearance</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Skin Tone</Label>
@@ -212,15 +212,15 @@ export default function Avatar() {
               </div>
             </div>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full bg-orange-500 hover:bg-orange-600 text-white text-lg py-3">
+            <Button onClick={handleSave} disabled={saving} className="w-full bg-yellow-300 hover:bg-yellow-400 text-black font-bold text-lg py-3">
               <Save className="mr-2 w-5 h-5" /> {saving ? "Saving..." : "Save Avatar"}
             </Button>
           </div>
 
           {/* Right: preview */}
           <div className="flex flex-col items-center">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 w-full flex flex-col items-center">
-              <h2 className="font-semibold text-gray-800 mb-6">Avatar Preview</h2>
+            <div className="bg-white/5 rounded-2xl border border-white/10 p-6 w-full flex flex-col items-center">
+              <h2 className="font-heading font-bold uppercase text-white text-xl mb-6">Avatar Preview</h2>
               <AvatarPreview profile={form} />
             </div>
           </div>

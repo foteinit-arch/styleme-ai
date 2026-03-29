@@ -99,27 +99,27 @@ export default function OutfitBuilder() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400 text-lg">Loading your wardrobe...</p>
+      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+        <p className="text-white/40 text-lg font-body">Loading your wardrobe...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link to={createPageUrl("Wardrobe")}>
-            <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
+            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10"><ArrowLeft className="w-5 h-5" /></Button>
           </Link>
-          <h1 className="text-xl font-bold text-gray-900">Outfit Builder</h1>
+          <h1 className="font-heading font-bold uppercase text-yellow-300 text-xl tracking-tight">Outfit Builder</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleClear} className="text-gray-500 border-gray-200">
+          <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
-          <Button onClick={() => setShowSave(true)} className="bg-orange-500 hover:bg-orange-600 text-white" size="sm">
+          <Button onClick={() => setShowSave(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save Outfit
           </Button>
         </div>
@@ -127,7 +127,7 @@ export default function OutfitBuilder() {
 
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
-        <div className="md:w-72 border-r border-gray-100 bg-white overflow-y-auto">
+        <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto">
           <ClothingPicker clothes={clothes} onDrop={handleDrop} />
         </div>
 

@@ -48,20 +48,20 @@ export default function Wardrobe() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Wardrobe</h1>
-            <p className="text-gray-400 mt-1">{items.length} items in your closet</p>
+            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight">My Wardrobe</h1>
+            <p className="text-white/50 mt-1 font-body">{items.length} items in your closet</p>
           </div>
           <div className="flex gap-3">
             <Link to={createPageUrl("OutfitBuilder")}>
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                 Try On →
               </Button>
             </Link>
-            <Button onClick={() => setShowAdd(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button onClick={() => setShowAdd(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>
@@ -70,11 +70,11 @@ export default function Wardrobe() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search items..." className="pl-9" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search items..." className="pl-9 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-yellow-300" />
           </div>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 bg-white/10 border-white/10 text-white">
               <Filter className="mr-2 w-4 h-4" />
               <SelectValue />
             </SelectTrigger>
@@ -89,15 +89,15 @@ export default function Wardrobe() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Array(10).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-52 animate-pulse border border-gray-100" />
+              <div key={i} className="bg-white/10 rounded-2xl h-52 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">👗</p>
-            <p className="text-gray-500 text-lg">Your wardrobe is empty</p>
-            <p className="text-gray-400 text-sm mb-6">Add your first clothing item to get started</p>
-            <Button onClick={() => setShowAdd(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <p className="text-white/60 text-lg">Your wardrobe is empty</p>
+            <p className="text-white/30 text-sm mb-6">Add your first clothing item to get started</p>
+            <Button onClick={() => setShowAdd(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>
