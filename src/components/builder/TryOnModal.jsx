@@ -9,7 +9,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const avatarUrl = profile?.avatar_photo_url;
+  const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
 
   const generate = async () => {
     setLoading(true);
