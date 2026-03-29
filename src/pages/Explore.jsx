@@ -45,7 +45,7 @@ export default function Explore() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Explore Outfits</h1>
@@ -68,7 +68,7 @@ export default function Explore() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {Array(12).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-64 animate-pulse border border-rose-100" />
+              <div key={i} className="bg-white rounded-2xl h-64 animate-pulse border border-gray-100" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -80,8 +80,8 @@ export default function Explore() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {filtered.map(outfit => (
-              <div key={outfit.id} className="bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden hover:shadow-md transition">
-                <div className="h-44 bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
+              <div key={outfit.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition">
+                <div className="h-44 bg-gray-50 flex items-center justify-center">
                   {outfit.outfit_snapshot_url ? (
                     <img src={outfit.outfit_snapshot_url} className="h-full w-full object-cover" alt={outfit.name} />
                   ) : (
@@ -91,15 +91,15 @@ export default function Explore() {
                 <div className="p-3">
                   <h3 className="font-semibold text-gray-800 text-sm truncate">{outfit.name}</h3>
                   {outfit.occasion && (
-                    <Badge className="bg-rose-50 text-rose-500 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
+                    <Badge className="bg-orange-50 text-orange-500 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
                   )}
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-xs text-gray-400">{format(new Date(outfit.created_date), "MMM d")}</p>
                     <button
                       onClick={() => handleLike(outfit)}
-                      className={`flex items-center gap-1 text-xs transition ${likes[outfit.id] ? "text-rose-500" : "text-gray-400 hover:text-rose-400"}`}
+                      className={`flex items-center gap-1 text-xs transition ${likes[outfit.id] ? "text-orange-500" : "text-gray-400 hover:text-orange-400"}`}
                     >
-                      <Heart className={`w-3.5 h-3.5 ${likes[outfit.id] ? "fill-rose-500 text-rose-500" : ""}`} />
+                      <Heart className={`w-3.5 h-3.5 ${likes[outfit.id] ? "fill-orange-500 text-orange-500" : ""}`} />
                       {outfit.likes_count || 0}
                     </button>
                   </div>

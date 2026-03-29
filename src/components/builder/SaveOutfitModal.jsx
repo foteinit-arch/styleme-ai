@@ -72,7 +72,7 @@ export default function SaveOutfitModal({ userEmail, placed, onClose, onSaved })
             </div>
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />
           </div>
-          <Button onClick={handleSave} disabled={saving || !name} className="w-full bg-rose-500 hover:bg-rose-600 text-white">
+          <Button onClick={handleSave} disabled={saving || !name} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
             <Save className="mr-2 w-4 h-4" /> {saving ? "Saving..." : "Save Outfit"}
           </Button>
         </div>
