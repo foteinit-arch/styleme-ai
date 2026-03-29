@@ -259,13 +259,19 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
         {x:clampX(c.x+s/2), y:clampY(mid)}, // 5 MR
       ]});
     } else if (c.corners.length === 4) {
-      // Upgrade legacy 4-corner to 6-point mesh
+      // Upgrade legacy 4-corner to 6-point mesh + clamp all
       const [tl, tr, br, bl] = c.corners;
       updateRef.current({ ...c, corners: [
-        tl, tr, br, bl,
-        {x:clampX((tl.x+bl.x)/2), y:clampY((tl.y+bl.y)/2)}, // ML
-        {x:clampX((tr.x+br.x)/2), y:clampY((tr.y+br.y)/2)}, // MR
+        {x:clampX(tl.x), y:clampY(tl.y)},
+        {x:clampX(tr.x), y:clampY(tr.y)},
+        {x:clampX(br.x), y:clampY(br.y)},
+        {x:clampX(bl.x), y:clampY(bl.y)},
+        {x:clampX((tl.x+bl.x)/2), y:clampY((tl.y+bl.y)/2)},
+        {x:clampX((tr.x+br.x)/2), y:clampY((tr.y+br.y)/2)},
       ]});
+    } else {
+      // Already 6-point — re-clamp every corner so handles are always reachable
+      updateRef.current({ ...c, corners: c.corners.map(p => ({ x:clampX(p.x), y:clampY(p.y) })) });
     }
     setFitMode(true); resetHide(15000);
   }, [resetHide, containerRef]);
