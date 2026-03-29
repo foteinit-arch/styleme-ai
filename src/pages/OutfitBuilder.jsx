@@ -33,7 +33,7 @@ export default function OutfitBuilder() {
 
   useEffect(() => {
     const handleAvatarUpdate = (e) => {
-      setProfile(prev => ({ ...prev, avatar_generated_url: e.detail.avatar_generated_url }));
+      setProfile(e.detail);
     };
     window.addEventListener('avatar-updated', handleAvatarUpdate);
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);

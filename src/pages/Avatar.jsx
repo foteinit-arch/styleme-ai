@@ -54,13 +54,15 @@ export default function Avatar() {
   const handleSave = async () => {
     setSaving(true);
     const data = { ...form, user_email: user.email };
+    let savedProfile;
     if (profile) {
       await base44.entities.UserProfile.update(profile.id, data);
+      savedProfile = { ...profile, ...data };
     } else {
-      const created = await base44.entities.UserProfile.create(data);
-      setProfile(created);
+      savedProfile = await base44.entities.UserProfile.create(data);
+      setProfile(savedProfile);
     }
-    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: form.avatar_generated_url } }));
+    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: savedProfile }));
     setSaving(false);
     toast.success("Avatar saved!");
   };
@@ -81,9 +83,10 @@ export default function Avatar() {
   const handleClearAvatar = async () => {
     setForm((f) => ({ ...f, avatar_generated_url: "" }));
     if (profile) {
+      const updated = { ...profile, avatar_generated_url: "" };
       await base44.entities.UserProfile.update(profile.id, { avatar_generated_url: "" });
+      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: updated }));
     }
-    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: "" } }));
   };
 
   const measurementsAreFresh = profile && (
