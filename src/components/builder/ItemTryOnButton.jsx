@@ -57,11 +57,20 @@ export default function ItemTryOnButton({ item, profile, variant = "button", but
   const handleSaveAsAvatar = async () => {
     setSaving(true);
     try {
+      // Fetch the image and convert to blob
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Upload to app storage
+      const file = new File([blob], `avatar-${Date.now()}.png`, { type: 'image/png' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Save the app storage URL to profile
       const user = await base44.auth.me();
       const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
       if (profiles.length > 0) {
-        await base44.entities.UserProfile.update(profiles[0].id, { avatar_generated_url: imageUrl });
-        window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: imageUrl } }));
+        await base44.entities.UserProfile.update(profiles[0].id, { avatar_generated_url: file_url });
+        window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatar_generated_url: file_url } }));
       }
       setIsOpen(false);
     } catch (err) {
