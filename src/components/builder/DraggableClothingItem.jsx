@@ -312,9 +312,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             style={{ width:"100%", height:"100%", objectFit:"contain", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
           />
           {showControls && (
-            <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={false}
-              style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
+            <>
+              <div style={{ position:"absolute", top:-56, left:"50%", transform:"translateX(-50%)", background:"#1a1a1a", color:"white", fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:4, border:"1px solid rgba(255,255,255,0.2)", whiteSpace:"nowrap", zIndex:9998 }}>
+                {item.category ? `${item.category.charAt(0).toUpperCase()}${item.category.slice(1)} • ${item.name || "Item"}` : item.name || "Item"}
+              </div>
+              <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
+                onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={false}
+                style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
+            </>
           )}
         </div>
       )}
@@ -364,11 +369,16 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           })}
 
           {/* Controls bar */}
-          {showControls && (
-            <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
-              style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
-          )}
+           {showControls && (
+             <>
+               <div style={{ position:"absolute", left:centX, top:topY-56, transform:"translateX(-50%)", background:"#1a1a1a", color:"white", fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:4, border:"1px solid rgba(255,255,255,0.2)", whiteSpace:"nowrap", zIndex:zIdx+1000 }}>
+                 {item.category ? `${item.category.charAt(0).toUpperCase()}${item.category.slice(1)} • ${item.name || "Item"}` : item.name || "Item"}
+               </div>
+               <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
+                 onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
+                 style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
+             </>
+           )}
         </>
       )}
     </>
