@@ -135,7 +135,11 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       const { idx, sc, sv } = cornerDrag.current;
       const dx = e.clientX - sc.x, dy = e.clientY - sc.y;
       const c = itemRef.current;
-      updateRef.current({ ...c, corners: c.corners.map((p,i) => i===idx ? {x:sv.x+dx,y:sv.y+dy} : p) });
+      const cw = containerRef?.current?.offsetWidth  || 320;
+      const ch = containerRef?.current?.offsetHeight || 600;
+      const newX = Math.max(0, Math.min(cw, sv.x + dx));
+      const newY = Math.max(0, Math.min(ch, sv.y + dy));
+      updateRef.current({ ...c, corners: c.corners.map((p,i) => i===idx ? {x:newX, y:newY} : p) });
       return;
     }
     if (!dragging.current || pinchRef.current.active) return;
@@ -215,15 +219,19 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     const c = itemRef.current;
     if (!c.corners) {
       const s = 100*(c.scale||1);
+      const cw = containerRef?.current?.offsetWidth  || 320;
+      const ch = containerRef?.current?.offsetHeight || 600;
+      const clampX = (x) => Math.max(0, Math.min(cw, x));
+      const clampY = (y) => Math.max(0, Math.min(ch, y));
       updateRef.current({ ...c, corners:[
-        {x:c.x-s/2, y:c.y-s/2}, // TL — left shoulder
-        {x:c.x+s/2, y:c.y-s/2}, // TR — right shoulder
-        {x:c.x+s/2, y:c.y+s/2}, // BR — right hip
-        {x:c.x-s/2, y:c.y+s/2}, // BL — left hip
+        {x:clampX(c.x-s/2), y:clampY(c.y-s/2)}, // TL — left shoulder
+        {x:clampX(c.x+s/2), y:clampY(c.y-s/2)}, // TR — right shoulder
+        {x:clampX(c.x+s/2), y:clampY(c.y+s/2)}, // BR — right hip
+        {x:clampX(c.x-s/2), y:clampY(c.y+s/2)}, // BL — left hip
       ]});
     }
     setFitMode(true); resetHide(15000);
-  }, [resetHide]);
+  }, [resetHide, containerRef]);
 
   const exitFit = useCallback(() => { setFitMode(false); resetHide(); }, [resetHide]);
 
