@@ -36,11 +36,11 @@ export default function MyOutfits() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight">My Outfits</h1>
+            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">My Outfits</h1>
             <p className="text-white/50 mt-1 font-body">{outfits.length} saved outfits</p>
           </div>
           <Link to={createPageUrl("OutfitBuilder")}>
-            <Button className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
+            <Button className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
               <Plus className="mr-2 w-4 h-4" /> New Outfit
             </Button>
           </Link>
@@ -58,7 +58,7 @@ export default function MyOutfits() {
             <p className="text-white/60 text-lg">No outfits yet</p>
             <p className="text-white/30 text-sm mb-6">Create your first outfit in the builder</p>
             <Link to={createPageUrl("OutfitBuilder")}>
-              <Button className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
+              <Button className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
                 <Plus className="mr-2 w-4 h-4" /> Create Outfit
               </Button>
             </Link>
@@ -82,7 +82,7 @@ export default function MyOutfits() {
                     </button>
                   </div>
                   {outfit.occasion && (
-                    <Badge className="bg-yellow-300/20 text-yellow-300 border-0 text-xs capitalize mb-2">{outfit.occasion}</Badge>
+                    <Badge className="bg-[#d4a017] text-[#373d47] font-semibold border-0 text-xs capitalize mb-2">{outfit.occasion}</Badge>
                   )}
                   <p className="text-xs text-white/30">{format(new Date(outfit.created_date), "MMM d, yyyy")}</p>
                   <div className="flex gap-2 mt-3">

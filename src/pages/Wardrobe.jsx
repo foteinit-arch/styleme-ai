@@ -52,7 +52,7 @@ export default function Wardrobe() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight">My Wardrobe</h1>
+            <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">My Wardrobe</h1>
             <p className="text-white/50 mt-1 font-body">{items.length} items in your closet</p>
           </div>
           <div className="flex gap-3">
@@ -61,7 +61,7 @@ export default function Wardrobe() {
                 Try On →
               </Button>
             </Link>
-            <Button onClick={() => setShowAdd(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
+            <Button onClick={() => setShowAdd(true)} className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>
@@ -97,7 +97,7 @@ export default function Wardrobe() {
             <p className="text-5xl mb-4">👗</p>
             <p className="text-white/60 text-lg">Your wardrobe is empty</p>
             <p className="text-white/30 text-sm mb-6">Add your first clothing item to get started</p>
-            <Button onClick={() => setShowAdd(true)} className="bg-yellow-300 hover:bg-yellow-400 text-black font-semibold">
+            <Button onClick={() => setShowAdd(true)} className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
               <Plus className="mr-2 w-4 h-4" /> Add Clothing
             </Button>
           </div>

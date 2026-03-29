@@ -48,7 +48,7 @@ export default function Explore() {
     <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight">Explore Outfits</h1>
+          <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight">Explore Outfits</h1>
           <p className="text-white/50 mt-1 font-body">Discover and get inspired by outfits from the community</p>
         </div>
 
@@ -91,7 +91,7 @@ export default function Explore() {
                 <div className="p-3">
                   <h3 className="font-heading font-bold text-white text-base uppercase truncate">{outfit.name}</h3>
                   {outfit.occasion && (
-                    <Badge className="bg-yellow-300/20 text-yellow-300 border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
+                    <Badge className="bg-[#d4a017] text-[#373d47] font-semibold border-0 text-xs capitalize mt-1">{outfit.occasion}</Badge>
                   )}
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-xs text-white/30">{format(new Date(outfit.created_date), "MMM d")}</p>
