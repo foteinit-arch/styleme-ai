@@ -78,7 +78,7 @@ export default function Avatar() {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleClearAvatar = () => {
-    setForm((f) => ({ ...f, avatar_photo_url: "", avatar_generated_url: "" }));
+    setForm((f) => ({ ...f, avatar_generated_url: "" }));
   };
 
   const measurementsAreFresh = profile && (
