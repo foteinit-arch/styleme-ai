@@ -42,17 +42,25 @@ export default function ItemTryOnButton({ item, profile, variant = "button" }) {
     a.click();
   };
 
+  const handleClick = (e) => {
+    console.log("Try-on button clicked");
+    e.stopPropagation();
+    e.preventDefault();
+    setIsOpen(true);
+    if (!imageUrl) generate();
+  };
+
   return (
     <>
       <button
         data-ctrl="true"
-        onClick={(e) => {
+        type="button"
+        onMouseDown={(e) => {
           e.stopPropagation();
-          setIsOpen(true);
-          if (!imageUrl) generate();
+          e.preventDefault();
         }}
-        onMouseDown={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
+        onClick={handleClick}
         title="AI Try-On"
         style={{
           width: 28,
@@ -66,6 +74,7 @@ export default function ItemTryOnButton({ item, profile, variant = "button" }) {
           justifyContent: "center",
           cursor: "pointer",
           boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          pointerEvents: "auto",
         }}
       >
         <Sparkles className="w-4 h-4" />
