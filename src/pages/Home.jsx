@@ -17,7 +17,7 @@ export default function Home() {
       <header className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full border-b border-gray-100">
         <div className="flex items-center gap-2">
           <Shirt className="w-7 h-7 text-orange-500" />
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">DressMe</span>
+          <span className="text-2xl font-bold text-gray-900 tracking-tight">StyleMe</span>
         </div>
         <div className="flex gap-3">
           {user ? (

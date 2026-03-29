@@ -31,7 +31,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2">
             <Shirt className="w-6 h-6 text-orange-500" />
-            <span className="text-xl font-bold text-orange-500">DressMe</span>
+            <span className="text-xl font-bold text-orange-500">StyleMe</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
