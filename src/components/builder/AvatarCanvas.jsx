@@ -48,6 +48,7 @@ export default function AvatarCanvas({ profile, placed, onUpdate, onRemove, onSe
           onRemove={onRemove}
           onSendToBack={onSendToBack}
           onBringToFront={onBringToFront}
+          profile={profile}
         />
       ))}
     </div>

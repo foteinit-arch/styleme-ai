@@ -145,6 +145,7 @@ export default function OutfitBuilder() {
             onRemove={handleRemovePlaced}
             onSendToBack={handleSendToBack}
             onBringToFront={handleBringToFront}
+            showItemTryOn={true}
           />
         </div>
       </div>

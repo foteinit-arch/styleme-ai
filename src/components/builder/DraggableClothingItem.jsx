@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight, FlipHorizontal } from "lucide-react";
+import ItemTryOnButton from "./ItemTryOnButton";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
 function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1, sy1, sx2, sy2) {
@@ -45,7 +46,7 @@ function drawWarped(canvas, imgEl, corners, imgSize, flipX) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef, onSendToBack, onBringToFront }) {
+export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef, onSendToBack, onBringToFront, profile }) {
   const [showControls, setShowControls] = useState(false);
   const [fitMode,      setFitMode]      = useState(false);
 
@@ -318,6 +319,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
               </div>
               <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
                 onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={false}
+                item={item} profile={profile}
                 style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
             </>
           )}
@@ -376,6 +378,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
                </div>
                <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
                  onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
+                 item={item} profile={profile}
                  style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
              </>
            )}
@@ -386,7 +389,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 }
 
 // ── Controls bar ──────────────────────────────────────────────────────────────
-function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, fitMode, style }) {
+function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, fitMode, style, item, profile }) {
   return (
     <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
       {fitMode ? (
@@ -400,6 +403,7 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
           <Btn bg="#111"    onClick={onBack}      title="Send to back"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
           <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
           <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
+          {item && profile && <ItemTryOnButton item={item} profile={profile} />}
         </>
       )}
     </div>

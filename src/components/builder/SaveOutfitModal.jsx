@@ -19,25 +19,30 @@ export default function SaveOutfitModal({ userEmail, placed, onClose, onSaved })
   const handleSave = async () => {
     if (!name) return;
     setSaving(true);
-    const items = placed.map(p => ({
-      clothing_item_id: p.id,
-      x: p.x,
-      y: p.y,
-      scale: p.scale,
-      rotation: p.rotation,
-      z_index: p.z_index,
-    }));
-    await base44.entities.Outfit.create({
-      user_email: userEmail,
-      name,
-      description,
-      occasion,
-      is_public: isPublic,
-      items,
-      likes_count: 0,
-    });
-    setSaving(false);
-    onSaved();
+    try {
+      const items = placed.map(p => ({
+        clothing_item_id: p.id,
+        x: p.x,
+        y: p.y,
+        scale: p.scale,
+        rotation: p.rotation,
+        z_index: p.z_index,
+      }));
+      await base44.entities.Outfit.create({
+        user_email: userEmail,
+        name,
+        description,
+        occasion,
+        is_public: isPublic,
+        items,
+        likes_count: 0,
+      });
+      setSaving(false);
+      onSaved();
+    } catch (err) {
+      setSaving(false);
+      alert("Error saving outfit: " + (err.message || "Unknown error"));
+    }
   };
 
   return (
