@@ -107,10 +107,18 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     resetHide();
   }, [resetHide]);
 
-  const toggleLayer = useCallback(() => {
+  // Single tap → always send to back (lets you "click through" to the item below)
+  const sendToBack = useCallback(() => {
     const c = itemRef.current;
-    updateRef.current({ ...c, z_index: (c.z_index || 1) > 10 ? 1 : Date.now() });
+    updateRef.current({ ...c, z_index: 1 });
   }, []);
+
+  // Controls button → bring to absolute front
+  const bringToFront = useCallback(() => {
+    const c = itemRef.current;
+    updateRef.current({ ...c, z_index: Date.now() });
+    resetHide();
+  }, [resetHide]);
 
   // ── Wheel zoom ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -148,9 +156,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   const onDocUp = useCallback(() => {
     if (cornerDrag.current) { cornerDrag.current = null; resetHide(); return; }
     clearTimeout(longTimer.current);
-    if (!hasMoved.current && dragging.current) toggleLayer();
+    if (!hasMoved.current && dragging.current) sendToBack();
     dragging.current = false;
-  }, [toggleLayer, resetHide]);
+  }, [sendToBack, resetHide]);
 
   useEffect(() => {
     document.addEventListener("mousemove", onDocMove);
@@ -240,7 +248,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           />
           {showControls && (
             <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} fitMode={false}
+              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} fitMode={false}
               style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
           )}
         </div>
@@ -285,7 +293,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
           {/* Controls bar */}
           {showControls && (
             <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} fitMode={fitMode}
+              onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} fitMode={fitMode}
               style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
           )}
         </>
@@ -295,7 +303,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 }
 
 // ── Controls bar ──────────────────────────────────────────────────────────────
-function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, fitMode, style }) {
+function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, fitMode, style }) {
   return (
     <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
       {fitMode ? (
@@ -305,6 +313,7 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, fitMode,
           <Btn bg="#111"    onClick={onScaleDown} title="Smaller"><ZoomOut   size={13}/></Btn>
           <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
           <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
+          <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
           <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
         </>
       )}
