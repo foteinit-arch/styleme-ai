@@ -161,7 +161,11 @@ export default function OutfitBuilder() {
     setSavingSnapshot(snapshot);
     setShowSave(true);
     // Temporarily restore placed items from snapshot for saving
-    setPlaced(snapshot.placed_items || []);
+    const restored = (snapshot.placed_items || []).map((item, idx) => ({
+      ...item,
+      placedId: item.placedId || Date.now() + idx,
+    }));
+    setPlaced(restored);
   };
 
   const handleDeleteSnapshot = (idx) => {
