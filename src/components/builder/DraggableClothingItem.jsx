@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
@@ -317,31 +318,37 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             style={{ position:"absolute", left:minX-8, top:minY-8, width:maxX-minX+16, height:maxY-minY+16, zIndex:zIdx, pointerEvents:"auto", cursor:"grab", touchAction:"none" }}
           />
 
-          {/* Corner handles (only in fit mode) */}
-          {fitMode && item.corners.map((corner, idx) => (
-            <div key={idx} data-ctrl="true"
-              title={["Left top","Right top","Right bottom","Left bottom","Left mid","Right mid"][idx]}
-              onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);}}
-              onTouchStart={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.touches[0].clientX,e.touches[0].clientY);}}
-              onTouchMove={e=>{
-                e.stopPropagation();e.preventDefault();
-                if(cornerDrag.current?.idx===idx){
-                  const dx=e.touches[0].clientX-cornerDrag.current.sc.x, dy=e.touches[0].clientY-cornerDrag.current.sc.y;
-                  const c=itemRef.current;
-                  updateRef.current({...c,corners:c.corners.map((p,i)=>i===idx?{x:cornerDrag.current.sv.x+dx,y:cornerDrag.current.sv.y+dy}:p)});
-                }
-              }}
-              onTouchEnd={e=>{e.stopPropagation();cornerDrag.current=null;resetHide();}}
-              style={{ position:"absolute", left:corner.x-14, top:corner.y-14, width:28, height:28, borderRadius:"50%",
-                background:"#f97316", border:"3px solid white", cursor:"crosshair",
-                zIndex:zIdx+1000, pointerEvents:"auto", touchAction:"none",
-                boxShadow:"0 2px 10px rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center" }}
-            >
-              {idx === 4 ? <ChevronLeft  size={11} color="white" strokeWidth={3}/> :
-               idx === 5 ? <ChevronRight size={11} color="white" strokeWidth={3}/> :
-               <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙"][idx]}</span>}
-            </div>
-          ))}
+          {/* Corner handles — rendered via portal on document.body so no parent overflow:hidden can clip them */}
+          {fitMode && containerRef?.current && item.corners.map((corner, idx) => {
+            const rect = containerRef.current.getBoundingClientRect();
+            const sx = rect.left + corner.x;
+            const sy = rect.top  + corner.y;
+            return createPortal(
+              <div key={idx} data-ctrl="true"
+                title={["Left top","Right top","Right bottom","Left bottom","Left mid","Right mid"][idx]}
+                onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);}}
+                onTouchStart={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.touches[0].clientX,e.touches[0].clientY);}}
+                onTouchMove={e=>{
+                  e.stopPropagation();e.preventDefault();
+                  if(cornerDrag.current?.idx===idx){
+                    const dx=e.touches[0].clientX-cornerDrag.current.sc.x, dy=e.touches[0].clientY-cornerDrag.current.sc.y;
+                    const c=itemRef.current;
+                    updateRef.current({...c,corners:c.corners.map((p,i)=>i===idx?{x:cornerDrag.current.sv.x+dx,y:cornerDrag.current.sv.y+dy}:p)});
+                  }
+                }}
+                onTouchEnd={e=>{e.stopPropagation();cornerDrag.current=null;resetHide();}}
+                style={{ position:"fixed", left:sx-14, top:sy-14, width:28, height:28, borderRadius:"50%",
+                  background:"#f97316", border:"3px solid white", cursor:"crosshair",
+                  zIndex:99999, pointerEvents:"auto", touchAction:"none",
+                  boxShadow:"0 2px 10px rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center" }}
+              >
+                {idx === 4 ? <ChevronLeft  size={11} color="white" strokeWidth={3}/> :
+                 idx === 5 ? <ChevronRight size={11} color="white" strokeWidth={3}/> :
+                 <span style={{color:"white",fontSize:10,fontWeight:700,userSelect:"none"}}>{["↖","↗","↘","↙"][idx]}</span>}
+              </div>,
+              document.body
+            );
+          })}
 
           {/* Controls bar */}
           {showControls && (
