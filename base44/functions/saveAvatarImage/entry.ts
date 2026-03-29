@@ -11,24 +11,14 @@ Deno.serve(async (req) => {
 
     const { imageUrl } = await req.json();
     
-    // Fetch the image from URL and convert to blob
-    const imageResponse = await fetch(imageUrl);
-    const imageBlob = await imageResponse.arrayBuffer();
-    
-    // Convert to base64 for the integration
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBlob)));
-    const dataUrl = `data:image/png;base64,${base64}`;
-    
-    // Upload using the integration
-    const { file_url } = await base44.asServiceRole.integrations.Core.UploadFile({ file: dataUrl });
-    
-    // Update user profile with the uploaded URL
+    // Update user profile directly with the image URL
     const profiles = await base44.entities.UserProfile.filter({ user_email: user.email });
     if (profiles.length > 0) {
-      await base44.entities.UserProfile.update(profiles[0].id, { avatar_generated_url: file_url });
+      await base44.entities.UserProfile.update(profiles[0].id, { avatar_generated_url: imageUrl });
+      return Response.json({ success: true, file_url: imageUrl });
     }
     
-    return Response.json({ success: true, file_url });
+    return Response.json({ error: 'Profile not found' }, { status: 404 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
