@@ -40,6 +40,18 @@ export default function OutfitBuilder() {
   };
 
   const handleDrop = (item) => {
+    if (item.category === "shoes") {
+      // Two instances: left foot shows left half of pair photo, right foot shows right half
+      const shoeScale = 1.4 * ((profile?.height_cm || 165) / 165);
+      const now = Date.now();
+      setPlaced(prev => [
+        ...prev,
+        { ...item, placedId: now + 0.1, x: 112, y: 592, scale: shoeScale, rotation: 0, z_index: prev.length + 1, shoeClip: "left"  },
+        { ...item, placedId: now + 0.2, x: 208, y: 592, scale: shoeScale, rotation: 0, z_index: prev.length + 2, shoeClip: "right" },
+      ]);
+      return;
+    }
+
     const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
 
     const measurementRatio = {
@@ -47,7 +59,6 @@ export default function OutfitBuilder() {
       outerwear: (profile?.bust_cm   || 88)  / 88,
       dress:     (profile?.bust_cm   || 88)  / 88,
       bottom:    (profile?.hips_cm   || 94)  / 94,
-      shoes:     (profile?.height_cm || 165) / 165,
       accessory: 1,
       bag:       1,
     }[item.category] ?? 1;

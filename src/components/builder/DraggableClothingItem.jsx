@@ -67,12 +67,15 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
-  // Shoes get a grounding drop-shadow; everything else no shadow by default
+  // Shoes: clip to left or right half so each instance shows only one shoe from the pair photo
+  const shoeClipPath = item.shoeClip === "left"  ? "inset(0 50% 0 0)" :
+                       item.shoeClip === "right" ? "inset(0 0 0 50%)" : undefined;
   const shoeImgStyle = {
     transform: `rotate(${item.rotation||0}deg)`,
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 6px 14px rgba(0,0,0,0.5))" : "none",
+    ...(shoeClipPath ? { clipPath: shoeClipPath } : {}),
   };
 
   // Centroid + bounds (for controls and bounding-box hit area)
