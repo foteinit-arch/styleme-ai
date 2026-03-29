@@ -84,8 +84,8 @@ export default function Avatar() {
   return (
     <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-yellow-300 tracking-tight mb-1 flex items-center gap-3">
-          <User className="text-yellow-300" /> My Avatar
+        <h1 className="font-heading font-bold uppercase text-4xl md:text-5xl text-white tracking-tight mb-1 flex items-center gap-3">
+          <User className="text-[#d4a017]" /> My Avatar
         </h1>
         <p className="text-white/50 mb-6 font-body">Fine-tune your measurements first — they control how clothes fit your avatar.</p>
 
@@ -116,8 +116,8 @@ export default function Avatar() {
               <p className="text-xs text-white/40 mb-4 font-body">These numbers scale clothes to your body on the builder.</p>
               <div className="space-y-4">
                 <div>
-                  <Label>Display Name</Label>
-                  <Input value={form.display_name} onChange={e => set("display_name", e.target.value)} placeholder="e.g. Sofia" className="mt-1" />
+                  <Label className="text-white/70">Display Name</Label>
+                  <Input value={form.display_name} onChange={e => set("display_name", e.target.value)} placeholder="e.g. Sofia" className="mt-1 bg-white/5 border-white/20 text-white placeholder:text-white/30" />
                 </div>
                 {[
                   { label: "Height (cm)", key: "height_cm", min: 140, max: 210 },
@@ -128,8 +128,8 @@ export default function Avatar() {
                 ].map(({ label, key, min, max }) => (
                   <div key={key}>
                     <div className="flex justify-between mb-1">
-                      <Label>{label}</Label>
-                      <span className="text-sm font-medium text-orange-500">{form[key]}</span>
+                      <Label className="text-white/70">{label}</Label>
+                      <span className="text-sm font-medium text-[#d4a017]">{form[key]}</span>
                     </div>
                     <Slider min={min} max={max} step={1} value={[form[key]]} onValueChange={([v]) => set(key, v)} />
                   </div>
@@ -183,9 +183,9 @@ export default function Avatar() {
               <h2 className="font-heading font-bold uppercase text-white text-xl mb-4">Appearance</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Skin Tone</Label>
+                  <Label className="text-white/70">Skin Tone</Label>
                   <Select value={form.skin_tone} onValueChange={v => set("skin_tone", v)}>
-                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="mt-1 bg-white/5 border-white/20 text-white"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {["light","medium-light","medium","medium-dark","dark"].map(s => (
                         <SelectItem key={s} value={s}>{s.replace("-", " ")}</SelectItem>
@@ -194,9 +194,9 @@ export default function Avatar() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Body Shape</Label>
+                  <Label className="text-white/70">Body Shape</Label>
                   <Select value={form.body_shape} onValueChange={v => set("body_shape", v)}>
-                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="mt-1 bg-white/5 border-white/20 text-white"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {["hourglass","pear","apple","rectangle","inverted-triangle"].map(s => (
                         <SelectItem key={s} value={s}>{s.replace("-", " ")}</SelectItem>
@@ -205,14 +205,14 @@ export default function Avatar() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Hair Color</Label>
+                  <Label className="text-white/70">Hair Color</Label>
                   <input type="color" value={form.hair_color} onChange={e => set("hair_color", e.target.value)}
-                    className="mt-1 w-full h-10 rounded-lg border border-gray-200 cursor-pointer" />
+                    className="mt-1 w-full h-10 rounded-lg border border-white/20 cursor-pointer bg-white/5" />
                 </div>
               </div>
             </div>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full bg-yellow-300 hover:bg-yellow-400 text-black font-bold text-lg py-3">
+            <Button onClick={handleSave} disabled={saving} className="w-full bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-bold text-lg py-3">
               <Save className="mr-2 w-5 h-5" /> {saving ? "Saving..." : "Save Avatar"}
             </Button>
           </div>
