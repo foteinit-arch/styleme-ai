@@ -193,7 +193,7 @@ export default function OutfitBuilder() {
   return (
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
       {/* Header */}
-      <div className="bg-[#111] border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#1a1a1a] border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <h1 className="font-heading font-bold text-white text-2xl tracking-tight">Outfit builder</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
