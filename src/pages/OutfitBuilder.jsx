@@ -276,7 +276,7 @@ export default function OutfitBuilder() {
                 </div>
               ) : (
                 <>
-                  <img src={shoePreview} alt="Shoe try-on" className="w-full rounded-xl object-cover max-h-[60vh]" />
+                  <img src={shoePreview} alt="Shoe try-on" className="w-full rounded-xl object-contain max-h-[60vh]" />
                   <div className="flex gap-2">
                     <Button onClick={handleTryShoes} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10" size="sm">
                       Retake
