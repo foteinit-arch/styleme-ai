@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Save, RotateCcw, ArrowLeft, Sparkles, X, Check } from "lucide-react";
+import { Save, RotateCcw, Sparkles } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
 import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
+import TryOnModal from "@/components/builder/TryOnModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -20,10 +21,8 @@ export default function OutfitBuilder() {
   const [loading, setLoading] = useState(true);
   const [editingOutfitId, setEditingOutfitId] = useState(null);
 
-  // Shoe try-on (canvas capture)
-  const [shoePreview, setShoePreview] = useState(null);
-  const [capturingPreview, setCapturingPreview] = useState(false);
-  const [captureError, setCaptureError] = useState(false);
+  // Shoe try-on (AI modal)
+  const [showTryOn, setShowTryOn] = useState(false);
   const avatarCanvasRef = useRef(null);
 
   useEffect(() => {
@@ -149,26 +148,7 @@ export default function OutfitBuilder() {
 
   const handleClear = () => setPlaced([]);
 
-  // ── Shoe try-on via canvas capture ────────────────────────────────────────
-  const handleTryShoes = async () => {
-    setCaptureError(false);
-    setCapturingPreview(true);
-    setShoePreview(null);
-    const url = await avatarCanvasRef.current?.captureSnapshot();
-    setCapturingPreview(false);
-    if (url) {
-      setShoePreview(url);
-    } else {
-      setCaptureError(true);
-    }
-  };
-
-  const handleUseAsAvatar = () => {
-    // Bake the try-on result into the avatar; remove shoes from canvas
-    setProfile(prev => ({ ...prev, avatar_generated_url: shoePreview }));
-    setPlaced(prev => prev.filter(p => p.category !== 'shoes'));
-    setShoePreview(null);
-  };
+  const handleTryShoes = () => setShowTryOn(true);
 
   // ── Snapshots ─────────────────────────────────────────────────────────────
   const handleSnapshotSaved = (snapshot) => {
@@ -219,12 +199,12 @@ export default function OutfitBuilder() {
           </Button>
           <Button
             onClick={handleTryShoes}
-            disabled={!placed.some(p => p.category === 'shoes') || capturingPreview}
+            disabled={!placed.some(p => p.category === 'shoes')}
             className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >
             <Sparkles className="w-4 h-4 mr-1" />
-            {capturingPreview ? "Capturing…" : "Try Shoes"}
+            Try Shoes
           </Button>
           <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -255,41 +235,17 @@ export default function OutfitBuilder() {
         </div>
       </div>
 
-      {/* Shoe preview modal */}
-      {(shoePreview || captureError) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={e => e.target === e.currentTarget && setShoePreview(null)}>
-          <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#e8b820]" />
-                <span className="font-heading font-bold text-white text-lg">Shoe Try-On</span>
-              </div>
-              <button onClick={() => { setShoePreview(null); setCaptureError(false); }} className="text-white/40 hover:text-white transition">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {captureError ? (
-                <div className="text-center py-8">
-                  <p className="text-red-400 text-sm mb-3">Could not capture snapshot — image CORS restriction.</p>
-                  <Button onClick={handleTryShoes} variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10" size="sm">Try again</Button>
-                </div>
-              ) : (
-                <>
-                  <img src={shoePreview} alt="Shoe try-on" className="rounded-xl object-contain mx-auto block" style={{ maxHeight: "60vh", maxWidth: "100%", aspectRatio: "320/600" }} />
-                  <div className="flex gap-2">
-                    <Button onClick={handleTryShoes} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10" size="sm">
-                      Retake
-                    </Button>
-                    <Button onClick={handleUseAsAvatar} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold" size="sm">
-                      <Check className="w-4 h-4 mr-1" /> Use as Avatar
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+      {showTryOn && (
+        <TryOnModal
+          profile={profile}
+          placed={placed}
+          onClose={() => setShowTryOn(false)}
+          onSnapshotSaved={(snapshot) => {
+            setProfile(prev => ({ ...prev, avatar_generated_url: snapshot.snapshot_url }));
+            setPlaced(prev => prev.filter(p => p.category !== 'shoes'));
+            setShowTryOn(false);
+          }}
+        />
       )}
 
       {showSave && user && (
