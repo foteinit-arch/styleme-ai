@@ -64,8 +64,9 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
     async captureSnapshot() {
       const container = canvasRef.current;
       if (!container) return null;
-      const w = 320;
-      const h = 600;
+      // Use actual rendered dimensions so item positions (in DOM px) map 1:1
+      const w = container.offsetWidth  || 320;
+      const h = container.offsetHeight || 600;
 
       const offscreen = document.createElement("canvas");
       offscreen.width  = w;
@@ -105,12 +106,11 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
           drawWarpedToCanvas(tmp, imgEl, item.corners, size, item.flipX);
           ctx.drawImage(tmp, 0, 0);
         } else {
-          // Normal item: replicate the CSS transform/position
+          // Normal item: replicate the CSS bottom-anchored (shoe) / centre-anchored positioning
           const isShoe  = item.category === "shoes";
-          const centerX = item.x;
-          const centerY = isShoe ? item.y - size / 2 : item.y;
+          const top     = isShoe ? item.y - size : item.y - size / 2;
           ctx.save();
-          ctx.translate(centerX, centerY);
+          ctx.translate(item.x, top + size / 2);
           ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
           if (item.flipX) ctx.scale(-1, 1);
           ctx.drawImage(imgEl, -size / 2, -size / 2, size, size);
