@@ -64,8 +64,8 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
     async captureSnapshot() {
       const container = canvasRef.current;
       if (!container) return null;
-      const w = container.offsetWidth  || 320;
-      const h = container.offsetHeight || 600;
+      const w = 320;
+      const h = 600;
 
       const offscreen = document.createElement("canvas");
       offscreen.width  = w;
