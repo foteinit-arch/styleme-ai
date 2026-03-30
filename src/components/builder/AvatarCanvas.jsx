@@ -72,11 +72,20 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
       offscreen.height = h;
       const ctx = offscreen.getContext("2d");
 
-      // 1. Draw avatar background
+      // 1. Draw avatar background (replicate object-fit:cover + object-position:top)
       const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
       if (avatarUrl) {
         const avatarImg = await loadImage(avatarUrl);
-        if (avatarImg) ctx.drawImage(avatarImg, 0, 0, w, h);
+        if (avatarImg) {
+          const iw = avatarImg.naturalWidth;
+          const ih = avatarImg.naturalHeight;
+          const scale = Math.max(w / iw, h / ih);
+          const dw = iw * scale;
+          const dh = ih * scale;
+          const dx = (w - dw) / 2;
+          const dy = 0; // object-position: top
+          ctx.drawImage(avatarImg, dx, dy, dw, dh);
+        }
       }
 
       // 2. Draw placed items in array order (= z-order)
