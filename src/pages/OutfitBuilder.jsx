@@ -206,7 +206,7 @@ export default function OutfitBuilder() {
             <Sparkles className="w-4 h-4 mr-1" />
             Try Shoes
           </Button>
-          <Button onClick={() => setShowSave(true)} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10" size="sm">
+          <Button onClick={() => setShowSave(true)} disabled={placed.length === 0} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10 disabled:opacity-40" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
           </Button>
         </div>
@@ -248,9 +248,9 @@ export default function OutfitBuilder() {
         />
       )}
 
-      {showSave && user && (
+      {showSave && (
         <SaveOutfitModal
-          userEmail={user.email}
+          userEmail={user?.email}
           placed={placed}
           snapshotUrl={savingSnapshot?.snapshot_url}
           onClose={() => {
