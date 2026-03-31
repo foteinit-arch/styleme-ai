@@ -400,8 +400,8 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
             <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
             <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
             <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
-            <Btn bg="#111"    onClick={onBack}      title="Send to back"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
-            <Btn bg="#111"    onClick={onFront}     title="Bring to front"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
+            <Btn bg="#111"    onClick={onBack}      title="Move behind other items"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
+            <Btn bg="#111"    onClick={onFront}     title="Move in front of other items"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
             <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
           </>
         )}

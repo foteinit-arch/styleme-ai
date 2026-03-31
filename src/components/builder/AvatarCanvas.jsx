@@ -148,12 +148,30 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
       onDrop={handleDrop}
       style={{ position: "relative", width: "100%", maxWidth: 320, height: 600, overflow: "visible", borderRadius: 24, isolation: "isolate" }}
     >
+      {!(profile?.avatar_generated_url || profile?.avatar_photo_url) && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center", padding: "0 24px" }}>
+            Set up your avatar first to start building outfits
+          </p>
+        </div>
+      )}
+
       {(profile?.avatar_generated_url || profile?.avatar_photo_url) && (
         <img
           src={profile.avatar_generated_url || profile.avatar_photo_url}
           alt="avatar"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
         />
+      )}
+
+      {placed.length === 0 && (profile?.avatar_generated_url || profile?.avatar_photo_url) && (
+        <div style={{ position: "absolute", bottom: 16, left: 0, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", borderRadius: 99, padding: "6px 14px" }}>
+            <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, textAlign: "center", margin: 0 }}>
+              👈 Tap or drag clothes from the left panel
+            </p>
+          </div>
+        </div>
       )}
 
       {placed.map(item => (
