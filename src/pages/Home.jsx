@@ -20,7 +20,7 @@ export default function Home() {
           src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/7e1762187_image.png"
           alt="Fashion hero"
           className="absolute inset-0 w-full h-full object-cover object-top"
-          style={{ imageRendering: "crisp-edges", WebkitFontSmoothing: "antialiased" }}
+          style={{ imageRendering: "crisp-edges", WebkitFontSmoothing: "antialiased", filter: "contrast(1.05) saturate(1.1)" }}
         />
         {/* Subtle dark overlay for text legibility */}
         <div className="absolute inset-0 bg-black/30" />
