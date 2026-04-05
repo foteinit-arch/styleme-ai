@@ -46,7 +46,7 @@ export default function Home() {
         <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 z-10">
           <h1
             className="font-heading font-bold uppercase leading-none text-white"
-            style={{ fontSize: "clamp(3.2rem, 11.2vw, 10.4rem)", letterSpacing: "-0.02em" }}
+            style={{ fontSize: "clamp(2.4rem, 8vw, 7.5rem)", letterSpacing: "-0.02em" }}
           >
             Virtually<br />Dressed
           </h1>
