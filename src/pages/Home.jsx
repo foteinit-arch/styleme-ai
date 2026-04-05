@@ -26,7 +26,7 @@ export default function Home() {
 
         {/* Nav */}
         <div className="absolute top-0 left-0 right-0 px-8 py-6 flex items-center justify-between z-10">
-          <span className="text-white text-sm font-body tracking-widest uppercase font-medium">StyleMe</span>
+          <span className="text-white text-sm font-body tracking-widest uppercase font-medium">Virtually Dressed</span>
           <div className="flex gap-6">
             <Link to={createPageUrl("Explore")} className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors">Explore</Link>
             {user ? (
@@ -48,7 +48,7 @@ export default function Home() {
             className="font-heading font-bold uppercase leading-none text-white"
             style={{ fontSize: "clamp(3.2rem, 11.2vw, 10.4rem)", letterSpacing: "-0.02em" }}
           >
-            Style<br />Me
+            Virtually<br />Dressed
           </h1>
           <p className="text-white/90 font-body text-lg md:text-xl mt-4 max-w-sm tracking-wide">
             Virtual wardrobe styling for every woman
