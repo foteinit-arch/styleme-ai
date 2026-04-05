@@ -17,7 +17,7 @@ export default function Home() {
       {/* Hero - full bleed fashion photo */}
       <div className="relative w-full h-screen overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1400&q=80"
+          src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/0d3ac3524_VirtuallyDressed.jpeg"
           alt="Fashion hero"
           className="absolute inset-0 w-full h-full object-cover object-top"
         />
