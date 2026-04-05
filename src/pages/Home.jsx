@@ -51,7 +51,7 @@ export default function Home() {
             Virtually<br />Dressed
           </h1>
           <p className="text-white/90 font-body text-lg md:text-xl mt-4 max-w-sm tracking-wide">
-            Virtual wardrobe styling for every woman
+            Virtual wardrobe styling and shopping tool
           </p>
           <button
             onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
