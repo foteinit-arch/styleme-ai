@@ -96,9 +96,8 @@ export default function OutfitBuilder() {
     bag:       { x: 225, y: 420, scale: 1.0 },
   };
 
-  const handleDrop = (item) => {
-    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
-    const measurementRatio = {
+  const getMeasurementRatio = (item) => {
+    const ratios = {
       top:       (profile?.bust_cm   || 88)  / 88,
       outerwear: (profile?.bust_cm   || 88)  / 88,
       dress:     (profile?.bust_cm   || 88)  / 88,
@@ -106,14 +105,35 @@ export default function OutfitBuilder() {
       shoes:     (profile?.height_cm || 165) / 165,
       accessory: 1,
       bag:       1,
-    }[item.category] ?? 1;
+    };
+    return ratios[item.category] ?? 1;
+  };
 
+  // Tap: place at predefined category position
+  const handleDrop = (item) => {
+    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
+    const ratio = getMeasurementRatio(item);
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
       x: pos.x,
       y: pos.y,
-      scale: (pos.scale ?? 1.0) * measurementRatio,
+      scale: (pos.scale ?? 1.0) * ratio,
+      rotation: 0,
+      z_index: prev.length + 1,
+    }]);
+  };
+
+  // Drag-and-drop: place exactly where user dropped it
+  const handleDropAtPosition = (item, x, y) => {
+    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
+    const ratio = getMeasurementRatio(item);
+    setPlaced(prev => [...prev, {
+      ...item,
+      placedId: Date.now() + Math.random(),
+      x,
+      y,
+      scale: (pos.scale ?? 1.0) * ratio,
       rotation: 0,
       z_index: prev.length + 1,
     }]);
@@ -232,6 +252,7 @@ export default function OutfitBuilder() {
               onRemove={handleRemovePlaced}
               onSendToBack={handleSendToBack}
               onBringToFront={handleBringToFront}
+              onDropAtPosition={handleDropAtPosition}
             />
           </div>
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />

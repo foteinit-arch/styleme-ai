@@ -54,7 +54,7 @@ function loadImage(src) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const AvatarCanvas = forwardRef(function AvatarCanvas(
-  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront },
+  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront, onDropAtPosition },
   ref
 ) {
   const canvasRef = useRef(null);
@@ -135,11 +135,13 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
     if (!json) return;
     const item = JSON.parse(json);
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 50;
-    const y = e.clientY - rect.top  - 50;
-    const event = new CustomEvent("clothing-dropped", { detail: { item, x, y } });
-    canvasRef.current.dispatchEvent(event);
-  }, []);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    // Call onDropAtPosition if provided (drag with coordinates), else fall back to onDrop (tap)
+    if (onDropAtPosition) {
+      onDropAtPosition(item, x, y);
+    }
+  }, [onDropAtPosition]);
 
   return (
     <div
