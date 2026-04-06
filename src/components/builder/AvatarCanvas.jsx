@@ -52,17 +52,33 @@ function loadImage(src) {
   });
 }
 
+// Category tap-placement positions as fractions of canvas size
+const CATEGORY_POSITIONS = {
+  top:       { xFrac: 0.50, yFrac: 0.42 },
+  bottom:    { xFrac: 0.50, yFrac: 0.65 },
+  dress:     { xFrac: 0.50, yFrac: 0.52 },
+  shoes:     { xFrac: 0.50, yFrac: 0.96 },
+  outerwear: { xFrac: 0.50, yFrac: 0.40 },
+  accessory: { xFrac: 0.50, yFrac: 0.15 },
+  bag:       { xFrac: 0.70, yFrac: 0.70 },
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 const AvatarCanvas = forwardRef(function AvatarCanvas(
-  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront, onDropAtPosition },
+  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront, onPlaceItem },
   ref
 ) {
   const canvasRef = useRef(null);
 
-  // Expose captureSnapshot + container element to parent via ref
+  // Expose captureSnapshot + placeItem (for tap from ClothingPicker) via ref
   useImperativeHandle(ref, () => ({
-    // Let OutfitBuilder read the canvas's actual rendered dimensions for tap-placement
-    get _containerEl() { return canvasRef.current; },
+    placeItem(item) {
+      const el = canvasRef.current;
+      const cw = el?.offsetWidth  || 320;
+      const ch = el?.offsetHeight || 600;
+      const pos = CATEGORY_POSITIONS[item.category] || { xFrac: 0.5, yFrac: 0.5 };
+      onPlaceItem?.(item, pos.xFrac * cw, pos.yFrac * ch);
+    },
     async captureSnapshot() {
       const container = canvasRef.current;
       if (!container) return null;
@@ -139,11 +155,8 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    // Call onDropAtPosition if provided (drag with coordinates), else fall back to onDrop (tap)
-    if (onDropAtPosition) {
-      onDropAtPosition(item, x, y);
-    }
-  }, [onDropAtPosition]);
+    onPlaceItem?.(item, x, y);
+  }, [onPlaceItem]);
 
   return (
     <div

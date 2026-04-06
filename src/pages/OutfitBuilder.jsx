@@ -83,18 +83,6 @@ export default function OutfitBuilder() {
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
   }, [user]);
 
-  // Positions as fractions of the canvas (xFrac: 0=left, 1=right; yFrac: 0=top, 1=bottom)
-  // so they stay correct regardless of the canvas's actual pixel size.
-  const categoryPositions = {
-    top:       { xFrac: 0.50, yFrac: 0.425, scale: 1.6 },
-    bottom:    { xFrac: 0.50, yFrac: 0.650, scale: 1.6 },
-    dress:     { xFrac: 0.50, yFrac: 0.517, scale: 1.9 },
-    shoes:     { xFrac: 0.50, yFrac: 0.958, scale: 0.7 },
-    outerwear: { xFrac: 0.50, yFrac: 0.408, scale: 1.8 },
-    accessory: { xFrac: 0.50, yFrac: 0.150, scale: 0.75 },
-    bag:       { xFrac: 0.70, yFrac: 0.700, scale: 1.0 },
-  };
-
   const getMeasurementRatio = (item) => {
     const ratios = {
       top:       (profile?.bust_cm   || 88)  / 88,
@@ -108,35 +96,16 @@ export default function OutfitBuilder() {
     return ratios[item.category] ?? 1;
   };
 
-  // Tap: place at predefined category position (resolved against actual canvas size)
-  const handleDrop = (item) => {
-    const pos = categoryPositions[item.category] || { xFrac: 0.5, yFrac: 0.5, scale: 1.0 };
+  // Called by AvatarCanvas for both tap and drag — canvas resolves x/y itself
+  const handlePlaceItem = (item, x, y) => {
     const ratio = getMeasurementRatio(item);
-    // Resolve canvas pixel size from the DOM element exposed via avatarCanvasRef
-    const container = avatarCanvasRef.current?._containerEl || avatarCanvasRef.current;
-    const cw = container?.offsetWidth  || 320;
-    const ch = container?.offsetHeight || 600;
-    setPlaced(prev => [...prev, {
-      ...item,
-      placedId: Date.now() + Math.random(),
-      x: (pos.xFrac ?? 0.5) * cw,
-      y: (pos.yFrac ?? 0.5) * ch,
-      scale: (pos.scale ?? 1.0) * ratio,
-      rotation: 0,
-      z_index: prev.length + 1,
-    }]);
-  };
-
-  // Drag-and-drop: place exactly where user dropped it
-  const handleDropAtPosition = (item, x, y) => {
-    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
-    const ratio = getMeasurementRatio(item);
+    const defaultScale = { top:1.6, bottom:1.6, dress:1.9, shoes:0.7, outerwear:1.8, accessory:0.75, bag:1.0 };
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
       x,
       y,
-      scale: (pos.scale ?? 1.0) * ratio,
+      scale: (defaultScale[item.category] ?? 1.0) * ratio,
       rotation: 0,
       z_index: prev.length + 1,
     }]);
@@ -241,7 +210,7 @@ export default function OutfitBuilder() {
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
         <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto">
-          <ClothingPicker clothes={clothes} onDrop={handleDrop} />
+          <ClothingPicker clothes={clothes} onDrop={(item) => avatarCanvasRef.current?.placeItem(item)} />
         </div>
 
         {/* Center: avatar canvas */}
@@ -255,7 +224,7 @@ export default function OutfitBuilder() {
               onRemove={handleRemovePlaced}
               onSendToBack={handleSendToBack}
               onBringToFront={handleBringToFront}
-              onDropAtPosition={handleDropAtPosition}
+              onPlaceItem={handlePlaceItem}
             />
           </div>
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
