@@ -17,11 +17,10 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     setImageUrl(null);
 
     try {
-      // Build description of shoes only
-      const shoes = placed.filter(p => p.category === 'shoes');
-      const shoeDesc = shoes.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""}`).join(", ");
+      // Build full outfit description
+      const outfitDesc = placed.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""} (${p.category})`).join(", ");
 
-      const prompt = `Fashion editorial photo. Reproduce the exact same person from the reference photo — same body, same face, same pose, same background. The ONLY change: the person is now wearing ${shoeDesc} on their feet. The shoes must be ON the feet, not floating. Photorealistic, full body, studio lighting.`;
+      const prompt = `Fashion editorial photo. Reproduce the exact same person from the reference photo — same body, same face, same pose, same background. The person is now wearing this complete outfit: ${outfitDesc}. All clothing items must be realistically worn on the body. Photorealistic, full body, studio lighting.`;
 
       // Only pass avatar as reference — shoe product shots confuse the model
       const refUrls = avatarUrl ? [avatarUrl] : [];

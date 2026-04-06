@@ -20,151 +20,98 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a] flex flex-col overflow-x-hidden">
+    <div style={{ minHeight: "100vh", backgroundColor: "#0d0d1a", display: "flex", flexDirection: "column", overflowX: "hidden" }}>
 
       {/* NAV */}
-      <nav className="absolute top-0 left-0 right-0 z-20 px-6 md:px-12 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-            <Shirt className="w-4 h-4 text-white" />
+      <nav style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, padding: "20px 48px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg, #a855f7, #4f46e5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Shirt style={{ width: 16, height: 16, color: "#fff" }} />
           </div>
-          <span className="text-white font-bold text-lg tracking-tight">Virtually Dressed</span>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}>Virtually Dressed</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link to={createPageUrl("Explore")} className="text-white/60 text-sm hover:text-white transition-colors hidden md:block">
-            Explore
-          </Link>
-          {user ? (
-            <Link to={createPageUrl("Wardrobe")} className="text-white/60 text-sm hover:text-white transition-colors hidden md:block">
-              My Wardrobe
-            </Link>
-          ) : null}
-          <button
-            onClick={handleCTA}
-            className="px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Link to={createPageUrl("Explore")} style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, textDecoration: "none" }}>Explore</Link>
+          {user && (
+            <Link to={createPageUrl("Wardrobe")} style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, textDecoration: "none" }}>My Wardrobe</Link>
+          )}
+          <button onClick={handleCTA} style={{ padding: "8px 18px", borderRadius: 999, background: "#fff", color: "#000", fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer" }}>
             {user ? "Open App" : "Get Started"}
           </button>
         </div>
       </nav>
 
       {/* HERO */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 overflow-hidden">
-
-        {/* Purple glow blobs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-violet-900/10 blur-3xl pointer-events-none" />
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "112px 24px 64px", position: "relative", overflow: "hidden" }}>
+        {/* Glow blobs */}
+        <div style={{ position: "absolute", top: "25%", left: "25%", width: 384, height: 384, borderRadius: "50%", background: "rgba(147,51,234,0.15)", filter: "blur(80px)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "25%", right: "25%", width: 320, height: 320, borderRadius: "50%", background: "rgba(79,70,229,0.15)", filter: "blur(80px)", pointerEvents: "none" }} />
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-sm mb-6">
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 24 }}>
+          <Sparkles style={{ width: 14, height: 14, color: "#c084fc" }} />
           AI-Powered Virtual Try-On
         </div>
 
         {/* Headline */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight max-w-4xl">
+        <h1 style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", fontWeight: 800, color: "#fff", lineHeight: 1.1, maxWidth: 800, margin: "0 auto" }}>
           Discover Your{" "}
-          <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
+          <span style={{ background: "linear-gradient(90deg, #c084fc, #818cf8, #6366f1)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Perfect Style
           </span>
           <br />Before You Wear It
         </h1>
 
-        <p className="text-white/50 text-lg md:text-xl mt-6 max-w-xl leading-relaxed">
-          Upload your photo, browse outfits, and see exactly how clothes look on <em>you</em> — powered by AI.
+        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 18, marginTop: 24, maxWidth: 480, lineHeight: 1.6 }}>
+          Upload your photo, pick outfits, and see exactly how clothes look on <em>you</em> — powered by AI.
         </p>
 
-        {/* CTA */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 mt-10">
+        {/* CTAs */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 40 }}>
           <button
             onClick={handleCTA}
-            className="flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-lg hover:from-purple-500 hover:to-indigo-500 transition-all shadow-lg shadow-purple-900/40"
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 32px", borderRadius: 999, background: "linear-gradient(90deg, #9333ea, #4f46e5)", color: "#fff", fontWeight: 600, fontSize: 17, border: "none", cursor: "pointer", boxShadow: "0 10px 40px rgba(147,51,234,0.4)" }}
           >
-            <Sparkles className="w-5 h-5" />
+            <Sparkles style={{ width: 20, height: 20 }} />
             Try On Outfits
           </button>
           <Link
             to={createPageUrl("Explore")}
-            className="flex items-center gap-2 px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-medium text-lg hover:bg-white/10 transition-all"
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 32px", borderRadius: 999, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", fontWeight: 500, fontSize: 17, textDecoration: "none" }}
           >
-            Browse Looks <ArrowRight className="w-4 h-4" />
+            Browse Looks <ArrowRight style={{ width: 16, height: 16 }} />
           </Link>
         </div>
 
         {/* Phone mockups */}
-        <div className="relative mt-16 flex items-end justify-center gap-4 md:gap-8 max-w-3xl mx-auto">
-
-          {/* Left phone - slightly tilted */}
-          <div className="relative hidden md:block" style={{ transform: "rotate(-6deg) translateY(20px)" }}>
-            <PhoneMockup
-              bgColor="bg-gradient-to-b from-pink-100 to-pink-200"
-              imageUrl="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=300&q=80"
-              label="Inspired by iconic looks"
-              accent="from-pink-400 to-rose-400"
-            />
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 24, marginTop: 64, maxWidth: 700, width: "100%" }}>
+          <div style={{ transform: "rotate(-6deg) translateY(20px)" }} className="hidden md:block">
+            <PhoneMockup imageUrl="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=300&q=80" label="Inspired by iconic looks" btnColor="linear-gradient(90deg,#f472b6,#fb7185)" />
           </div>
-
-          {/* Center phone - front and center */}
-          <div className="relative z-10" style={{ transform: "scale(1.08)" }}>
-            <PhoneMockup
-              bgColor="bg-gradient-to-b from-purple-100 to-indigo-200"
-              imageUrl="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=300&q=80"
-              label="Generate your look"
-              accent="from-purple-500 to-indigo-500"
-              showBadge
-            />
+          <div style={{ transform: "scale(1.08)", zIndex: 10, position: "relative" }}>
+            <PhoneMockup imageUrl="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=300&q=80" label="Generate your look" btnColor="linear-gradient(90deg,#9333ea,#4f46e5)" showBadge />
           </div>
-
-          {/* Right phone - slightly tilted */}
-          <div className="relative hidden md:block" style={{ transform: "rotate(6deg) translateY(20px)" }}>
-            <PhoneMockup
-              bgColor="bg-gradient-to-b from-amber-100 to-orange-200"
-              imageUrl="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80"
-              label="Discover new styles"
-              accent="from-amber-400 to-orange-400"
-            />
+          <div style={{ transform: "rotate(6deg) translateY(20px)" }} className="hidden md:block">
+            <PhoneMockup imageUrl="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80" label="Discover new styles" btnColor="linear-gradient(90deg,#f59e0b,#f97316)" />
           </div>
         </div>
       </div>
 
       {/* FEATURES */}
-      <div className="bg-[#0f0f1f] py-20 px-6 md:px-12">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-            Your AI Stylist, Always On
-          </h2>
-          <p className="text-white/40 text-center mb-14 max-w-xl mx-auto">
-            Everything you need to experiment with fashion without spending a cent.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div style={{ backgroundColor: "#0f0f1f", padding: "80px 24px" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.5rem)", fontWeight: 800, color: "#fff", textAlign: "center", marginBottom: 12 }}>Your AI Stylist, Always On</h2>
+          <p style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", marginBottom: 56, maxWidth: 480, margin: "0 auto 56px" }}>Everything you need to experiment with fashion without spending a cent.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
             {[
-              {
-                icon: <Camera className="w-6 h-6" />,
-                color: "from-purple-500 to-indigo-500",
-                title: "AI Virtual Try-On",
-                desc: "Upload your photo and watch AI place any outfit on your exact body — realistic and instant.",
-              },
-              {
-                icon: <Shirt className="w-6 h-6" />,
-                color: "from-pink-500 to-rose-500",
-                title: "Digital Wardrobe",
-                desc: "Upload your clothes or add from URLs. AI removes backgrounds automatically.",
-              },
-              {
-                icon: <Sparkles className="w-6 h-6" />,
-                color: "from-amber-400 to-orange-500",
-                title: "Mix & Match Builder",
-                desc: "Drag clothes onto your avatar, layer pieces, and save unlimited outfits.",
-              },
+              { icon: <Camera style={{ width: 24, height: 24, color: "#fff" }} />, from: "#9333ea", to: "#4f46e5", title: "AI Virtual Try-On", desc: "Upload your photo and watch AI place any outfit on your body — realistic and instant." },
+              { icon: <Shirt style={{ width: 24, height: 24, color: "#fff" }} />, from: "#ec4899", to: "#f43f5e", title: "Digital Wardrobe", desc: "Upload your clothes or add from URLs. AI removes backgrounds automatically." },
+              { icon: <Sparkles style={{ width: 24, height: 24, color: "#fff" }} />, from: "#f59e0b", to: "#f97316", title: "Mix & Match Builder", desc: "Drag clothes onto your avatar, layer pieces, and save unlimited outfits." },
             ].map((f) => (
-              <div key={f.title} className="bg-white/5 border border-white/8 rounded-2xl p-6 hover:bg-white/8 transition-colors">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-4`}>
-                  {f.icon}
-                </div>
-                <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
-                <p className="text-white/40 text-sm leading-relaxed">{f.desc}</p>
+              <div key={f.title} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 24 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: `linear-gradient(135deg,${f.from},${f.to})`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>{f.icon}</div>
+                <h3 style={{ color: "#fff", fontWeight: 700, fontSize: 17, marginBottom: 8 }}>{f.title}</h3>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, lineHeight: 1.6 }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -172,62 +119,42 @@ export default function Home() {
       </div>
 
       {/* BOTTOM CTA */}
-      <div className="bg-[#0d0d1a] py-20 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-1 mb-4">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
-            ))}
+      <div style={{ backgroundColor: "#0d0d1a", padding: "80px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 16 }}>
+            {[...Array(5)].map((_, i) => <Star key={i} style={{ width: 20, height: 20, fill: "#fbbf24", color: "#fbbf24" }} />)}
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Start Styling for Free
-          </h2>
-          <p className="text-white/40 mb-8">
-            No credit card needed. Build your digital wardrobe and try on outfits instantly.
-          </p>
-          <button
-            onClick={handleCTA}
-            className="flex items-center gap-2 px-10 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-lg hover:from-purple-500 hover:to-indigo-500 transition-all shadow-lg shadow-purple-900/40 mx-auto"
-          >
-            <Zap className="w-5 h-5" />
+          <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.5rem)", fontWeight: 800, color: "#fff", marginBottom: 12 }}>Start Styling for Free</h2>
+          <p style={{ color: "rgba(255,255,255,0.4)", marginBottom: 32 }}>No credit card needed. Build your digital wardrobe and try on outfits instantly.</p>
+          <button onClick={handleCTA} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 40px", borderRadius: 999, background: "linear-gradient(90deg,#9333ea,#4f46e5)", color: "#fff", fontWeight: 600, fontSize: 17, border: "none", cursor: "pointer", boxShadow: "0 10px 40px rgba(147,51,234,0.4)" }}>
+            <Zap style={{ width: 20, height: 20 }} />
             {user ? "Go to Builder" : "Get Started Free"}
           </button>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="bg-[#0a0a14] border-t border-white/5 py-6 px-6 text-center">
-        <p className="text-white/20 text-sm">© 2025 Virtually Dressed. All rights reserved.</p>
+      <div style={{ backgroundColor: "#0a0a14", borderTop: "1px solid rgba(255,255,255,0.05)", padding: "24px", textAlign: "center" }}>
+        <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 13 }}>© 2025 Virtually Dressed. All rights reserved.</p>
       </div>
     </div>
   );
 }
 
-function PhoneMockup({ bgColor, imageUrl, label, accent, showBadge }) {
+function PhoneMockup({ imageUrl, label, btnColor, showBadge }) {
   return (
-    <div className="w-36 md:w-44 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-black">
-      {/* Phone screen */}
-      <div className={`${bgColor} relative aspect-[9/18]`}>
-        <img
-          src={imageUrl}
-          alt={label}
-          className="absolute inset-0 w-full h-full object-cover object-top"
-        />
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
+    <div style={{ width: 150, borderRadius: 28, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", border: "3px solid rgba(255,255,255,0.15)", backgroundColor: "#000" }}>
+      <div style={{ position: "relative", aspectRatio: "9/18" }}>
+        <img src={imageUrl} alt={label} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)" }} />
         {showBadge && (
-          <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs font-medium flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> AI
+          <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", borderRadius: 999, padding: "3px 8px", display: "flex", alignItems: "center", gap: 4, color: "#fff", fontSize: 11, fontWeight: 600 }}>
+            <Sparkles style={{ width: 10, height: 10 }} /> AI
           </div>
         )}
-
-        {/* Bottom label */}
-        <div className="absolute bottom-0 left-0 right-0 p-3">
-          <p className="text-white font-bold text-xs leading-tight mb-2">{label}</p>
-          <div className={`w-full py-2 rounded-xl bg-gradient-to-r ${accent} text-white text-xs font-semibold text-center`}>
-            Generate outfit
-          </div>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 12 }}>
+          <p style={{ color: "#fff", fontWeight: 700, fontSize: 11, marginBottom: 8, lineHeight: 1.3 }}>{label}</p>
+          <div style={{ background: btnColor, borderRadius: 10, padding: "7px 0", color: "#fff", fontSize: 11, fontWeight: 700, textAlign: "center" }}>Generate outfit</div>
         </div>
       </div>
     </div>
