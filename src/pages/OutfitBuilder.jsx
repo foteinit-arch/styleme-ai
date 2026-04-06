@@ -83,17 +83,16 @@ export default function OutfitBuilder() {
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
   }, [user]);
 
-  // Positions calibrated to a 320×600 canvas with avatar photo cover+top aligned.
-  // x=160 = horizontal centre. y is the vertical anchor point for the item centre
-  // (shoes use bottom-anchor so y = sole position).
+  // Positions as fractions of the canvas (xFrac: 0=left, 1=right; yFrac: 0=top, 1=bottom)
+  // so they stay correct regardless of the canvas's actual pixel size.
   const categoryPositions = {
-    top:       { x: 160, y: 255, scale: 1.6 },
-    bottom:    { x: 160, y: 390, scale: 1.6 },
-    dress:     { x: 160, y: 310, scale: 1.9 },
-    shoes:     { x: 160, y: 575, scale: 0.7 },
-    outerwear: { x: 160, y: 245, scale: 1.8 },
-    accessory: { x: 160, y: 90,  scale: 0.75 },
-    bag:       { x: 225, y: 420, scale: 1.0 },
+    top:       { xFrac: 0.50, yFrac: 0.425, scale: 1.6 },
+    bottom:    { xFrac: 0.50, yFrac: 0.650, scale: 1.6 },
+    dress:     { xFrac: 0.50, yFrac: 0.517, scale: 1.9 },
+    shoes:     { xFrac: 0.50, yFrac: 0.958, scale: 0.7 },
+    outerwear: { xFrac: 0.50, yFrac: 0.408, scale: 1.8 },
+    accessory: { xFrac: 0.50, yFrac: 0.150, scale: 0.75 },
+    bag:       { xFrac: 0.70, yFrac: 0.700, scale: 1.0 },
   };
 
   const getMeasurementRatio = (item) => {
@@ -109,15 +108,19 @@ export default function OutfitBuilder() {
     return ratios[item.category] ?? 1;
   };
 
-  // Tap: place at predefined category position
+  // Tap: place at predefined category position (resolved against actual canvas size)
   const handleDrop = (item) => {
-    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
+    const pos = categoryPositions[item.category] || { xFrac: 0.5, yFrac: 0.5, scale: 1.0 };
     const ratio = getMeasurementRatio(item);
+    // Resolve canvas pixel size from the DOM element exposed via avatarCanvasRef
+    const container = avatarCanvasRef.current?._containerEl || avatarCanvasRef.current;
+    const cw = container?.offsetWidth  || 320;
+    const ch = container?.offsetHeight || 600;
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
-      x: pos.x,
-      y: pos.y,
+      x: (pos.xFrac ?? 0.5) * cw,
+      y: (pos.yFrac ?? 0.5) * ch,
       scale: (pos.scale ?? 1.0) * ratio,
       rotation: 0,
       z_index: prev.length + 1,

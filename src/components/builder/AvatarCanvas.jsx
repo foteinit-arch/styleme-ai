@@ -59,8 +59,10 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
 ) {
   const canvasRef = useRef(null);
 
-  // Expose captureSnapshot to parent via ref
+  // Expose captureSnapshot + container element to parent via ref
   useImperativeHandle(ref, () => ({
+    // Let OutfitBuilder read the canvas's actual rendered dimensions for tap-placement
+    get _containerEl() { return canvasRef.current; },
     async captureSnapshot() {
       const container = canvasRef.current;
       if (!container) return null;
