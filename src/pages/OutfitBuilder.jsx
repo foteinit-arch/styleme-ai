@@ -83,14 +83,17 @@ export default function OutfitBuilder() {
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
   }, [user]);
 
+  // Positions calibrated to a 320×600 canvas with avatar photo cover+top aligned.
+  // x=160 = horizontal centre. y is the vertical anchor point for the item centre
+  // (shoes use bottom-anchor so y = sole position).
   const categoryPositions = {
-    top:       { x: 160, y: 260, scale: 1.4 },
-    bottom:    { x: 160, y: 355, scale: 1.5 },
-    dress:     { x: 160, y: 250, scale: 1.6 },
-    shoes:     { x: 160, y: 550, scale: 0.6  },
-    outerwear: { x: 160, y: 235, scale: 1.5 },
-    accessory: { x: 160, y: 75,  scale: 0.7 },
-    bag:       { x: 160, y: 410, scale: 0.9 },
+    top:       { x: 160, y: 255, scale: 1.6 },
+    bottom:    { x: 160, y: 390, scale: 1.6 },
+    dress:     { x: 160, y: 310, scale: 1.9 },
+    shoes:     { x: 160, y: 575, scale: 0.7 },
+    outerwear: { x: 160, y: 245, scale: 1.8 },
+    accessory: { x: 160, y: 90,  scale: 0.75 },
+    bag:       { x: 225, y: 420, scale: 1.0 },
   };
 
   const handleDrop = (item) => {
