@@ -83,8 +83,19 @@ export default function OutfitBuilder() {
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
   }, [user]);
 
-  const getMeasurementRatio = (item) => {
-    const ratios = {
+  const categoryPositions = {
+    top:       { x: 160, y: 260, scale: 1.4 },
+    bottom:    { x: 160, y: 355, scale: 1.5 },
+    dress:     { x: 160, y: 250, scale: 1.6 },
+    shoes:     { x: 160, y: 550, scale: 0.6  },
+    outerwear: { x: 160, y: 235, scale: 1.5 },
+    accessory: { x: 160, y: 75,  scale: 0.7 },
+    bag:       { x: 160, y: 410, scale: 0.9 },
+  };
+
+  const handleDrop = (item) => {
+    const pos = categoryPositions[item.category] || { x: 160, y: 300, scale: 1.0 };
+    const measurementRatio = {
       top:       (profile?.bust_cm   || 88)  / 88,
       outerwear: (profile?.bust_cm   || 88)  / 88,
       dress:     (profile?.bust_cm   || 88)  / 88,
@@ -92,20 +103,14 @@ export default function OutfitBuilder() {
       shoes:     (profile?.height_cm || 165) / 165,
       accessory: 1,
       bag:       1,
-    };
-    return ratios[item.category] ?? 1;
-  };
+    }[item.category] ?? 1;
 
-  // Called by AvatarCanvas for both tap and drag — canvas resolves x/y itself
-  const handlePlaceItem = (item, x, y) => {
-    const ratio = getMeasurementRatio(item);
-    const defaultScale = { top:1.6, bottom:1.6, dress:1.9, shoes:0.7, outerwear:1.8, accessory:0.75, bag:1.0 };
     setPlaced(prev => [...prev, {
       ...item,
       placedId: Date.now() + Math.random(),
-      x,
-      y,
-      scale: (defaultScale[item.category] ?? 1.0) * ratio,
+      x: pos.x,
+      y: pos.y,
+      scale: (pos.scale ?? 1.0) * measurementRatio,
       rotation: 0,
       z_index: prev.length + 1,
     }]);
@@ -194,12 +199,12 @@ export default function OutfitBuilder() {
           </Button>
           <Button
             onClick={handleTryShoes}
-            disabled={placed.length === 0}
+            disabled={!placed.some(p => p.category === 'shoes')}
             className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >
             <Sparkles className="w-4 h-4 mr-1" />
-            AI Try-On
+            Try Shoes
           </Button>
           <Button onClick={() => setShowSave(true)} disabled={placed.length === 0} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10 disabled:opacity-40" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -210,7 +215,7 @@ export default function OutfitBuilder() {
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
         <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto">
-          <ClothingPicker clothes={clothes} onDrop={(item) => avatarCanvasRef.current?.placeItem(item)} />
+          <ClothingPicker clothes={clothes} onDrop={handleDrop} />
         </div>
 
         {/* Center: avatar canvas */}
@@ -224,7 +229,6 @@ export default function OutfitBuilder() {
               onRemove={handleRemovePlaced}
               onSendToBack={handleSendToBack}
               onBringToFront={handleBringToFront}
-              onPlaceItem={handlePlaceItem}
             />
           </div>
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />

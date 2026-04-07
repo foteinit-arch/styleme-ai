@@ -47,7 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Home from './pages/Home.jsx';
+import Home from './pages/Home';
 import Avatar from './pages/Avatar';
 import Wardrobe from './pages/Wardrobe';
 import OutfitBuilder from './pages/OutfitBuilder';

@@ -52,33 +52,15 @@ function loadImage(src) {
   });
 }
 
-// Category tap-placement positions as fractions of canvas size
-const CATEGORY_POSITIONS = {
-  top:       { xFrac: 0.50, yFrac: 0.42 },
-  bottom:    { xFrac: 0.50, yFrac: 0.65 },
-  dress:     { xFrac: 0.50, yFrac: 0.52 },
-  shoes:     { xFrac: 0.50, yFrac: 0.96 },
-  outerwear: { xFrac: 0.50, yFrac: 0.40 },
-  accessory: { xFrac: 0.50, yFrac: 0.15 },
-  bag:       { xFrac: 0.70, yFrac: 0.70 },
-};
-
 // ── Component ─────────────────────────────────────────────────────────────────
 const AvatarCanvas = forwardRef(function AvatarCanvas(
-  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront, onPlaceItem },
+  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront },
   ref
 ) {
   const canvasRef = useRef(null);
 
-  // Expose captureSnapshot + placeItem (for tap from ClothingPicker) via ref
+  // Expose captureSnapshot to parent via ref
   useImperativeHandle(ref, () => ({
-    placeItem(item) {
-      const el = canvasRef.current;
-      const cw = el?.offsetWidth  || 320;
-      const ch = el?.offsetHeight || 600;
-      const pos = CATEGORY_POSITIONS[item.category] || { xFrac: 0.5, yFrac: 0.5 };
-      onPlaceItem?.(item, pos.xFrac * cw, pos.yFrac * ch);
-    },
     async captureSnapshot() {
       const container = canvasRef.current;
       if (!container) return null;
@@ -153,10 +135,11 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
     if (!json) return;
     const item = JSON.parse(json);
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    onPlaceItem?.(item, x, y);
-  }, [onPlaceItem]);
+    const x = e.clientX - rect.left - 50;
+    const y = e.clientY - rect.top  - 50;
+    const event = new CustomEvent("clothing-dropped", { detail: { item, x, y } });
+    canvasRef.current.dispatchEvent(event);
+  }, []);
 
   return (
     <div
