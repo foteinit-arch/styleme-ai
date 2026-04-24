@@ -88,12 +88,21 @@ export default function Layout({ children, currentPageName }) {
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-white/10 flex"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {NAV.map(({ label, page, icon: Icon }) => (
-          <Link key={page} to={createPageUrl(page)} className="flex-1 flex flex-col items-center justify-center py-2 min-h-[44px]">
-            <Icon className={`w-5 h-5 ${currentPageName === page ? "text-[#e8b820]" : "text-white/40"}`} />
-            <span className={`text-[10px] mt-0.5 font-body ${currentPageName === page ? "text-[#e8b820]" : "text-white/40"}`}>{label}</span>
-          </Link>
-        ))}
+        {NAV.map(({ label, page, icon: Icon }) => {
+          const isActive = currentPageName === page;
+          const dest = createPageUrl(page);
+          return (
+            <Link
+              key={page}
+              to={dest}
+              replace={isActive}
+              className="flex-1 flex flex-col items-center justify-center py-2 min-h-[44px]"
+            >
+              <Icon className={`w-5 h-5 ${isActive ? "text-[#e8b820]" : "text-white/40"}`} />
+              <span className={`text-[10px] mt-0.5 font-body ${isActive ? "text-[#e8b820]" : "text-white/40"}`}>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
