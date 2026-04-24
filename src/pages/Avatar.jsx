@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Upload, Save, User, Ruler, Sparkles, AlertCircle, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import AvatarPreview from "@/components/avatar/AvatarPreview";
 
@@ -241,6 +253,32 @@ export default function Avatar() {
             <Button onClick={handleSave} disabled={saving} className="w-full bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-bold text-lg py-3">
               <Save className="mr-2 w-5 h-5" /> {saving ? "Saving..." : "Save Avatar"}
             </Button>
+
+            {/* Delete Account */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 bg-transparent mt-2">
+                  <Trash2 className="mr-2 w-4 h-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-white">Delete your account?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-white/50">
+                    This will permanently delete your account and all your data. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={() => base44.auth.logout(createPageUrl ? createPageUrl("Home") : "/")}
+                  >
+                    Delete Account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Right: preview */}
