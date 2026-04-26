@@ -1,0 +1,58 @@
+{
+  "name": "ClothingItem",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "top",
+        "bottom",
+        "dress",
+        "outerwear",
+        "shoes",
+        "accessory",
+        "underwear",
+        "bag"
+      ]
+    },
+    "original_image_url": {
+      "type": "string"
+    },
+    "processed_image_url": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "upload",
+        "url",
+        "pinterest"
+      ]
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

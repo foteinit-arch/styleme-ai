@@ -1,0 +1,68 @@
+{
+  "name": "Outfit",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "outfit_snapshot_url": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "clothing_item_id": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "z_index": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0
+    },
+    "occasion": {
+      "type": "string",
+      "enum": [
+        "casual",
+        "formal",
+        "wedding",
+        "party",
+        "sport",
+        "work",
+        "beach",
+        "other"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

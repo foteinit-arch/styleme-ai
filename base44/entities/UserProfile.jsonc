@@ -1,0 +1,57 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "avatar_photo_url": {
+      "type": "string"
+    },
+    "avatar_generated_url": {
+      "type": "string"
+    },
+    "height_cm": {
+      "type": "number"
+    },
+    "weight_kg": {
+      "type": "number"
+    },
+    "bust_cm": {
+      "type": "number"
+    },
+    "waist_cm": {
+      "type": "number"
+    },
+    "hips_cm": {
+      "type": "number"
+    },
+    "skin_tone": {
+      "type": "string",
+      "enum": [
+        "light",
+        "medium-light",
+        "medium",
+        "medium-dark",
+        "dark"
+      ]
+    },
+    "hair_color": {
+      "type": "string"
+    },
+    "body_shape": {
+      "type": "string",
+      "enum": [
+        "hourglass",
+        "pear",
+        "apple",
+        "rectangle",
+        "inverted-triangle"
+      ]
+    }
+  },
+  "required": []
+}

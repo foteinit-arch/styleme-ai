@@ -1,0 +1,16 @@
+{
+  "name": "OutfitLike",
+  "type": "object",
+  "properties": {
+    "outfit_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "outfit_id",
+    "user_email"
+  ]
+}
