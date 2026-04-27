@@ -40,7 +40,22 @@ const Select = ({ children, value, onValueChange, defaultValue, ...props }) => {
 const SelectMobileContext = React.createContext(null)
 
 const SelectGroup = SelectPrimitive.Group
-const SelectValue = SelectPrimitive.Value
+
+const SelectValue = React.forwardRef(({ className, placeholder, ...props }, ref) => {
+  const mobile = React.useContext(SelectMobileContext)
+
+  if (mobile) {
+    const label = mobile.value && mobile.value !== "" ? mobile.value : placeholder
+    return (
+      <span ref={ref} className={cn("pointer-events-none", className)} {...props}>
+        {label}
+      </span>
+    )
+  }
+
+  return <SelectPrimitive.Value ref={ref} placeholder={placeholder} className={className} {...props} />
+})
+SelectValue.displayName = "SelectValue"
 
 const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) => {
   const mobile = React.useContext(SelectMobileContext)
