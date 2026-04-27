@@ -13,29 +13,21 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
-      {/* Hero - full bleed fashion photo */}
-      <div className="relative w-full h-screen overflow-hidden">
-        <img
-          src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/53c68c5d7_generated_image.png"
-          alt="Fashion hero"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ imageRendering: "crisp-edges", WebkitFontSmoothing: "antialiased" }}
-        />
-        {/* Subtle dark overlay for text legibility */}
-        <div className="absolute inset-0 bg-black/30" />
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#f5f0eb" }}>
+      {/* Hero - split layout like reference */}
+      <div className="relative w-full min-h-screen flex flex-col">
 
         {/* Nav */}
-        <div className="absolute top-0 left-0 right-0 px-8 py-6 flex items-center justify-between z-10">
-          <span className="text-white text-sm font-body tracking-widest uppercase font-medium">Virtually Dressed</span>
+        <div className="px-8 py-6 flex items-center justify-between z-10">
+          <span className="text-gray-900 text-sm font-body tracking-widest uppercase font-medium">Virtually Dressed</span>
           <div className="flex gap-6">
-            <Link to={createPageUrl("Explore")} className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors">Explore</Link>
+            <Link to={createPageUrl("Explore")} className="text-gray-600 text-sm font-body tracking-wider uppercase hover:text-gray-900 transition-colors">Explore</Link>
             {user ? (
-              <Link to={createPageUrl("Wardrobe")} className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors">Wardrobe</Link>
+              <Link to={createPageUrl("Wardrobe")} className="text-gray-600 text-sm font-body tracking-wider uppercase hover:text-gray-900 transition-colors">Wardrobe</Link>
             ) : (
               <button
                 onClick={() => base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
-                className="text-white/80 text-sm font-body tracking-wider uppercase hover:text-white transition-colors"
+                className="text-gray-600 text-sm font-body tracking-wider uppercase hover:text-gray-900 transition-colors"
               >
                 Sign In
               </button>
@@ -43,23 +35,35 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero text */}
-        <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 z-10">
-          <h1
-            className="font-heading font-bold uppercase leading-none text-white"
-            style={{ fontSize: "clamp(2.4rem, 8vw, 7.5rem)", letterSpacing: "-0.02em" }}
-          >
-            Virtually<br />Dressed
-          </h1>
-          <p className="text-white/90 font-body text-lg md:text-xl mt-4 max-w-sm tracking-wide">
-            Virtual wardrobe styling and shopping tool in the palm of your hand
-          </p>
-          <button
-            onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
-            className="mt-8 w-fit text-white font-body text-base tracking-widest uppercase underline underline-offset-4 hover:text-white/70 transition-colors"
-          >
-            Start Styling →
-          </button>
+        {/* Hero content — text left, image right */}
+        <div className="flex-1 flex flex-col md:flex-row items-center px-8 md:px-16 py-8 md:py-0 gap-8 md:gap-0">
+          {/* Left: Text */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h1
+              className="font-heading font-bold leading-none text-gray-900"
+              style={{ fontSize: "clamp(3rem, 8vw, 7rem)", letterSpacing: "-0.02em" }}
+            >
+              Virtually<br />Dressed
+            </h1>
+            <p className="text-gray-500 font-body text-lg md:text-xl mt-6 max-w-sm leading-relaxed">
+              Virtual wardrobe styling and shopping tool in the palm of your hand
+            </p>
+            <button
+              onClick={() => user ? window.location.href = createPageUrl("Wardrobe") : base44.auth.redirectToLogin(createPageUrl("Wardrobe"))}
+              className="mt-8 w-fit px-8 py-3 bg-gray-900 text-white font-body text-sm tracking-widest uppercase hover:bg-gray-700 transition-colors"
+            >
+              Start Styling →
+            </button>
+          </div>
+
+          {/* Right: Haute couture illustration */}
+          <div className="flex-1 flex items-center justify-center">
+            <img
+              src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/1fd937900_generated_image.png"
+              alt="Virtual wardrobe illustration"
+              className="w-full max-w-lg object-contain"
+            />
+          </div>
         </div>
       </div>
 
