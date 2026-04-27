@@ -85,7 +85,7 @@ export default function Explore() {
               <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search outfits..." className="pl-9 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-yellow-300" />
             </div>
             <Select value={occasion} onValueChange={setOccasion}>
-              <SelectTrigger className="w-44 bg-white/10 border-white/10 text-white"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-44 bg-white/10 border-white/10 text-white"><SelectValue placeholder="Occasion" /></SelectTrigger>
               <SelectContent>
                 {OCCASIONS.map(o => <SelectItem key={o} value={o}>{o.charAt(0).toUpperCase() + o.slice(1)}</SelectItem>)}
               </SelectContent>
