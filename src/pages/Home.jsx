@@ -59,7 +59,7 @@ export default function Home() {
           {/* Right: Haute couture illustration */}
           <div className="flex-1 flex items-center justify-center">
             <img
-              src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/1fd937900_generated_image.png"
+              src="https://media.base44.com/images/public/69aadeecce5a4e6de9d10643/523000f2f_generated_image.png"
               alt="Virtual wardrobe illustration"
               className="w-full max-w-lg object-contain"
             />
