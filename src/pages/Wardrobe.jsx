@@ -87,7 +87,7 @@ export default function Wardrobe() {
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-40 bg-white/10 border-white/10 text-white">
                 <Filter className="mr-2 w-4 h-4" />
-                <SelectValue />
+                <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map(c => (
