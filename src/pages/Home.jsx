@@ -67,6 +67,11 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Footer */}
+      <div className="bg-[#f5f0eb] py-6 px-8 border-t border-gray-200 flex justify-center">
+        <a href="/privacy-policy" className="text-gray-400 font-body text-xs tracking-widest uppercase hover:text-gray-700 transition-colors">Privacy Policy</a>
+      </div>
+
       {/* Feature strip */}
       <div className="bg-white py-20 px-8 md:px-16">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
