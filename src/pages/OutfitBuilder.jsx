@@ -72,6 +72,9 @@ export default function OutfitBuilder() {
         const outfit = await base44.entities.Outfit.filter({ id: outfitId });
         if (outfit.length > 0) {
           const loadedOutfit = outfit[0];
+          setEditingOutfitId(outfitId);
+          // Store the full outfit for pre-filling the save modal
+          window.__editingOutfit = loadedOutfit;
           if (profiles.length > 0) {
             setProfile(profiles[0]);
           }
@@ -312,6 +315,7 @@ export default function OutfitBuilder() {
           userEmail={user?.email}
           placed={placed}
           snapshotUrl={savingSnapshot?.snapshot_url}
+          editingOutfit={savingSnapshot ? null : (editingOutfitId ? window.__editingOutfit : null)}
           onClose={() => {
             setShowSave(false);
             setSavingSnapshot(null);

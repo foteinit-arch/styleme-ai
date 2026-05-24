@@ -9,14 +9,16 @@ import { X, Save, Download, Sparkles } from "lucide-react";
 
 const OCCASIONS = ["casual","formal","wedding","party","sport","work","beach","other"];
 
-export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClose, onSaved }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [occasion, setOccasion] = useState("casual");
-  const [isPublic, setIsPublic] = useState(false);
+export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editingOutfit, onClose, onSaved }) {
+  const [name, setName] = useState(editingOutfit?.name || "");
+  const [description, setDescription] = useState(editingOutfit?.description || "");
+  const [occasion, setOccasion] = useState(editingOutfit?.occasion || "casual");
+  const [isPublic, setIsPublic] = useState(editingOutfit?.is_public || false);
   const [saving, setSaving] = useState(false);
   const [magazineUrl, setMagazineUrl] = useState(null);
   const [generatingMagazine, setGeneratingMagazine] = useState(false);
+
+  const isEditing = !!editingOutfit;
 
   const handleSave = async () => {
     if (!name) return;
@@ -30,9 +32,25 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
         rotation: p.rotation,
         z_index: p.z_index,
       }));
-      
-      // Save outfit
-      const savedOutfit = await base44.entities.Outfit.create({
+
+      let savedOutfit;
+      if (isEditing) {
+        // Update existing outfit — keep existing images unless we have new ones
+        savedOutfit = await base44.entities.Outfit.update(editingOutfit.id, {
+          name,
+          description,
+          occasion,
+          is_public: isPublic,
+          items,
+          ...(snapshotUrl ? { outfit_snapshot_url: snapshotUrl } : {}),
+        });
+        setSaving(false);
+        onSaved();
+        return;
+      }
+
+      // Create new outfit
+      savedOutfit = await base44.entities.Outfit.create({
         user_email: userEmail,
         name,
         description,
@@ -110,7 +128,7 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-lg font-bold text-gray-900">Save Outfit</h2>
+          <h2 className="text-lg font-bold text-gray-900">{isEditing ? "Edit Outfit" : "Save Outfit"}</h2>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5" /></Button>
         </div>
         <div className="p-5 space-y-4">
@@ -139,7 +157,7 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />
           </div>
           <Button onClick={handleSave} disabled={saving || !name} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-            <Save className="mr-2 w-4 h-4" /> {saving ? "Saving..." : "Save Outfit"}
+            <Save className="mr-2 w-4 h-4" /> {saving ? "Saving..." : isEditing ? "Update Outfit" : "Save Outfit"}
           </Button>
         </div>
       </div>
