@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Save } from "lucide-react";
+import { X, Save, Download, Sparkles } from "lucide-react";
 
 const OCCASIONS = ["casual","formal","wedding","party","sport","work","beach","other"];
 
@@ -15,6 +15,8 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
   const [occasion, setOccasion] = useState("casual");
   const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [magazineUrl, setMagazineUrl] = useState(null);
+  const [generatingMagazine, setGeneratingMagazine] = useState(false);
 
   const handleSave = async () => {
     if (!name) return;
@@ -43,11 +45,64 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
 
       setSaving(false);
       onSaved();
+
+      // Generate magazine editorial
+      setGeneratingMagazine(true);
+      const itemNames = placed.map(p => p.name).filter(Boolean).join(", ");
+      const imageUrls = placed.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
+      const prompt = `90s fashion magazine editorial page. Flat lay styling of these clothing items arranged artistically on a white background: ${itemNames}. Style it like a Vogue or Harper's Bazaar editorial spread — items overlapping slightly, styled with attitude, dramatic shadows, magazine typography feeling. High fashion, film grain, editorial lighting.`;
+      const { url } = await base44.integrations.Core.GenerateImage({
+        prompt,
+        existing_image_urls: imageUrls,
+      });
+      setMagazineUrl(url);
+      setGeneratingMagazine(false);
     } catch (err) {
       setSaving(false);
       alert("Error saving outfit: " + (err.message || "Unknown error"));
     }
   };
+
+  const handleDownload = () => {
+    const a = document.createElement("a");
+    a.href = magazineUrl;
+    a.download = "editorial.png";
+    a.target = "_blank";
+    a.click();
+  };
+
+  if (generatingMagazine || magazineUrl) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        {generatingMagazine ? (
+          <div className="flex flex-col items-center gap-5">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-[#e8b820] animate-spin" />
+              <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#e8b820]" />
+            </div>
+            <p className="text-white/70 font-body text-lg tracking-wide">Creating your editorial…</p>
+          </div>
+        ) : (
+          <div className="w-full h-full flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3 bg-black/80 border-b border-white/10">
+              <span className="text-white font-heading font-bold text-lg tracking-tight">Your Editorial</span>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleDownload} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
+                  <Download className="w-4 h-4 mr-1" /> Download
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onClose} className="text-white/60 hover:text-white hover:bg-white/10">
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+              <img src={magazineUrl} alt="Magazine editorial" className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
