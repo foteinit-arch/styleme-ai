@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export default function ClothingCard({ item, onDelete }) {
+export default function ClothingCard({ item, onDelete, onGenerateSimilar }) {
   const [confirming, setConfirming] = useState(false);
 
   const imgSrc = item.processed_image_url || item.original_image_url;
@@ -16,7 +16,11 @@ export default function ClothingCard({ item, onDelete }) {
         ) : (
           <span className="text-5xl">👗</span>
         )}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
+          <Button size="icon" variant="ghost" className="w-7 h-7 bg-white/80 hover:bg-purple-50"
+            onClick={(e) => { e.stopPropagation(); onGenerateSimilar?.(); }}>
+            <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+          </Button>
           {confirming ? (
             <div className="flex gap-1">
               <Button size="sm" variant="destructive" className="text-xs h-6 px-2"

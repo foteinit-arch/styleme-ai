@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter, Palette } from "lucide-react";
+import { Plus, Search, Filter, Palette, Sparkles, Loader2, X } from "lucide-react";
 import ClothingCard from "@/components/wardrobe/ClothingCard";
 import AddClothingModal from "@/components/wardrobe/AddClothingModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +21,8 @@ export default function Wardrobe() {
   const [color, setColor]     = useState("all");
   const [hiddenWeatherCategories, setHiddenWeatherCategories] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [generatingFor, setGeneratingFor] = useState(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -50,6 +52,47 @@ export default function Wardrobe() {
   const handleAdded = (item) => {
     queryClient.setQueryData(["wardrobe", user?.email], old => [item, ...(old || [])]);
     setShowAdd(false);
+  };
+
+  const handleGenerateSimilar = async (item) => {
+    setGeneratingFor(item);
+    setShowGenerateModal(true);
+  };
+
+  const generateVariations = async (prompt) => {
+    if (!generatingFor) return;
+    try {
+      const imgSrc = generatingFor.processed_image_url || generatingFor.original_image_url;
+      const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
+        prompt: `${prompt}. Based on this clothing item: ${generatingFor.name}. Keep the same category (${generatingFor.category}) but create a new variation. Show as a clean product photo on white background, ghost mannequin style, no person, no artifacts.`,
+        existing_image_urls: [imgSrc],
+      });
+      
+      // Upload the generated image
+      const response = await fetch(generatedUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "generated.png", { type: "image/png" });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Create new clothing item
+      const newItem = await base44.entities.ClothingItem.create({
+        user_email: user.email,
+        name: `${generatingFor.name} (Variation)`,
+        category: generatingFor.category,
+        color: generatingFor.color,
+        brand: generatingFor.brand,
+        original_image_url: file_url,
+        processed_image_url: file_url,
+        source: "upload",
+        source_url: file_url,
+      });
+      
+      queryClient.setQueryData(["wardrobe", user?.email], old => [newItem, ...(old || [])]);
+      setShowGenerateModal(false);
+      setGeneratingFor(null);
+    } catch (error) {
+      console.error("Failed to generate:", error);
+    }
   };
 
   const handleRefresh = useCallback(async () => {
@@ -139,7 +182,12 @@ export default function Wardrobe() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {filtered.map(item => (
-                <ClothingCard key={item.id} item={item} onDelete={(id) => deleteMutation.mutate(id)} />
+                <ClothingCard 
+                  key={item.id} 
+                  item={item} 
+                  onDelete={(id) => deleteMutation.mutate(id)}
+                  onGenerateSimilar={() => handleGenerateSimilar(item)}
+                />
               ))}
             </div>
           )}
@@ -147,6 +195,53 @@ export default function Wardrobe() {
 
         {showAdd && user && (
           <AddClothingModal userEmail={user.email} onClose={() => setShowAdd(false)} onAdded={handleAdded} />
+        )}
+
+        {showGenerateModal && generatingFor && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowGenerateModal(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e=>e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-500" />
+                  <h3 className="text-lg font-bold text-gray-900">Generate Similar Item</h3>
+                </div>
+                <button onClick={() => setShowGenerateModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">Create a variation of:</p>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <img src={generatingFor.processed_image_url || generatingFor.original_image_url} alt={generatingFor.name} className="w-16 h-16 object-contain bg-white rounded" />
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">{generatingFor.name}</p>
+                    <p className="text-xs text-gray-500 capitalize">{generatingFor.category}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm text-gray-700 font-medium">Choose a variation style:</p>
+                <button onClick={() => generateVariations("Same style but in a different color")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                  <p className="font-medium text-gray-900 text-sm">🎨 Different Color</p>
+                  <p className="text-xs text-gray-500 mt-1">Same design, new color palette</p>
+                </button>
+                <button onClick={() => generateVariations("Similar design with different pattern or texture")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                  <p className="font-medium text-gray-900 text-sm">✨ New Pattern</p>
+                  <p className="text-xs text-gray-500 mt-1">Add stripes, dots, or texture variations</p>
+                </button>
+                <button onClick={() => generateVariations("Modern updated version with contemporary styling")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                  <p className="font-medium text-gray-900 text-sm">🔄 Modern Style</p>
+                  <p className="text-xs text-gray-500 mt-1">Contemporary take on this piece</p>
+                </button>
+                <button onClick={() => generateVariations("Luxury designer version with premium details")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                  <p className="font-medium text-gray-900 text-sm">💎 Luxury Version</p>
+                  <p className="text-xs text-gray-500 mt-1">High-end designer interpretation</p>
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </PullToRefresh>
