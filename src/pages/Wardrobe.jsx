@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PullToRefresh from "@/components/PullToRefresh";
+import WeatherFilter from "@/components/wardrobe/WeatherFilter";
 
 const CATEGORIES = ["all", "top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 
@@ -17,6 +18,7 @@ export default function Wardrobe() {
   const [user, setUser]       = useState(null);
   const [category, setCategory] = useState("all");
   const [search, setSearch]   = useState("");
+  const [hiddenWeatherCategories, setHiddenWeatherCategories] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const queryClient = useQueryClient();
 
@@ -55,7 +57,8 @@ export default function Wardrobe() {
 
   const filtered = items.filter(i =>
     (category === "all" || i.category === category) &&
-    (!search || i.name.toLowerCase().includes(search.toLowerCase()))
+    (!search || i.name.toLowerCase().includes(search.toLowerCase())) &&
+    (!hiddenWeatherCategories || !hiddenWeatherCategories.includes(i.category))
   );
 
   return (
@@ -77,6 +80,10 @@ export default function Wardrobe() {
                 <Plus className="mr-2 w-4 h-4" /> Add Clothing
               </Button>
             </div>
+          </div>
+
+          <div className="mb-4">
+            <WeatherFilter onWeatherFilter={setHiddenWeatherCategories} />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
