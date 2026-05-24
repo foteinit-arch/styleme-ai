@@ -69,25 +69,38 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     img.src = URL.createObjectURL(f);
   });
 
-  const handleUrlChange = async (e) => {
+  const handleUrlChange = (e) => {
     const val = e.target.value;
     setUrl(val);
     setUploadedUrl("");
-    if (!val) return;
-    // Debounce: only fetch when user stops typing
+  };
+
+  const handleUrlFetch = async () => {
+    if (!url) return;
     setUrlLoading(true);
+    setUploadedUrl("");
     try {
-      // Fetch the image via InvokeLLM as a proxy workaround — actually just try uploading directly
-      const res = await fetch(val);
-      if (!res.ok) throw new Error("fetch failed");
+      // Try direct fetch first (works for public CDN images)
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("direct fetch failed");
       const blob = await res.blob();
+      if (!blob.type.startsWith("image/")) throw new Error("not an image");
       const ext = blob.type.includes("png") ? "png" : "jpg";
       const f = new File([blob], `url-image.${ext}`, { type: blob.type });
       const { file_url } = await base44.integrations.Core.UploadFile({ file: f });
       setUploadedUrl(file_url);
     } catch {
-      // If direct fetch fails (CORS), fall back to using the URL directly
-      setUploadedUrl(val);
+      // Fall back to server-side proxy for CORS-blocked sites
+      try {
+        const { data } = await base44.functions.invoke("proxyImage", { image_url: url });
+        if (data?.file_url) {
+          setUploadedUrl(data.file_url);
+        } else {
+          setError("Could not load image from this URL.");
+        }
+      } catch {
+        setError("Could not load image from this URL.");
+      }
     } finally {
       setUrlLoading(false);
     }
@@ -241,15 +254,15 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
             <TabsContent value="url" className="mt-4">
               <div>
                 <Label>Image URL (from any website, Pinterest, etc.)</Label>
-                <Input value={url} onChange={handleUrlChange} placeholder="https://..." className="mt-1" />
+                <div className="flex gap-2 mt-1">
+                  <Input value={url} onChange={handleUrlChange} placeholder="https://..." className="flex-1" onKeyDown={e => e.key === "Enter" && handleUrlFetch()} />
+                  <Button type="button" onClick={handleUrlFetch} disabled={!url || urlLoading} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white px-3">
+                    {urlLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Load"}
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Background will be removed automatically
                 </p>
-                {urlLoading && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Loading image…
-                  </div>
-                )}
                 {uploadedUrl && !urlLoading && (
                   <img src={uploadedUrl} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" />
                 )}
