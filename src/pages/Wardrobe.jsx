@@ -23,6 +23,7 @@ export default function Wardrobe() {
   const [showAdd, setShowAdd] = useState(false);
   const [generatingFor, setGeneratingFor] = useState(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function Wardrobe() {
 
   const generateVariations = async (prompt) => {
     if (!generatingFor) return;
+    setIsGenerating(true);
     try {
       const imgSrc = generatingFor.processed_image_url || generatingFor.original_image_url;
       const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
@@ -92,6 +94,8 @@ export default function Wardrobe() {
       setGeneratingFor(null);
     } catch (error) {
       console.error("Failed to generate:", error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -221,25 +225,33 @@ export default function Wardrobe() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-sm text-gray-700 font-medium">Choose a variation style:</p>
-                <button onClick={() => generateVariations("Same style but in a different color")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
-                  <p className="font-medium text-gray-900 text-sm">🎨 Different Color</p>
-                  <p className="text-xs text-gray-500 mt-1">Same design, new color palette</p>
-                </button>
-                <button onClick={() => generateVariations("Similar design with different pattern or texture")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
-                  <p className="font-medium text-gray-900 text-sm">✨ New Pattern</p>
-                  <p className="text-xs text-gray-500 mt-1">Add stripes, dots, or texture variations</p>
-                </button>
-                <button onClick={() => generateVariations("Modern updated version with contemporary styling")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
-                  <p className="font-medium text-gray-900 text-sm">🔄 Modern Style</p>
-                  <p className="text-xs text-gray-500 mt-1">Contemporary take on this piece</p>
-                </button>
-                <button onClick={() => generateVariations("Luxury designer version with premium details")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
-                  <p className="font-medium text-gray-900 text-sm">💎 Luxury Version</p>
-                  <p className="text-xs text-gray-500 mt-1">High-end designer interpretation</p>
-                </button>
-              </div>
+              {isGenerating ? (
+                <div className="text-center py-8">
+                  <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+                  <p className="text-gray-700 font-medium mb-2">Creating your variation...</p>
+                  <p className="text-sm text-gray-500">This takes about 10-15 seconds</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-700 font-medium">Choose a variation style:</p>
+                  <button onClick={() => generateVariations("Same style but in a different color")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                    <p className="font-medium text-gray-900 text-sm">🎨 Different Color</p>
+                    <p className="text-xs text-gray-500 mt-1">Same design, new color palette</p>
+                  </button>
+                  <button onClick={() => generateVariations("Similar design with different pattern or texture")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                    <p className="font-medium text-gray-900 text-sm">✨ New Pattern</p>
+                    <p className="text-xs text-gray-500 mt-1">Add stripes, dots, or texture variations</p>
+                  </button>
+                  <button onClick={() => generateVariations("Modern updated version with contemporary styling")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                    <p className="font-medium text-gray-900 text-sm">🔄 Modern Style</p>
+                    <p className="text-xs text-gray-500 mt-1">Contemporary take on this piece</p>
+                  </button>
+                  <button onClick={() => generateVariations("Luxury designer version with premium details")} className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition">
+                    <p className="font-medium text-gray-900 text-sm">💎 Luxury Version</p>
+                    <p className="text-xs text-gray-500 mt-1">High-end designer interpretation</p>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
