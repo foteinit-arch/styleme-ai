@@ -14,6 +14,9 @@
     "outfit_snapshot_url": {
       "type": "string"
     },
+    "magazine_url": {
+      "type": "string"
+    },
     "items": {
       "type": "array",
       "items": {

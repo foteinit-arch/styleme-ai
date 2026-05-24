@@ -32,7 +32,7 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
       }));
       
       // Save outfit
-      await base44.entities.Outfit.create({
+      const savedOutfit = await base44.entities.Outfit.create({
         user_email: userEmail,
         name,
         description,
@@ -55,6 +55,8 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, onClos
         prompt,
         existing_image_urls: imageUrls,
       });
+      // Save magazine URL to the outfit record
+      await base44.entities.Outfit.update(savedOutfit.id, { magazine_url: url });
       setMagazineUrl(url);
       setGeneratingMagazine(false);
     } catch (err) {
