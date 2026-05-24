@@ -86,7 +86,7 @@ export default function OutfitBuilder() {
   const categoryPositions = {
     top:       { x: 160, y: 260, scale: 1.4 },
     bottom:    { x: 160, y: 355, scale: 1.5 },
-    dress:     { x: 160, y: 250, scale: 1.8 },
+    dress:     { x: 160, y: 250, scale: 2.2 },
     shoes:     { x: 160, y: 550, scale: 0.6  },
     outerwear: { x: 160, y: 235, scale: 1.5 },
     accessory: { x: 160, y: 75,  scale: 0.7 },
