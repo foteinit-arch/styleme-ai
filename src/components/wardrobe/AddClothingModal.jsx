@@ -10,12 +10,12 @@ import { X, Upload, Link, Sparkles } from "lucide-react";
 const CATEGORIES = ["top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 const REMOVEBG_KEY = "dx2dhWT2m31UEp3NvgxYMivt";
 
-async function removeBackground(imageUrl, isBlob = false) {
+async function removeBackground(imageSource, useFile = false) {
   const formData = new FormData();
-  if (isBlob) {
-    formData.append("image_url", imageUrl);
+  if (useFile) {
+    formData.append("image_file", imageSource);
   } else {
-    formData.append("image_url", imageUrl);
+    formData.append("image_url", imageSource);
   }
   formData.append("size", "auto");
   const res = await fetch("https://api.remove.bg/v1.0/removebg", {
@@ -58,9 +58,9 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         // Upload original
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         originalUrl = file_url;
-        // Remove background
+        // Remove background using raw file blob
         try {
-          const blob = await removeBackground(file_url);
+          const blob = await removeBackground(file, true);
           const processed = new File([blob], "processed.png", { type: "image/png" });
           const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processed });
           processedUrl = pUrl;
