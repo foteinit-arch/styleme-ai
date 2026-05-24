@@ -211,13 +211,9 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           }
         }
         originalUrl = sourceUrl;
-        // Clean garment image with AI, then remove background
+        // Remove background from the proxied image
         try {
-          const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
-            prompt: "Extract only the clothing item from this photo. Show the garment as a ghost mannequin style with no person, no body, no skin, no white blocks or artifacts visible. Pure white background only. Keep all fabric details, color and texture exactly as they are. Remove any background elements completely.",
-            existing_image_urls: [sourceUrl],
-          });
-          const blob = await removeBackground(generatedUrl);
+          const blob = await removeBackground(sourceUrl);
           const processed = new File([blob], "processed.png", { type: "image/png" });
           const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processed });
           processedUrl = pUrl;
