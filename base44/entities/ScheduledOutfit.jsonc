@@ -1,0 +1,21 @@
+{
+  "name": "ScheduledOutfit",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "outfit_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "user_email",
+    "outfit_id",
+    "date"
+  ]
+}
