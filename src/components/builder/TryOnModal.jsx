@@ -17,14 +17,12 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     setImageUrl(null);
 
     try {
-      // Build description of shoes only
       const shoes = placed.filter(p => p.category === 'shoes');
-      const shoeDesc = shoes.map(p => `${p.name}${p.color ? ` in ${p.color}` : ""}`).join(", ");
+      const shoeUrls = shoes.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
 
-      const prompt = `Fashion editorial photo. Reproduce the exact same person from the reference photo — same body, same face, same pose, same background. The ONLY change: the person is now wearing ${shoeDesc} on their feet. The shoes must be ON the feet, not floating. Photorealistic, full body, studio lighting.`;
+      const prompt = `Fashion photo. This is the same person from the first reference image — same body, same face, same pose, same background, same skin tone. Put the exact shoes from the second reference image onto her feet. The shoes must sit ON the feet naturally, not floating. Keep every detail of the shoes identical — same color, same heel, same style. Photorealistic, full body visible, studio lighting.`;
 
-      // Only pass avatar as reference — shoe product shots confuse the model
-      const refUrls = avatarUrl ? [avatarUrl] : [];
+      const refUrls = [avatarUrl, ...shoeUrls].filter(Boolean);
 
       const { url } = await base44.integrations.Core.GenerateImage({
         prompt,
