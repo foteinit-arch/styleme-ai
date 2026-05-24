@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { AnimatePresence, motion } from "framer-motion";
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import WardrobeCalendar from './pages/WardrobeCalendar';
+import WardrobeStats from './pages/WardrobeStats';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
         ))}
         <Route path="/privacy-policy" element={<AnimatedPage><PrivacyPolicy /></AnimatedPage>} />
         <Route path="/WardrobeCalendar" element={<LayoutWrapper currentPageName="WardrobeCalendar"><AnimatedPage><WardrobeCalendar /></AnimatedPage></LayoutWrapper>} />
+        <Route path="/WardrobeStats" element={<LayoutWrapper currentPageName="WardrobeStats"><AnimatedPage><WardrobeStats /></AnimatedPage></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>

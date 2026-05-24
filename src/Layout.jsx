@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Shirt, User, Sparkles, Globe, LogOut, BookOpen, ChevronLeft, CalendarDays } from "lucide-react";
+import { Shirt, User, Sparkles, Globe, LogOut, BookOpen, ChevronLeft, CalendarDays, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
@@ -10,11 +10,12 @@ const NAV = [
   { label: "Builder", page: "OutfitBuilder", icon: Sparkles },
   { label: "My Outfits", page: "MyOutfits", icon: BookOpen },
   { label: "Planner", page: "WardrobeCalendar", icon: CalendarDays },
+  { label: "Insights", page: "WardrobeStats", icon: BarChart2 },
   { label: "Explore", page: "Explore", icon: Globe },
   { label: "My Avatar", page: "Avatar", icon: User },
 ];
 
-const ROOT_PAGES = ["Home", "Wardrobe", "OutfitBuilder", "MyOutfits", "Explore", "Avatar", "WardrobeCalendar"];
+const ROOT_PAGES = ["Home", "Wardrobe", "OutfitBuilder", "MyOutfits", "Explore", "Avatar", "WardrobeCalendar", "WardrobeStats"];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
