@@ -338,14 +338,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       {/* ── Normal mode ─────────────────────────────────────────────────── */}
       {!warped && (
         <div style={{ position:"absolute", left:item.x-size/2, top:itemTop, width:size, height:size, zIndex:zIdx, pointerEvents:"none", userSelect:"none", touchAction:"none" }}>
-          <div
+          <img
             ref={imgRef}
-            draggable={false}
+            src={imgSrc} alt="" draggable={false}
             onMouseDown={onPointerDown}
             onMouseMove={onDocMove}
             onMouseUp={onDocUp}
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
-            style={{ width:"100%", height:"100%", backgroundImage:`url(${imgSrc})`, backgroundSize:"cover", backgroundPosition:"center", backgroundRepeat:"no-repeat", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
+            style={{ width:"100%", height:"100%", objectFit:"cover", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
           />
           {(showControls || fitMode) && (
             <>
