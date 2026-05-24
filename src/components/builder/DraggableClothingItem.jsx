@@ -74,11 +74,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
   const scaleXVal = (item.scaleX ?? 1.0) * (item.flipX ? -1 : 1);
+  // If bg removal didn't produce a different processed image, use multiply blend to knock out the white bg
+  const bgNotRemoved = !item.processed_image_url || item.processed_image_url === item.original_image_url;
   const shoeImgStyle = {
     transform: `rotate(${item.rotation||0}deg) scaleX(${scaleXVal})`,
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 8px 16px rgba(0,0,0,0.5))" : "none",
+    mixBlendMode: bgNotRemoved ? "multiply" : "normal",
   };
 
   // Centroid + bounds (for controls and bounding-box hit area)
@@ -365,7 +368,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       {warped && (
         <>
           {/* Canvas: renders the warped image, NO pointer events so it never blocks other items */}
-          <canvas ref={warpCanvas} style={{ position:"absolute", left:0, top:0, width:"100%", height:"100%", zIndex:zIdx, pointerEvents:"none" }} />
+          <canvas ref={warpCanvas} style={{ position:"absolute", left:0, top:0, width:"100%", height:"100%", zIndex:zIdx, pointerEvents:"none", mixBlendMode: bgNotRemoved ? "multiply" : "normal" }} />
 
           {/* Bounding-box hit area: only covers the item's actual footprint */}
           <div
