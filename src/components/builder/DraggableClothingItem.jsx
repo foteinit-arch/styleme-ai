@@ -74,11 +74,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
   const scaleXVal = (item.scaleX ?? 1.0) * (item.flipX ? -1 : 1);
+  // Use multiply blend mode to make white backgrounds transparent on product photos
+  const hasProcessed = !!item.processed_image_url;
   const shoeImgStyle = {
     transform: `rotate(${item.rotation||0}deg) scaleX(${scaleXVal})`,
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 8px 16px rgba(0,0,0,0.5))" : "none",
+    mixBlendMode: !hasProcessed ? "multiply" : "normal",
   };
 
   // Centroid + bounds (for controls and bounding-box hit area)
