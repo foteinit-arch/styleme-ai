@@ -75,8 +75,21 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     setUploadedUrl("");
   };
 
+  const isProductPageUrl = (u) => {
+    // Detect product page URLs (not direct image URLs)
+    const imagePattern = /\.(jpg|jpeg|png|webp|avif|gif)(\?.*)?$/i;
+    return !imagePattern.test(u.split('?')[0]);
+  };
+
   const handleUrlFetch = async () => {
     if (!url) return;
+
+    // If it's a product page URL, show instructions immediately — don't spin
+    if (isProductPageUrl(url)) {
+      setError("This looks like a product page, not a direct image URL.\n\nTo get the image URL: right-click the product photo on the website → \"Copy image address\" → paste that URL here.");
+      return;
+    }
+
     setUrlLoading(true);
     setUploadedUrl("");
     setError("");
@@ -91,16 +104,16 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: f });
       setUploadedUrl(file_url);
     } catch {
-      // Fall back to server-side proxy for CORS-blocked sites
+      // Fall back to server-side proxy for CORS-blocked CDN images
       try {
         const { data } = await base44.functions.invoke("proxyImage", { image_url: url });
         if (data?.file_url) {
           setUploadedUrl(data.file_url);
         } else {
-          setError("Could not load image from this URL.");
+          setError("Could not load image. Please right-click the product image → \"Copy image address\" and paste that URL.");
         }
       } catch {
-        setError("Could not load image from this URL.");
+        setError("Could not load image. Please right-click the product image → \"Copy image address\" and paste that URL.");
       }
     } finally {
       setUrlLoading(false);
@@ -262,14 +275,14 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
                   </Button>
                 </div>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Background will be removed automatically
+                  <Sparkles className="w-3 h-3" /> Paste a direct image URL (right-click image → "Copy image address")
                 </p>
                 {uploadedUrl && !urlLoading && (
                   <img src={uploadedUrl} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" />
                 )}
                 {error && tab === "url" && (
-                  <div className="mt-2 p-3 bg-red-50 border border-red-100 rounded-lg">
-                    <p className="text-xs text-red-600">{error}</p>
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800 whitespace-pre-line">{error}</p>
                   </div>
                 )}
               </div>
