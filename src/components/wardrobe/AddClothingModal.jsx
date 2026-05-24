@@ -79,6 +79,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     if (!url) return;
     setUrlLoading(true);
     setUploadedUrl("");
+    setError("");
     try {
       // Try direct fetch first (works for public CDN images)
       const res = await fetch(url);
@@ -266,6 +267,11 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
                 {uploadedUrl && !urlLoading && (
                   <img src={uploadedUrl} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" />
                 )}
+                {error && tab === "url" && (
+                  <div className="mt-2 p-3 bg-red-50 border border-red-100 rounded-lg">
+                    <p className="text-xs text-red-600">{error}</p>
+                  </div>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="bulk" className="mt-4 space-y-4">
@@ -338,7 +344,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
             <Input value={brand} onChange={e => setBrand(e.target.value)} placeholder="e.g. Zara" className="mt-1" />
           </div>
 
-          {error && tab !== "bulk" && <p className="text-sm text-red-500">{error}</p>}
+          {error && tab === "upload" && <p className="text-sm text-red-500">{error}</p>}
 
           {tab !== "bulk" && <Button onClick={handleSubmit} disabled={processing} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
             {processing ? (
