@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Save, RotateCcw, Sparkles } from "lucide-react";
+import { Save, RotateCcw, Sparkles, Wand2 } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
@@ -24,6 +24,35 @@ export default function OutfitBuilder() {
   // Shoe try-on (AI modal)
   const [showTryOn, setShowTryOn] = useState(false);
   const avatarCanvasRef = useRef(null);
+
+  // Suggest outfit
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+
+  const OCCASIONS = ['Casual Day', 'Work Meeting', 'Date Night', 'Wedding Guest', 'Weekend Brunch'];
+
+  const handleSuggestOutfit = async (occasion) => {
+    setSuggesting(true);
+    const itemList = clothes.map(c => `${c.name} (${c.category})`).join(', ');
+    const prompt = `I have these clothing items in my wardrobe: ${itemList}. Suggest the best outfit combination for: ${occasion}. Reply ONLY with a JSON array of item names that work together, maximum 4 items, one per category. Example: ["White blouse", "Black trousers", "Black heels"]`;
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      const jsonMatch = result.match(/\[.*\]/s);
+      if (!jsonMatch) throw new Error("No JSON array found");
+      const names = JSON.parse(jsonMatch[0]);
+      const matched = names.map(name =>
+        clothes.find(c => c.name?.toLowerCase() === name?.toLowerCase())
+      ).filter(Boolean);
+      setPlaced([]);
+      matched.forEach((item, i) => {
+        setTimeout(() => handleDrop(item), i * 50);
+      });
+      setShowSuggest(false);
+    } catch (err) {
+      console.error(err);
+    }
+    setSuggesting(false);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -198,6 +227,9 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowSuggest(true)} disabled={clothes.length === 0} className="text-purple-300 border-purple-500/40 bg-transparent hover:bg-purple-500/10 disabled:opacity-40">
+            <Wand2 className="w-4 h-4 mr-1" /> Suggest Outfit
+          </Button>
           <Button
             onClick={handleTryShoes}
             disabled={!placed.some(p => p.category === 'shoes')}
@@ -247,6 +279,33 @@ export default function OutfitBuilder() {
             setShowTryOn(false);
           }}
         />
+      )}
+
+      {showSuggest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => !suggesting && setShowSuggest(false)}>
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-4">
+              <Wand2 className="w-5 h-5 text-purple-400" />
+              <h2 className="text-white font-heading font-bold text-xl">Suggest Outfit</h2>
+            </div>
+            <p className="text-white/50 text-sm font-body mb-4">Pick an occasion and AI will suggest the best combination from your wardrobe.</p>
+            {suggesting ? (
+              <div className="flex items-center justify-center py-6 gap-3">
+                <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-white/60 text-sm font-body">Styling your outfit…</span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {OCCASIONS.map(occ => (
+                  <button key={occ} onClick={() => handleSuggestOutfit(occ)}
+                    className="text-left px-4 py-2.5 rounded-lg bg-white/5 hover:bg-purple-500/20 text-white/80 hover:text-white text-sm font-body transition-colors border border-white/5 hover:border-purple-500/40">
+                    {occ}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {showSave && (
