@@ -155,7 +155,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     return () => el.removeEventListener("wheel", h);
   }, [scaleBy, warped]);
 
-  // ── Document mouse listeners ──────────────────────────────────────────────
+  // ── Mouse move / up handlers (attached directly to each item, not document) ──
   const onDocMove = useCallback((e) => {
     if (!dragging.current && !cornerDrag.current) return;
     if (cornerDrag.current) {
@@ -212,11 +212,22 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     dragging.current = false;
   }, [revealControls, resetHide]);
 
-  useEffect(() => {
-    document.addEventListener("mousemove", onDocMove);
-    document.addEventListener("mouseup",   onDocUp);
-    return () => { document.removeEventListener("mousemove", onDocMove); document.removeEventListener("mouseup", onDocUp); };
-  }, [onDocMove, onDocUp]);
+  // ── Corner drag: attach global mousemove/mouseup ONLY while a corner is being dragged ──
+  const startCornerGlobalDrag = useCallback((idx, clientX, clientY) => {
+    cornerDrag.current = { idx, sc:{x:clientX,y:clientY}, sv:{...itemRef.current.corners[idx]} };
+    dragging.current = false;
+    resetHide();
+
+    const onMove = (e) => onDocMove(e);
+    const onUp   = () => {
+      cornerDrag.current = null;
+      resetHide();
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup",   onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup",   onUp);
+  }, [onDocMove, resetHide]);
 
   // ── Pointer down ──────────────────────────────────────────────────────────
   const onPointerDown = useCallback((e) => {
@@ -258,9 +269,10 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     onDocUp();
   }, [onDocUp]);
 
-  // ── Corner drag ───────────────────────────────────────────────────────────
+  // ── Corner drag (touch only — mouse uses startCornerGlobalDrag) ───────────
   const startCornerDrag = useCallback((idx, clientX, clientY) => {
     cornerDrag.current = { idx, sc:{x:clientX,y:clientY}, sv:{...itemRef.current.corners[idx]} };
+    dragging.current = false;
     resetHide();
   }, [resetHide]);
 
@@ -330,6 +342,8 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             ref={imgRef}
             src={imgSrc} alt="" draggable={false}
             onMouseDown={onPointerDown}
+            onMouseMove={onDocMove}
+            onMouseUp={onDocUp}
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
             style={{ width:"100%", height:"100%", objectFit:"contain", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
           />
@@ -355,7 +369,8 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
           {/* Bounding-box hit area: only covers the item's actual footprint */}
           <div
-            onMouseDown={onPointerDown} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+            onMouseDown={onPointerDown} onMouseMove={onDocMove} onMouseUp={onDocUp}
+            onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
             style={{ position:"absolute", left:minX-8, top:minY-8, width:maxX-minX+16, height:maxY-minY+16, zIndex:zIdx, pointerEvents:"auto", cursor:"grab", touchAction:"none" }}
           />
 
@@ -367,7 +382,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             return createPortal(
               <div key={idx} data-ctrl="true"
                 title={["Left top","Right top","Right bottom","Left bottom","Left mid","Right mid"][idx]}
-                onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);dragging.current=false;}}
+                onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerGlobalDrag(idx,e.clientX,e.clientY);}}
                 onTouchStart={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.touches[0].clientX,e.touches[0].clientY);}}
                 onTouchMove={e=>{
                   e.stopPropagation();e.preventDefault();
