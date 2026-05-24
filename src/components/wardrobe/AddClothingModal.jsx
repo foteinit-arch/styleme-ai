@@ -45,6 +45,22 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     setPreview(URL.createObjectURL(f));
   };
 
+  const convertAvifToJpeg = (f) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext("2d").drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error("Canvas toBlob failed"));
+        resolve(new File([blob], f.name.replace(/\.avif$/i, ".jpg"), { type: "image/jpeg" }));
+      }, "image/jpeg", 0.95);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(f);
+  });
+
   const handleSubmit = async () => {
     if (!name || !category) { setError("Please fill in name and category."); return; }
     setProcessing(true);
@@ -55,14 +71,16 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
 
     try {
       if (tab === "upload" && file) {
+        // Convert AVIF to JPEG if needed
+        const uploadFile = file.type === "image/avif" ? await convertAvifToJpeg(file) : file;
         // Upload original
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: uploadFile });
         originalUrl = file_url;
         // Generate clean garment image, then remove background
         try {
           const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
             prompt: "Extract only the clothing item from this photo. Show the garment as a ghost mannequin style with no person, no body, no skin, no white blocks or artifacts visible. Pure white background only. Keep all fabric details, color and texture exactly as they are. Remove any background elements completely.",
-            existing_image_urls: [originalUrl],
+            existing_image_urls: [file_url],
           });
           const blob = await removeBackground(generatedUrl);
           const processed = new File([blob], "processed.png", { type: "image/png" });
