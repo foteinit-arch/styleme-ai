@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight, FlipHorizontal } from "lucide-react";
+import { X, ZoomIn, ZoomOut, Maximize2, Check, ChevronLeft, ChevronRight, FlipHorizontal, Shuffle } from "lucide-react";
 
 // ── Canvas-based warp rendering ───────────────────────────────────────────────
 function drawAffineTriangle(ctx, imgEl, imgSize, dst0, dst1, dst2, sx0, sy0, sx1, sy1, sx2, sy2) {
@@ -45,9 +45,10 @@ function drawWarped(canvas, imgEl, corners, imgSize, flipX) {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef, onSendToBack, onBringToFront, profile }) {
+export default function DraggableClothingItem({ item, onUpdate, onRemove, containerRef, onSendToBack, onBringToFront, profile, allWardrobeItems }) {
   const [showControls, setShowControls] = useState(false);
   const [fitMode,      setFitMode]      = useState(false);
+  const [showSwap,     setShowSwap]     = useState(false);
 
   const dragging    = useRef(false);
   const hasMoved    = useRef(false);
@@ -326,6 +327,24 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     resetHide();
   }, [resetHide]);
 
+  const handleSwap = useCallback((newItem) => {
+    const c = itemRef.current;
+    updateRef.current({
+      ...newItem,
+      placedId: c.placedId,
+      x: c.x,
+      y: c.y,
+      scale: c.scale,
+      rotation: c.rotation,
+      z_index: c.z_index,
+      corners: c.corners,
+      flipX: c.flipX,
+      scaleX: c.scaleX,
+    });
+    setShowSwap(false);
+    setShowControls(false);
+  }, []);
+
   useEffect(() => () => { clearTimeout(longTimer.current); clearTimeout(hideTimer.current); }, []);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -335,6 +354,14 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
   return (
     <>
+      {showSwap && (
+        <SwapModal
+          currentItem={item}
+          wardrobeItems={allWardrobeItems || []}
+          onSelect={handleSwap}
+          onClose={()=>setShowSwap(false)}
+        />
+      )}
       {/* ── Normal mode ─────────────────────────────────────────────────── */}
       {!warped && (
         <div style={{ position:"absolute", left:item.x-size/2, top:itemTop, width:size, height:size, zIndex:zIdx, pointerEvents:"none", userSelect:"none", touchAction:"none" }}>
@@ -451,6 +478,7 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
             <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
             <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
             <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
+            <Btn bg="#8b5cf6" onClick={()=>setShowSwap(true)} title="Swap with similar item"><Shuffle size={13}/></Btn>
             <Btn bg="#111"    onClick={onBack}      title="Move behind other items"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
             <Btn bg="#111"    onClick={onFront}     title="Move in front of other items"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
             <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>
@@ -471,5 +499,53 @@ function Btn({ bg, onClick, title, children, wide }) {
         boxShadow:"0 2px 8px rgba(0,0,0,0.3)" }}>
       {children}
     </button>
+  );
+}
+
+// Swap Modal Component
+function SwapModal({ currentItem, wardrobeItems, onSelect, onClose }) {
+  const similarItems = wardrobeItems.filter(
+    item => item.category === currentItem.category && item.id !== currentItem.id
+  );
+
+  return createPortal(
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-5 w-full max-w-md mx-4 shadow-2xl" onClick={e=>e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Shuffle className="w-5 h-5 text-purple-400" />
+            <h3 className="text-white font-heading font-bold text-lg">Swap {currentItem.category}</h3>
+          </div>
+          <button onClick={onClose} className="text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+        </div>
+        <p className="text-white/50 text-sm font-body mb-4">
+          {similarItems.length} alternative{similarItems.length !== 1 ? 's' : ''} in your wardrobe
+        </p>
+        {similarItems.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-white/30 text-sm">No other {currentItem.category} items available</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+            {similarItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => onSelect(item)}
+                className="group relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-purple-400 transition"
+              >
+                <img src={item.processed_image_url || item.original_image_url} alt={item.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <Shuffle className="w-6 h-6 text-purple-400" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                  <p className="text-[10px] text-white truncate font-body">{item.name}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
   );
 }

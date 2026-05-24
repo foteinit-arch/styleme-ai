@@ -54,7 +54,7 @@ function loadImage(src) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const AvatarCanvas = forwardRef(function AvatarCanvas(
-  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront },
+  { profile, placed, onUpdate, onRemove, onSendToBack, onBringToFront, allWardrobeItems },
   ref
 ) {
   const canvasRef = useRef(null);
@@ -184,6 +184,7 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
           onSendToBack={onSendToBack}
           onBringToFront={onBringToFront}
           profile={profile}
+          allWardrobeItems={allWardrobeItems}
         />
       ))}
     </div>

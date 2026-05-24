@@ -266,6 +266,7 @@ export default function OutfitBuilder() {
               onRemove={handleRemovePlaced}
               onSendToBack={handleSendToBack}
               onBringToFront={handleBringToFront}
+              allWardrobeItems={clothes}
             />
           </div>
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
