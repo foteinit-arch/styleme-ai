@@ -6,6 +6,7 @@ import { Plus, Trash2, Globe, Lock, Edit, Share2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import LookbookExport from "@/components/outfits/LookbookExport";
 
 export default function MyOutfits() {
   const [user, setUser] = useState(null);
@@ -51,11 +52,14 @@ export default function MyOutfits() {
             <h1 className="font-heading font-bold text-2xl text-white tracking-tight">My outfits</h1>
             <p className="text-white/50 mt-1 font-body">{outfits.length} saved outfits</p>
           </div>
-          <Link to={createPageUrl("OutfitBuilder")}>
-            <Button className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
-              <Plus className="mr-2 w-4 h-4" /> New Outfit
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <LookbookExport outfits={outfits} />
+            <Link to={createPageUrl("OutfitBuilder")}>
+              <Button className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
+                <Plus className="mr-2 w-4 h-4" /> New Outfit
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {loading ? (
