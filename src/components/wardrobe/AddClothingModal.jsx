@@ -58,9 +58,13 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         // Upload original
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         originalUrl = file_url;
-        // Remove background using raw file blob
+        // Generate clean garment image, then remove background
         try {
-          const blob = await removeBackground(file, true);
+          const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
+            prompt: "Extract only the clothing item from this photo. Show the garment as a flat lay or ghost mannequin with no person, no body, no skin visible. Pure white background. Keep all fabric details, color and texture exactly as they are.",
+            existing_image_urls: [originalUrl],
+          });
+          const blob = await removeBackground(generatedUrl);
           const processed = new File([blob], "processed.png", { type: "image/png" });
           const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processed });
           processedUrl = pUrl;
