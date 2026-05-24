@@ -381,7 +381,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
               </div>
               <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
                 onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
-                item={item} profile={profile}
+                item={item} profile={profile} onSwap={()=>setShowSwap(true)}
                 style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
             </>
           )}
@@ -455,7 +455,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
                </div>
                <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
                  onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
-                 item={item} profile={profile}
+                 item={item} profile={profile} onSwap={()=>setShowSwap(true)}
                  style={{ position:"absolute", left:centX, top:topY-36, transform:"translateX(-50%)", zIndex:zIdx+1001 }} />
              </>
            )}
@@ -466,7 +466,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 }
 
 // ── Controls bar ──────────────────────────────────────────────────────────────
-function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, fitMode, style, item, profile }) {
+function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront, onBack, onFlip, onSwap, fitMode, style, item, profile }) {
   return (
     <>
       <div data-ctrl="true" style={{ display:"flex", gap:7, pointerEvents:"auto", touchAction:"none", ...style }}>
@@ -478,7 +478,7 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
             <Btn bg="#ef4444" onClick={onRemove}    title="Remove"><X          size={13}/></Btn>
             <Btn bg="#111"    onClick={onScaleUp}   title="Bigger"><ZoomIn     size={13}/></Btn>
             <Btn bg="#111"    onClick={onFlip}      title="Flip horizontally"><FlipHorizontal size={13}/></Btn>
-            <Btn bg="#8b5cf6" onClick={()=>setShowSwap(true)} title="Swap with similar item"><Shuffle size={13}/></Btn>
+            <Btn bg="#8b5cf6" onClick={onSwap}      title="Swap with similar item"><Shuffle size={13}/></Btn>
             <Btn bg="#111"    onClick={onBack}      title="Move behind other items"><span  style={{fontSize:13,fontWeight:700,lineHeight:1}}>↓</span></Btn>
             <Btn bg="#111"    onClick={onFront}     title="Move in front of other items"><span style={{fontSize:13,fontWeight:700,lineHeight:1}}>↑</span></Btn>
             <Btn bg="#f97316" onClick={onFit}       title="Fit to body"><Maximize2 size={13}/></Btn>

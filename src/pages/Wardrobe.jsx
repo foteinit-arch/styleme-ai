@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Palette } from "lucide-react";
 import ClothingCard from "@/components/wardrobe/ClothingCard";
 import AddClothingModal from "@/components/wardrobe/AddClothingModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +18,7 @@ export default function Wardrobe() {
   const [user, setUser]       = useState(null);
   const [category, setCategory] = useState("all");
   const [search, setSearch]   = useState("");
+  const [color, setColor]     = useState("all");
   const [hiddenWeatherCategories, setHiddenWeatherCategories] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const queryClient = useQueryClient();
@@ -55,8 +56,12 @@ export default function Wardrobe() {
     await queryClient.invalidateQueries({ queryKey: ["wardrobe", user?.email] });
   }, [queryClient, user?.email]);
 
+  // Extract unique colors from wardrobe
+  const uniqueColors = Array.from(new Set(items.map(i => i.color).filter(Boolean))).sort();
+
   const filtered = items.filter(i =>
     (category === "all" || i.category === category) &&
+    (color === "all" || !i.color || i.color.toLowerCase() === color.toLowerCase()) &&
     (!search || i.name.toLowerCase().includes(search.toLowerCase())) &&
     (!hiddenWeatherCategories || !hiddenWeatherCategories.includes(i.category))
   );
@@ -99,6 +104,18 @@ export default function Wardrobe() {
               <SelectContent>
                 {CATEGORIES.map(c => (
                   <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={color} onValueChange={setColor}>
+              <SelectTrigger className="w-40 bg-white/10 border-white/10 text-white">
+                <Palette className="mr-2 w-4 h-4" />
+                <SelectValue placeholder="Color" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Colors</SelectItem>
+                {uniqueColors.map(c => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
