@@ -138,15 +138,13 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Hide controls immediately so the z-index boost drops and DOM order takes effect at once.
   const sendToBack = useCallback(() => {
     onSendToBack?.(itemRef.current.placedId);
-    clearTimeout(hideTimer.current);
-    setShowControls(false);
-  }, [onSendToBack]);
+    resetHide();
+  }, [onSendToBack, resetHide]);
 
   const bringToFront = useCallback(() => {
     onBringToFront?.(itemRef.current.placedId);
-    clearTimeout(hideTimer.current);
-    setShowControls(false);
-  }, [onBringToFront]);
+    resetHide();
+  }, [onBringToFront, resetHide]);
 
   // ── Wheel zoom ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -302,7 +300,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       // Already 6-point — re-clamp every corner so handles are always reachable
       updateRef.current({ ...c, corners: c.corners.map(p => ({ x:clampX(p.x), y:clampY(p.y) })) });
     }
-    setFitMode(true); resetHide(15000);
+    setFitMode(true);
+    setShowControls(true);
+    resetHide(15000);
   }, [resetHide, containerRef]);
 
   const exitFit = useCallback(() => { setFitMode(false); resetHide(); }, [resetHide]);
@@ -332,13 +332,13 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
             style={{ width:"100%", height:"100%", objectFit:"contain", pointerEvents:"auto", cursor:"grab", display:"block", ...shoeImgStyle }}
           />
-          {showControls && (
+          {(showControls || fitMode) && (
             <>
               <div style={{ position:"absolute", top:-56, left:"50%", transform:"translateX(-50%)", background:"#1a1a1a", color:"white", fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:4, border:"1px solid rgba(255,255,255,0.2)", whiteSpace:"nowrap", zIndex:9998 }}>
                 {item.category ? `${item.category.charAt(0).toUpperCase()}${item.category.slice(1)} • ${item.name || "Item"}` : item.name || "Item"}
               </div>
               <ControlsBar onScaleDown={()=>scaleBy(0.85)} onRemove={()=>onRemove(item.placedId)}
-                onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={false}
+                onScaleUp={()=>scaleBy(1.15)} onFit={enterFit} onDone={exitFit} onFront={bringToFront} onBack={sendToBack} onFlip={flipH} fitMode={fitMode}
                 item={item} profile={profile}
                 style={{ position:"absolute", top:-36, left:"50%", transform:"translateX(-50%)" }} />
             </>
@@ -447,8 +447,8 @@ function ControlsBar({ onScaleDown, onRemove, onScaleUp, onFit, onDone, onFront,
 
 function Btn({ bg, onClick, title, children, wide }) {
   return (
-    <button data-ctrl="true" onMouseDown={e=>e.stopPropagation()} onTouchStart={e=>e.stopPropagation()}
-      onClick={onClick} title={title}
+    <button data-ctrl="true" onMouseDown={e=>e.stopPropagation()} onTouchStart={e=>{e.stopPropagation();e.preventDefault();}}
+      onClick={e=>{e.stopPropagation();onClick&&onClick(e);}} title={title}
       style={{ width:wide?"auto":28, height:28, padding:wide?"0 10px":0, borderRadius:14,
         background:bg, color:"white", border:"2px solid white",
         display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer",
