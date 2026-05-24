@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Globe, Lock, Edit, Share2, Check } from "lucide-react";
+import { Plus, Trash2, Globe, Lock, Edit, Share2, Check, Luggage } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
@@ -54,6 +54,11 @@ export default function MyOutfits() {
           </div>
           <div className="flex items-center gap-3">
             <LookbookExport outfits={outfits} />
+            <Link to={createPageUrl("PackingLists")}>
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+                <Luggage className="w-4 h-4 mr-1" /> Packing Lists
+              </Button>
+            </Link>
             <Link to={createPageUrl("OutfitBuilder")}>
               <Button className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
                 <Plus className="mr-2 w-4 h-4" /> New Outfit
