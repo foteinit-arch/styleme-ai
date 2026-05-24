@@ -122,7 +122,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // ── Scale ─────────────────────────────────────────────────────────────────
   const scaleBy = useCallback((f) => {
     const c = itemRef.current;
-    const s = Math.max(0.3, Math.min(4, (c.scale || 1) * f));
+    const s = Math.max(0.5, Math.min(5.0, (c.scale || 2.5) * f));
     if (c.corners) {
       const cx = c.corners.reduce((a, p) => a + p.x, 0) / c.corners.length;
       const cy = c.corners.reduce((a, p) => a + p.y, 0) / c.corners.length;
@@ -164,10 +164,30 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
       const c = itemRef.current;
       const cw = containerRef?.current?.offsetWidth  || 320;
       const ch = containerRef?.current?.offsetHeight || 600;
-      const PAD = 16; // keep handles fully inside the visible canvas
+      const PAD = 16;
       const newX = Math.max(PAD, Math.min(cw - PAD, sv.x + dx));
       const newY = Math.max(PAD, Math.min(ch - PAD, sv.y + dy));
-      updateRef.current({ ...c, corners: c.corners.map((p,i) => i===idx ? {x:newX, y:newY} : p) });
+
+      // For corner handles (0-3), scale uniformly from the opposite corner as anchor
+      if (idx < 4 && c.corners) {
+        const oppositeIdx = (idx + 2) % 4;
+        const anchor = c.corners[oppositeIdx];
+        const oldDist = Math.hypot(sv.x - anchor.x, sv.y - anchor.y);
+        const newDist = Math.hypot(newX - anchor.x, newY - anchor.y);
+        if (oldDist > 1) {
+          const f = newDist / oldDist;
+          const newScale = Math.max(0.5, Math.min(5.0, (c.scale || 2.5) * f));
+          const actualF = newScale / (c.scale || 2.5);
+          updateRef.current({
+            ...c,
+            scale: newScale,
+            corners: c.corners.map(p => ({ x: anchor.x + (p.x - anchor.x) * actualF, y: anchor.y + (p.y - anchor.y) * actualF }))
+          });
+        }
+      } else {
+        // Mid handles (4,5): free move
+        updateRef.current({ ...c, corners: c.corners.map((p,i) => i===idx ? {x:newX, y:newY} : p) });
+      }
       return;
     }
     if (!dragging.current || pinchRef.current.active) return;
@@ -226,7 +246,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
     if (cornerDrag.current) { e.preventDefault(); return; } // corner drag handled by portal
     if (pinchRef.current.active && e.touches.length===2) {
       const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
-      const s=Math.max(0.3,Math.min(4,pinchRef.current.scale*Math.hypot(dx,dy)/pinchRef.current.dist));
+      const s=Math.max(0.5,Math.min(5.0,pinchRef.current.scale*Math.hypot(dx,dy)/pinchRef.current.dist));
       updateRef.current({ ...itemRef.current, scale:s }); e.preventDefault();
     } else if (!pinchRef.current.active) {
       onDocMove({ clientX:e.touches[0].clientX, clientY:e.touches[0].clientY }); e.preventDefault();
@@ -352,7 +372,21 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
                   if(cornerDrag.current?.idx===idx){
                     const dx=e.touches[0].clientX-cornerDrag.current.sc.x, dy=e.touches[0].clientY-cornerDrag.current.sc.y;
                     const c=itemRef.current;
-                    updateRef.current({...c,corners:c.corners.map((p,i)=>i===idx?{x:cornerDrag.current.sv.x+dx,y:cornerDrag.current.sv.y+dy}:p)});
+                    const sv=cornerDrag.current.sv;
+                    const newX=sv.x+dx, newY=sv.y+dy;
+                    if(idx<4&&c.corners){
+                      const anchor=c.corners[(idx+2)%4];
+                      const oldDist=Math.hypot(sv.x-anchor.x,sv.y-anchor.y);
+                      const newDist=Math.hypot(newX-anchor.x,newY-anchor.y);
+                      if(oldDist>1){
+                        const f=newDist/oldDist;
+                        const newScale=Math.max(0.5,Math.min(5.0,(c.scale||2.5)*f));
+                        const actualF=newScale/(c.scale||2.5);
+                        updateRef.current({...c,scale:newScale,corners:c.corners.map(p=>({x:anchor.x+(p.x-anchor.x)*actualF,y:anchor.y+(p.y-anchor.y)*actualF}))});
+                      }
+                    } else {
+                      updateRef.current({...c,corners:c.corners.map((p,i)=>i===idx?{x:newX,y:newY}:p)});
+                    }
                   }
                 }}
                 onTouchEnd={e=>{e.stopPropagation();cornerDrag.current=null;resetHide();}}
