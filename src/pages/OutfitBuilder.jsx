@@ -73,8 +73,7 @@ export default function OutfitBuilder() {
         if (outfit.length > 0) {
           const loadedOutfit = outfit[0];
           if (profiles.length > 0) {
-            const originalProfile = { ...profiles[0], avatar_generated_url: null };
-            setProfile(originalProfile);
+            setProfile(profiles[0]);
           }
           if (loadedOutfit.items && loadedOutfit.items.length > 0) {
             const reconstructed = loadedOutfit.items.map((itemData, idx) => {
