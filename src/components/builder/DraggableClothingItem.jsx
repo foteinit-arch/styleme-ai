@@ -157,6 +157,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
   // ── Document mouse listeners ──────────────────────────────────────────────
   const onDocMove = useCallback((e) => {
+    if (!dragging.current && !cornerDrag.current) return;
     if (cornerDrag.current) {
       const { idx, sc, sv } = cornerDrag.current;
       const dx = e.clientX - sc.x, dy = e.clientY - sc.y;
@@ -366,7 +367,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
             return createPortal(
               <div key={idx} data-ctrl="true"
                 title={["Left top","Right top","Right bottom","Left bottom","Left mid","Right mid"][idx]}
-                onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);}}
+                onMouseDown={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.clientX,e.clientY);dragging.current=false;}}
                 onTouchStart={e=>{e.stopPropagation();e.preventDefault();startCornerDrag(idx,e.touches[0].clientX,e.touches[0].clientY);}}
                 onTouchMove={e=>{
                   e.stopPropagation();e.preventDefault();
