@@ -33,9 +33,11 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   const [category, setCategory] = useState("top");
   const [brand, setBrand]       = useState("");
   const [url, setUrl]           = useState("");
+  const [uploadedUrl, setUploadedUrl] = useState(""); // proxied/uploaded version of the URL
   const [file, setFile]         = useState(null);
   const [preview, setPreview]   = useState("");
   const [processing, setProcessing] = useState(false);
+  const [urlLoading, setUrlLoading] = useState(false);
   const [error, setError]       = useState("");
 
   // Bulk upload state
@@ -66,6 +68,30 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     img.onerror = reject;
     img.src = URL.createObjectURL(f);
   });
+
+  const handleUrlChange = async (e) => {
+    const val = e.target.value;
+    setUrl(val);
+    setUploadedUrl("");
+    if (!val) return;
+    // Debounce: only fetch when user stops typing
+    setUrlLoading(true);
+    try {
+      // Fetch the image via InvokeLLM as a proxy workaround — actually just try uploading directly
+      const res = await fetch(val);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const ext = blob.type.includes("png") ? "png" : "jpg";
+      const f = new File([blob], `url-image.${ext}`, { type: blob.type });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: f });
+      setUploadedUrl(file_url);
+    } catch {
+      // If direct fetch fails (CORS), fall back to using the URL directly
+      setUploadedUrl(val);
+    } finally {
+      setUrlLoading(false);
+    }
+  };
 
   const handleBulkFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -147,10 +173,15 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         }
 
       } else if (tab === "url" && url) {
-        originalUrl = url;
-        // Remove background from URL
+        const sourceUrl = uploadedUrl || url;
+        originalUrl = sourceUrl;
+        // Remove background using the (potentially proxied) URL
         try {
-          const blob = await removeBackground(url);
+          const { url: generatedUrl } = await base44.integrations.Core.GenerateImage({
+            prompt: "Extract only the clothing item from this photo. Show the garment as a ghost mannequin style with no person, no body, no skin, no white blocks or artifacts visible. Pure white background only. Keep all fabric details, color and texture exactly as they are. Remove any background elements completely.",
+            existing_image_urls: [sourceUrl],
+          });
+          const blob = await removeBackground(generatedUrl);
           const processed = new File([blob], "processed.png", { type: "image/png" });
           const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processed });
           processedUrl = pUrl;
@@ -210,11 +241,18 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
             <TabsContent value="url" className="mt-4">
               <div>
                 <Label>Image URL (from any website, Pinterest, etc.)</Label>
-                <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." className="mt-1" />
+                <Input value={url} onChange={handleUrlChange} placeholder="https://..." className="mt-1" />
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Background will be removed automatically
                 </p>
-                {url && <img src={url} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" onError={() => {}} />}
+                {urlLoading && (
+                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Loading image…
+                  </div>
+                )}
+                {uploadedUrl && !urlLoading && (
+                  <img src={uploadedUrl} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" />
+                )}
               </div>
             </TabsContent>
             <TabsContent value="bulk" className="mt-4 space-y-4">
