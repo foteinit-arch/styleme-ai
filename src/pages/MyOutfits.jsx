@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Globe, Lock, Edit } from "lucide-react";
+import { Plus, Trash2, Globe, Lock, Edit, Share2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
@@ -11,6 +11,7 @@ export default function MyOutfits() {
   const [user, setUser] = useState(null);
   const [outfits, setOutfits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then(async (u) => {
@@ -24,6 +25,17 @@ export default function MyOutfits() {
   const handleDelete = async (id) => {
     await base44.entities.Outfit.delete(id);
     setOutfits(prev => prev.filter(o => o.id !== id));
+  };
+
+  const handleShare = async (outfit) => {
+    if (!outfit.is_public) {
+      await base44.entities.Outfit.update(outfit.id, { is_public: true });
+      setOutfits(prev => prev.map(o => o.id === outfit.id ? { ...o, is_public: true } : o));
+    }
+    const link = `${window.location.origin}/Explore?outfitId=${outfit.id}`;
+    await navigator.clipboard.writeText(link);
+    setCopiedId(outfit.id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const togglePublic = async (outfit) => {
@@ -91,6 +103,10 @@ export default function MyOutfits() {
                         <Edit className="w-3 h-3 mr-1" /> Edit
                       </Button>
                     </Link>
+                    <Button variant="ghost" size="sm" className="text-white/40 hover:text-white hover:bg-white/10"
+                      onClick={() => handleShare(outfit)}>
+                      {copiedId === outfit.id ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+                    </Button>
                     <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-400 hover:bg-red-400/10"
                       onClick={() => handleDelete(outfit.id)}>
                       <Trash2 className="w-4 h-4" />
