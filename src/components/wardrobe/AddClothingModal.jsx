@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { X, Upload, Link, Sparkles, FolderOpen, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { X, Upload, Sparkles, FolderOpen, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 const CATEGORIES = ["top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 const REMOVEBG_KEY = "dx2dhWT2m31UEp3NvgxYMivt";
@@ -32,12 +32,9 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   const [name, setName]         = useState("");
   const [category, setCategory] = useState("top");
   const [brand, setBrand]       = useState("");
-  const [url, setUrl]           = useState("");
-  const [uploadedUrl, setUploadedUrl] = useState(""); // proxied/uploaded version of the URL
   const [file, setFile]         = useState(null);
   const [preview, setPreview]   = useState("");
   const [processing, setProcessing] = useState(false);
-  const [urlLoading, setUrlLoading] = useState(false);
   const [error, setError]       = useState("");
 
   // Bulk upload state
@@ -69,56 +66,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     img.src = URL.createObjectURL(f);
   });
 
-  const handleUrlChange = (e) => {
-    const val = e.target.value;
-    setUrl(val);
-    setUploadedUrl("");
-  };
 
-  const isProductPageUrl = (u) => {
-    // Detect product page URLs (not direct image URLs)
-    const imagePattern = /\.(jpg|jpeg|png|webp|avif|gif)(\?.*)?$/i;
-    return !imagePattern.test(u.split('?')[0]);
-  };
-
-  const handleUrlFetch = async () => {
-    if (!url) return;
-
-    // If it's a product page URL, show instructions immediately — don't spin
-    if (isProductPageUrl(url)) {
-      setError("This looks like a product page, not a direct image URL.\n\nTo get the image URL: right-click the product photo on the website → \"Copy image address\" → paste that URL here.");
-      return;
-    }
-
-    setUrlLoading(true);
-    setUploadedUrl("");
-    setError("");
-    try {
-      // Try direct fetch first (works for public CDN images)
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("direct fetch failed");
-      const blob = await res.blob();
-      if (!blob.type.startsWith("image/")) throw new Error("not an image");
-      const ext = blob.type.includes("png") ? "png" : "jpg";
-      const f = new File([blob], `url-image.${ext}`, { type: blob.type });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: f });
-      setUploadedUrl(file_url);
-    } catch {
-      // Fall back to server-side proxy for CORS-blocked CDN images
-      try {
-        const { data } = await base44.functions.invoke("proxyImage", { image_url: url });
-        if (data?.file_url) {
-          setUploadedUrl(data.file_url);
-        } else {
-          setError("Could not load image. Please right-click the product image → \"Copy image address\" and paste that URL.");
-        }
-      } catch {
-        setError("Could not load image. Please right-click the product image → \"Copy image address\" and paste that URL.");
-      }
-    } finally {
-      setUrlLoading(false);
-    }
-  };
 
   const handleBulkFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -198,28 +146,6 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         } catch {
           processedUrl = originalUrl;
         }
-
-      } else if (tab === "url" && url) {
-        // First, proxy the image server-side to get a hosted URL
-        let sourceUrl = uploadedUrl;
-        if (!sourceUrl) {
-          try {
-            const { data } = await base44.functions.invoke("proxyImage", { image_url: url });
-            sourceUrl = data?.file_url || url;
-          } catch {
-            sourceUrl = url;
-          }
-        }
-        originalUrl = sourceUrl;
-        // Remove background from the proxied image
-        try {
-          const blob = await removeBackground(sourceUrl);
-          const processed = new File([blob], "processed.png", { type: "image/png" });
-          const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: processed });
-          processedUrl = pUrl;
-        } catch {
-          processedUrl = originalUrl;
-        }
       }
 
       const item = await base44.entities.ClothingItem.create({
@@ -229,8 +155,8 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         brand,
         original_image_url:   originalUrl,
         processed_image_url:  processedUrl || originalUrl,
-        source:                tab === "upload" ? "upload" : "url",
-        source_url:            url || originalUrl,
+        source:                "upload",
+        source_url:            originalUrl,
       });
 
       onAdded(item);
@@ -252,7 +178,6 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="w-full">
               <TabsTrigger value="upload" className="flex-1"><Upload className="w-4 h-4 mr-1" /> Upload Photo</TabsTrigger>
-              <TabsTrigger value="url"    className="flex-1"><Link    className="w-4 h-4 mr-1" /> From URL</TabsTrigger>
               <TabsTrigger value="bulk"   className="flex-1"><FolderOpen className="w-4 h-4 mr-1" /> Bulk</TabsTrigger>
             </TabsList>
             <TabsContent value="upload" className="mt-4">
@@ -270,28 +195,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
                 <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               </label>
             </TabsContent>
-            <TabsContent value="url" className="mt-4">
-              <div>
-                <Label>Image URL (from any website, Pinterest, etc.)</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input value={url} onChange={handleUrlChange} placeholder="https://..." className="flex-1" onKeyDown={e => e.key === "Enter" && handleUrlFetch()} />
-                  <Button type="button" onClick={handleUrlFetch} disabled={!url || urlLoading} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white px-3">
-                    {urlLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Load"}
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Paste a direct image URL (right-click image → "Copy image address")
-                </p>
-                {uploadedUrl && !urlLoading && (
-                  <img src={uploadedUrl} className="h-24 mt-2 object-contain rounded-lg border border-gray-100" alt="preview" />
-                )}
-                {error && tab === "url" && (
-                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-xs text-amber-800 whitespace-pre-line">{error}</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
+
             <TabsContent value="bulk" className="mt-4 space-y-4">
               <label className="block cursor-pointer">
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 transition">
