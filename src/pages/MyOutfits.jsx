@@ -83,9 +83,9 @@ export default function MyOutfits() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {outfits.map(outfit => (
               <div key={outfit.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-yellow-300/40 transition">
-                <div className="h-36 bg-white/5 flex items-center justify-center">
-                  {outfit.outfit_snapshot_url ? (
-                    <img src={outfit.outfit_snapshot_url} className="h-full object-contain" alt={outfit.name} />
+                <div className="h-36 bg-white/5 flex items-center justify-center overflow-hidden">
+                  {outfit.magazine_url || outfit.outfit_snapshot_url ? (
+                    <img src={outfit.magazine_url || outfit.outfit_snapshot_url} className="w-full h-full object-cover" alt={outfit.name} />
                   ) : (
                     <span className="text-6xl">👗</span>
                   )}
