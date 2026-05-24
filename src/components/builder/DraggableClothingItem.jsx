@@ -73,8 +73,9 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
   // Everything else is centre-anchored.
   const isShoe  = item.category === "shoes";
   const itemTop = isShoe ? item.y - size : item.y - size / 2;
+  const scaleXVal = (item.scaleX ?? 1.0) * (item.flipX ? -1 : 1);
   const shoeImgStyle = {
-    transform: `rotate(${item.rotation||0}deg) scaleX(${item.flipX ? -1 : 1})`,
+    transform: `rotate(${item.rotation||0}deg) scaleX(${scaleXVal})`,
     filter: showControls
       ? "drop-shadow(0 0 8px rgba(249,115,22,0.75))"
       : isShoe ? "drop-shadow(0 8px 16px rgba(0,0,0,0.5))" : "none",
@@ -308,7 +309,7 @@ export default function DraggableClothingItem({ item, onUpdate, onRemove, contai
 
   const flipH = useCallback(() => {
     const c = itemRef.current;
-    updateRef.current({ ...c, flipX: !c.flipX });
+    updateRef.current({ ...c, flipX: !c.flipX, scaleX: c.scaleX ?? 1.0 });
     resetHide();
   }, [resetHide]);
 
