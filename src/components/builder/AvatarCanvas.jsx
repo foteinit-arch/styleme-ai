@@ -168,7 +168,7 @@ const AvatarCanvas = forwardRef(function AvatarCanvas(
         <div style={{ position: "absolute", bottom: 16, left: 0, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
           <div style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", borderRadius: 99, padding: "6px 14px" }}>
             <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, textAlign: "center", margin: 0 }}>
-              👈 Tap or drag clothes from the left panel
+              👈 Tap clothes from the left panel to add them
             </p>
           </div>
         </div>
