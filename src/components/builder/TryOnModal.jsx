@@ -39,20 +39,25 @@ Be precise and specific. This description will be used to lock the person's iden
 }
 
 // ── Step 2: Generate the try-on image using Gemini Flash Image ─────────────────
-async function generateTryOnImage(avatarUrl, garmentUrl, avatarDescription, extraEmphasis = "") {
+async function generateTryOnImage(avatarUrl, garmentUrls, avatarDescription, extraEmphasis = "") {
   const identityBlock = avatarDescription
     ? `IDENTITY LOCK — the person in your output must be the same person as image 1, with this exact appearance: ${avatarDescription}. Do not change face, hair, skin tone, eyes, or body proportions in any way.`
     : `IDENTITY LOCK — do not change the person's face, hair, skin tone, eyes, or body proportions in any way.`;
 
   const emphasisBlock = extraEmphasis ? `\nEMPHASIS: ${extraEmphasis}` : "";
 
-  const prompt = `You are editing image 1. Image 1 is a person in a beige bodysuit on a white background — this is the person you must preserve exactly. Image 2 is a garment. Your task: dress the person from image 1 in the exact garment shown in image 2. Reproduce the garment with exact fidelity — same color, pattern, cut, and details. The garment MUST be visibly worn on the person's body.
+  const garmentCount = garmentUrls.length;
+  const garmentRef = garmentCount === 1
+    ? "Image 2 is a garment."
+    : `Images 2 through ${garmentCount + 1} are garments — dress the person in ALL of them simultaneously as a complete outfit.`;
+
+  const prompt = `You are editing image 1. Image 1 is a person in a beige bodysuit on a white background — this is the person you must preserve exactly. ${garmentRef} Your task: dress the person from image 1 in the exact garments shown. Reproduce every garment with exact fidelity — same color, pattern, cut, and details. ALL garments MUST be visibly worn on the person's body at the same time as a full outfit.
 ${identityBlock}
 COMPOSITION LOCK — full body must be visible from head to feet. Pure white background. Do not crop, do not zoom, do not reframe.${emphasisBlock}`;
 
   const { url } = await base44.integrations.Core.GenerateImage({
     prompt,
-    existing_image_urls: [avatarUrl, garmentUrl].filter(Boolean),
+    existing_image_urls: [avatarUrl, ...garmentUrls].filter(Boolean).slice(0, 5),
   });
 
   return url;
@@ -125,9 +130,8 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
 
-  // Use only the first placed item for the garment
-  const garment = placed?.[0];
-  const garmentUrl = garment?.processed_image_url || garment?.original_image_url;
+  // All placed garment URLs
+  const garmentUrls = (placed || []).map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
 
   const generate = async () => {
     setLoading(true);
@@ -144,7 +148,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
 
       // Step 2: first generation attempt
       setLoadingStep("Generating your look…");
-      const firstUrl = await generateTryOnImage(avatarUrl, garmentUrl, descriptionRef.current);
+      const firstUrl = await generateTryOnImage(avatarUrl, garmentUrls, descriptionRef.current);
 
       // Step 3: quality gate
       setLoadingStep("Checking quality…");
@@ -157,7 +161,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
         // Automatic retry with emphasis on failing dimensions
         setLoadingStep("Improving result…");
         const emphasis = buildEmphasis(scores);
-        const retryUrl = await generateTryOnImage(avatarUrl, garmentUrl, descriptionRef.current, emphasis);
+        const retryUrl = await generateTryOnImage(avatarUrl, garmentUrls, descriptionRef.current, emphasis);
 
         // Score the retry
         const retryScores = await scoreResult(avatarUrl, retryUrl);
