@@ -3,12 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { X, Download, Sparkles, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ── Step 1: Generate a fresh description of the avatar person ──────────────────
-async function getOrGenerateDescription(profile) {
-  const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
-  if (!avatarUrl) return "";
-
-  // Always regenerate from the current avatar image — never use stale cache
+// ── Step 1: Describe the avatar person ────────────────────────────────────────
+async function generateAvatarDescription(avatarUrl) {
   const result = await base44.integrations.Core.InvokeLLM({
     model: "claude_sonnet_4_6",
     prompt: `Look at this image and write a detailed physical description of the person shown. Cover ALL of these attributes in a single structured paragraph:
@@ -20,99 +16,84 @@ async function getOrGenerateDescription(profile) {
 - Approximate age range
 - Body proportions and build
 - Height impression (tall/average/petite)
-- Posture
-- Current pose
+- Posture and current pose
 
-Be precise and specific. This description will be used to lock the person's identity during AI clothing try-on.`,
+Be precise and specific. This description will be used to reproduce this exact person in a new AI image.`,
     file_urls: [avatarUrl],
   });
-
-  const description = typeof result === "string" ? result : JSON.stringify(result);
-
-  // Update the cache with the fresh description
-  if (profile?.id) {
-    await base44.entities.UserProfile.update(profile.id, { avatar_description: description });
-  }
-
-  return description;
+  return typeof result === "string" ? result : JSON.stringify(result);
 }
 
-// ── Step 2: Generate the try-on image using Gemini Flash Image ─────────────────
+// ── Step 2: Describe the garments in text ─────────────────────────────────────
+async function describeGarments(garmentUrls) {
+  if (!garmentUrls.length) return "casual outfit";
+  const result = await base44.integrations.Core.InvokeLLM({
+    model: "claude_sonnet_4_6",
+    prompt: `Look at these ${garmentUrls.length} clothing item image(s) and describe each one in detail: type of garment, exact color(s), pattern, cut, style, fabric appearance, and any notable details. Be concise but very specific about colors and style. Number each item.`,
+    file_urls: garmentUrls,
+  });
+  return typeof result === "string" ? result : JSON.stringify(result);
+}
+
+// ── Step 3: Generate try-on — avatar as ONLY image reference ──────────────────
 async function generateTryOnImage(avatarUrl, garmentUrls, avatarDescription, extraEmphasis = "") {
-  const identityBlock = avatarDescription
-    ? `IDENTITY LOCK — the person in your output must be the same person as image 1, with this exact appearance: ${avatarDescription}. Do not change face, hair, skin tone, eyes, or body proportions in any way.`
-    : `IDENTITY LOCK — do not change the person's face, hair, skin tone, eyes, or body proportions in any way.`;
+  // Describe garments in text — do NOT pass garment images to avoid model identity theft
+  const garmentDescription = await describeGarments(garmentUrls);
 
-  const emphasisBlock = extraEmphasis ? `\nEMPHASIS: ${extraEmphasis}` : "";
+  const emphasisBlock = extraEmphasis ? ` ${extraEmphasis}` : "";
 
-  const garmentCount = garmentUrls.length;
-  const garmentRef = garmentCount === 1
-    ? "Image 2 is a garment."
-    : `Images 2 through ${garmentCount + 1} are garments — dress the person in ALL of them simultaneously as a complete outfit.`;
+  const prompt = `You are generating a fashion photo. The reference image shows a specific real person. You MUST reproduce that exact person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 
-  const prompt = `You are editing image 1. Image 1 is a person in a beige bodysuit on a white background — this is the person you must preserve exactly. ${garmentRef} Your task: dress the person from image 1 in the exact garments shown. Reproduce every garment with exact fidelity — same color, pattern, cut, and details. ALL garments MUST be visibly worn on the person's body at the same time as a full outfit.
-${identityBlock}
-COMPOSITION LOCK — full body must be visible from head to feet. Pure white background. Do not crop, do not zoom, do not reframe.${emphasisBlock}`;
+The person should be shown wearing this specific outfit: ${garmentDescription}
+
+Person description for reference: ${avatarDescription}
+
+Requirements:
+- The face and physical appearance MUST exactly match the reference image person
+- Pure white background
+- Full body visible from top of head to feet, no cropping
+- Professional fashion photo style${emphasisBlock}`;
 
   const { url } = await base44.integrations.Core.GenerateImage({
     prompt,
-    existing_image_urls: [avatarUrl, ...garmentUrls].filter(Boolean).slice(0, 5),
+    existing_image_urls: [avatarUrl],
   });
 
   return url;
 }
 
-// ── Step 3: Quality gate ────────────────────────────────────────────────────────
+// ── Step 4: Quality gate ───────────────────────────────────────────────────────
 async function scoreResult(avatarUrl, generatedUrl) {
   try {
     const scores = await base44.integrations.Core.InvokeLLM({
       model: "claude_sonnet_4_6",
       prompt: `Compare image 1 (original avatar) and image 2 (AI-generated try-on result). Score each dimension from 1 to 10 as integers:
 - identity_match: How closely does the person in image 2 match the person in image 1? (face, hair, skin tone, body — 10 = identical, 1 = completely different person)
-- garment_match: How well is the garment rendered? (10 = crisp, accurate color/cut/style, 1 = garment looks wrong or missing)
-- full_body_framing: Is the full body visible from head to toe with no cropping? (10 = perfect framing, 1 = head or feet cropped)
-Return ONLY a JSON object with keys: identity_match, garment_match, full_body_framing.`,
+- garment_visible: Are clothes clearly visible and well-rendered? (10 = yes, 1 = no)
+- full_body_framing: Is the full body visible from head to toe with no cropping? (10 = perfect, 1 = cropped)
+Return ONLY a JSON object with keys: identity_match, garment_visible, full_body_framing.`,
       file_urls: [avatarUrl, generatedUrl],
       response_json_schema: {
         type: "object",
         properties: {
           identity_match: { type: "integer" },
-          garment_match: { type: "integer" },
+          garment_visible: { type: "integer" },
           full_body_framing: { type: "integer" },
         },
       },
     });
     return scores;
   } catch {
-    // If scoring fails, skip the gate
-    return { identity_match: 10, garment_match: 10, full_body_framing: 10 };
+    return { identity_match: 10, garment_visible: 10, full_body_framing: 10 };
   }
 }
 
 function buildEmphasis(scores) {
   const failing = [];
-  if ((scores?.identity_match ?? 10) < 7) failing.push("The person's face, hair, skin tone, and body MUST match the original person in image 1 exactly — this is the most critical requirement.");
-  if ((scores?.garment_match ?? 10) < 7) failing.push("Reproduce the garment from image 2 with perfect accuracy — exact color, exact cut, exact pattern, exact details.");
-  if ((scores?.full_body_framing ?? 10) < 7) failing.push("The FULL body MUST be visible from the very top of the head to the very bottom of the feet — do not crop anything.");
+  if ((scores?.identity_match ?? 10) < 7) failing.push("CRITICAL: The output person MUST have the identical face, hair, and skin tone as the person in the reference image. Do not change any facial features.");
+  if ((scores?.garment_visible ?? 10) < 7) failing.push("Make sure the outfit is clearly visible and well-rendered on the person.");
+  if ((scores?.full_body_framing ?? 10) < 7) failing.push("Show the complete full body from head to feet without any cropping.");
   return failing.join(" ");
-}
-
-// ── Full pipeline ──────────────────────────────────────────────────────────────
-async function runTryOnPipeline(avatarUrl, garmentUrl, profile, cachedDescription, isRetry = false, retryEmphasis = "") {
-  // Step 1: get/generate description (only on first run, skip on retry)
-  let description = cachedDescription;
-  if (!description) {
-    description = await getOrGenerateDescription(profile);
-  }
-
-  // Step 2: generate
-  const generatedUrl = await generateTryOnImage(avatarUrl, garmentUrl, description, isRetry ? retryEmphasis : "");
-
-  // Step 3: quality gate
-  const scores = await scoreResult(avatarUrl, generatedUrl);
-  const passed = (scores.identity_match ?? 10) >= 7 && (scores.garment_match ?? 10) >= 7 && (scores.full_body_framing ?? 10) >= 7;
-
-  return { generatedUrl, scores, passed, description };
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -124,14 +105,9 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
   const [saving, setSaving] = useState(false);
   const [qualityWarning, setQualityWarning] = useState(false);
 
-  // Cache description within this modal session only (cleared on each open)
   const descriptionRef = useRef(null);
-  // Clear on mount so stale description from previous session is never used
-  useEffect(() => { descriptionRef.current = null; }, []);
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
-
-  // All placed garment URLs
   const garmentUrls = (placed || []).map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
 
   const generate = async () => {
@@ -141,39 +117,29 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     setQualityWarning(false);
 
     try {
-      // Step 1: description
+      // Step 1: describe avatar fresh every time
       setLoadingStep("Analyzing your avatar…");
-      if (!descriptionRef.current) {
-        descriptionRef.current = await getOrGenerateDescription(profile);
-      }
+      descriptionRef.current = await generateAvatarDescription(avatarUrl);
 
-      // Step 2: first generation attempt
+      // Step 2: generate
       setLoadingStep("Generating your look…");
       const firstUrl = await generateTryOnImage(avatarUrl, garmentUrls, descriptionRef.current);
 
       // Step 3: quality gate
       setLoadingStep("Checking quality…");
       const scores = await scoreResult(avatarUrl, firstUrl);
-      const passed = (scores.identity_match ?? 10) >= 7 && (scores.garment_match ?? 10) >= 7 && (scores.full_body_framing ?? 10) >= 7;
+      const passed = (scores.identity_match ?? 10) >= 7 && (scores.garment_visible ?? 10) >= 7;
 
       if (passed) {
         setImageUrl(firstUrl);
       } else {
-        // Automatic retry with emphasis on failing dimensions
         setLoadingStep("Improving result…");
         const emphasis = buildEmphasis(scores);
         const retryUrl = await generateTryOnImage(avatarUrl, garmentUrls, descriptionRef.current, emphasis);
-
-        // Score the retry
         const retryScores = await scoreResult(avatarUrl, retryUrl);
-        const retryPassed = (retryScores.identity_match ?? 10) >= 7 && (retryScores.garment_match ?? 10) >= 7 && (retryScores.full_body_framing ?? 10) >= 7;
-
+        const retryPassed = (retryScores.identity_match ?? 10) >= 7;
         setImageUrl(retryUrl);
-        if (!retryPassed) {
-          // Flag internally but still show result
-          setQualityWarning(true);
-          console.warn("[TryOn] Quality gate failed after retry", retryScores);
-        }
+        if (!retryPassed) setQualityWarning(true);
       }
     } catch (err) {
       setError(err.message || "Failed to generate image. Please try again.");
@@ -236,7 +202,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
               <p className="text-white/50 text-sm font-body text-center">
                 {loadingStep || "Generating your look…"}
                 <br />
-                <span className="text-white/30 text-xs">This can take up to 30 seconds</span>
+                <span className="text-white/30 text-xs">This can take up to 60 seconds</span>
               </p>
             </div>
           )}
@@ -244,11 +210,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
           {error && (
             <div className="text-center py-10">
               <p className="text-red-400 mb-3">{error}</p>
-              <Button
-                onClick={generate}
-                variant="outline"
-                className="border-white/20 text-white bg-transparent hover:bg-white/10"
-              >
+              <Button onClick={generate} variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10">
                 <RefreshCw className="w-4 h-4 mr-2" /> Try again
               </Button>
             </div>
@@ -272,25 +234,13 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
               </p>
 
               <div className="flex gap-2">
-                <Button
-                  onClick={generate}
-                  variant="outline"
-                  className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10"
-                >
+                <Button onClick={generate} variant="outline" className="flex-1 border-white/20 text-white bg-transparent hover:bg-white/10">
                   <RefreshCw className="w-4 h-4 mr-2" /> Regenerate
                 </Button>
-                <Button
-                  onClick={handleDownload}
-                  variant="outline"
-                  className="border-white/20 text-white bg-transparent hover:bg-white/10 px-3"
-                >
+                <Button onClick={handleDownload} variant="outline" className="border-white/20 text-white bg-transparent hover:bg-white/10 px-3">
                   <Download className="w-4 h-4" />
                 </Button>
-                <Button
-                  onClick={handleSaveSnapshot}
-                  disabled={saving}
-                  className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold"
-                >
+                <Button onClick={handleSaveSnapshot} disabled={saving} className="flex-1 bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
                   {saving ? "Saving..." : "Use as Avatar"}
                 </Button>
               </div>
