@@ -20,7 +20,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
       const itemUrls = placed.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
       const itemDescriptions = placed.map(p => `${p.category}: ${p.name}${p.color ? ` (${p.color})` : ''}`).join(', ');
 
-      const prompt = `This is a clothing swap edit. Image 1 is the reference person — you MUST preserve their exact identity: identical face (same features, same expression, same skin, zero facial changes), identical hair (same color, same style, same length), identical skin tone, identical body shape and proportions. Do NOT generate a new person. Do NOT alter the face in any way. ONLY swap the clothing to: ${itemDescriptions} (shown in the other reference images). Keep the same pose, same white background, same lighting as image 1. Full body visible head to toe, do not crop. Photorealistic fashion photo.`;
+      const prompt = `You are editing image 1. Do not create a new person. The person in image 1 must remain EXACTLY the same — same face, same expression, same hair, same skin tone, same body, same pose. Do not change anything about the person at all. The ONLY edit is: replace the clothing they are wearing with the exact garments shown in the other reference images (${itemDescriptions}). Reproduce those garments accurately — same color, same style, same cut as shown. The full body must be visible from head to toe — do not crop any part. Plain white background. Photorealistic.`;
 
       const refUrls = [avatarUrl, ...itemUrls].filter(Boolean);
 
