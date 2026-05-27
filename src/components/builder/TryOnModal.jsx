@@ -46,26 +46,16 @@ async function generateTryOnImage(avatarUrl, garmentUrl, avatarDescription, extr
 
   const emphasisBlock = extraEmphasis ? `\nEMPHASIS: ${extraEmphasis}` : "";
 
-  const prompt = `You are editing image 1. Image 1 is a person in a beige bodysuit on a white background — this is the person you must preserve exactly. Image 2 is a garment. Your task: edit image 1 by replacing the beige bodysuit only where the garment covers the body with the garment from image 2. Reproduce the garment from image 2 with exact fidelity — same color, pattern, cut, and details.
+  const prompt = `You are editing image 1. Image 1 is a person in a beige bodysuit on a white background — this is the person you must preserve exactly. Image 2 is a garment. Your task: dress the person from image 1 in the exact garment shown in image 2. Reproduce the garment with exact fidelity — same color, pattern, cut, and details. The garment MUST be visibly worn on the person's body.
 ${identityBlock}
-COMPOSITION LOCK — output must match image 1's aspect ratio exactly. Full body must be visible from head to feet with equal margin top and bottom. Pure white background. Do not crop, do not zoom, do not reframe.${emphasisBlock}`;
+COMPOSITION LOCK — full body must be visible from head to feet. Pure white background. Do not crop, do not zoom, do not reframe.${emphasisBlock}`;
 
-  const result = await base44.integrations.Core.InvokeLLM({
-    model: "gemini_3_flash",
+  const { url } = await base44.integrations.Core.GenerateImage({
     prompt,
-    file_urls: [avatarUrl, garmentUrl].filter(Boolean),
-    response_json_schema: {
-      type: "object",
-      properties: {
-        image_url: { type: "string" },
-      },
-    },
+    existing_image_urls: [avatarUrl, garmentUrl].filter(Boolean),
   });
 
-  // InvokeLLM with gemini image model returns the image url
-  if (result?.image_url) return result.image_url;
-  if (typeof result === "string") return result;
-  throw new Error("No image URL returned from generation model.");
+  return url;
 }
 
 // ── Step 3: Quality gate ────────────────────────────────────────────────────────
