@@ -11,7 +11,7 @@ async function getOrGenerateDescription(profile) {
   if (!avatarUrl) return "";
 
   const result = await base44.integrations.Core.InvokeLLM({
-    model: "claude_sonnet_4_5",
+    model: "claude_sonnet_4_6",
     prompt: `Look at this image and write a detailed physical description of the person shown. Cover ALL of these attributes in a single structured paragraph:
 - Face shape
 - Skin tone (be specific, e.g. "warm medium-tan", "light porcelain", "deep brown")
@@ -72,7 +72,7 @@ COMPOSITION LOCK — output must match image 1's aspect ratio exactly. Full body
 async function scoreResult(avatarUrl, generatedUrl) {
   try {
     const scores = await base44.integrations.Core.InvokeLLM({
-      model: "claude_sonnet_4_5",
+      model: "claude_sonnet_4_6",
       prompt: `Compare image 1 (original avatar) and image 2 (AI-generated try-on result). Score each dimension from 1 to 10 as integers:
 - identity_match: How closely does the person in image 2 match the person in image 1? (face, hair, skin tone, body — 10 = identical, 1 = completely different person)
 - garment_match: How well is the garment rendered? (10 = crisp, accurate color/cut/style, 1 = garment looks wrong or missing)
