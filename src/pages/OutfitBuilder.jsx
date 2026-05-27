@@ -280,6 +280,7 @@ export default function OutfitBuilder() {
           onClose={() => setShowTryOn(false)}
           onSnapshotSaved={(snapshot) => {
             setProfile(prev => ({ ...prev, avatar_generated_url: snapshot.snapshot_url }));
+            setPlaced([]);
             setShowTryOn(false);
           }}
         />

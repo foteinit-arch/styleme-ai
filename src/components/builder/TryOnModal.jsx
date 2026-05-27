@@ -20,7 +20,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
       const itemUrls = placed.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
       const itemDescriptions = placed.map(p => `${p.category}: ${p.name}${p.color ? ` (${p.color})` : ''}`).join(', ');
 
-      const prompt = `Fashion editorial photo. This is the same person from the first reference image — same face, same body, same skin tone. Dress this person in the complete outfit: ${itemDescriptions}. Wear every item from the reference images faithfully — same colors, same textures, same styles. Full body view, standing pose, professional studio lighting, clean neutral background. Photorealistic fashion photography.`;
+      const prompt = `Fashion editorial photo. Use EXACTLY the same person from the first reference image — same face, same hair, same body, same skin tone, identical appearance. Do NOT change or replace the person. Show the FULL body from head to toe, including the face and head — do NOT crop the head. Dress this exact person in this complete outfit: ${itemDescriptions}. Replicate every clothing item from the reference images faithfully — same colors, textures, and styles. Full body standing pose, professional studio lighting, clean neutral background. Photorealistic fashion photography.`;
 
       const refUrls = [avatarUrl, ...itemUrls].filter(Boolean);
 
