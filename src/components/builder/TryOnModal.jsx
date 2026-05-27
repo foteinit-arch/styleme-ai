@@ -3,13 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { X, Download, Sparkles, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ── Step 1: Get or generate a cached description of the avatar person ──────────
+// ── Step 1: Generate a fresh description of the avatar person ──────────────────
 async function getOrGenerateDescription(profile) {
-  if (profile?.avatar_description) return profile.avatar_description;
-
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
   if (!avatarUrl) return "";
 
+  // Always regenerate from the current avatar image — never use stale cache
   const result = await base44.integrations.Core.InvokeLLM({
     model: "claude_sonnet_4_6",
     prompt: `Look at this image and write a detailed physical description of the person shown. Cover ALL of these attributes in a single structured paragraph:
@@ -30,7 +29,7 @@ Be precise and specific. This description will be used to lock the person's iden
 
   const description = typeof result === "string" ? result : JSON.stringify(result);
 
-  // Cache it on the profile entity
+  // Update the cache with the fresh description
   if (profile?.id) {
     await base44.entities.UserProfile.update(profile.id, { avatar_description: description });
   }
@@ -125,8 +124,10 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
   const [saving, setSaving] = useState(false);
   const [qualityWarning, setQualityWarning] = useState(false);
 
-  // Cache description across regenerations within this modal session
+  // Cache description within this modal session only (cleared on each open)
   const descriptionRef = useRef(null);
+  // Clear on mount so stale description from previous session is never used
+  useEffect(() => { descriptionRef.current = null; }, []);
 
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
 
