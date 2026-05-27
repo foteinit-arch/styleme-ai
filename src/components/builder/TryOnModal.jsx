@@ -17,12 +17,12 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
     setImageUrl(null);
 
     try {
-      const shoes = placed.filter(p => p.category === 'shoes');
-      const shoeUrls = shoes.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
+      const itemUrls = placed.map(p => p.processed_image_url || p.original_image_url).filter(Boolean);
+      const itemDescriptions = placed.map(p => `${p.category}: ${p.name}${p.color ? ` (${p.color})` : ''}`).join(', ');
 
-      const prompt = `Fashion photo. This is the same person from the first reference image — same body, same face, same pose, same background, same skin tone. Put the exact shoes from the second reference image onto her feet. The shoes must sit ON the feet naturally, not floating. Keep every detail of the shoes identical — same color, same heel, same style. Photorealistic, full body visible, studio lighting.`;
+      const prompt = `Fashion editorial photo. This is the same person from the first reference image — same face, same body, same skin tone. Dress this person in the complete outfit: ${itemDescriptions}. Wear every item from the reference images faithfully — same colors, same textures, same styles. Full body view, standing pose, professional studio lighting, clean neutral background. Photorealistic fashion photography.`;
 
-      const refUrls = [avatarUrl, ...shoeUrls].filter(Boolean);
+      const refUrls = [avatarUrl, ...itemUrls].filter(Boolean);
 
       const { url } = await base44.integrations.Core.GenerateImage({
         prompt,
@@ -70,7 +70,7 @@ export default function TryOnModal({ profile, placed, onClose, onSnapshotSaved }
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#e8b820]" />
-            <span className="font-heading font-bold text-white text-lg">AI Try-On</span>
+            <span className="font-heading font-bold text-white text-lg">AI Try-On ({placed.length} item{placed.length !== 1 ? 's' : ''})</span>
           </div>
           <button onClick={onClose} className="text-white/40 hover:text-white transition">
             <X className="w-5 h-5" />

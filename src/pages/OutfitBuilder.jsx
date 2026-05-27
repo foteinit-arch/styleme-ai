@@ -236,12 +236,12 @@ export default function OutfitBuilder() {
           </Button>
           <Button
             onClick={handleTryShoes}
-            disabled={!placed.some(p => p.category === 'shoes')}
+            disabled={placed.length === 0}
             className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             size="sm"
           >
             <Sparkles className="w-4 h-4 mr-1" />
-            Try Shoes
+            Try On
           </Button>
           <Button onClick={() => setShowSave(true)} disabled={placed.length === 0} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10 disabled:opacity-40" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -280,7 +280,6 @@ export default function OutfitBuilder() {
           onClose={() => setShowTryOn(false)}
           onSnapshotSaved={(snapshot) => {
             setProfile(prev => ({ ...prev, avatar_generated_url: snapshot.snapshot_url }));
-            setPlaced(prev => prev.filter(p => p.category !== 'shoes'));
             setShowTryOn(false);
           }}
         />
