@@ -3,6 +3,20 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter, Palette, Sparkles, Loader2, X } from "lucide-react";
+
+const REMOVEBG_KEY = "dx2dhWT2m31UEp3NvgxYMivt";
+async function removeBackground(imageUrl) {
+  const formData = new FormData();
+  formData.append("image_url", imageUrl);
+  formData.append("size", "auto");
+  const res = await fetch("https://api.remove.bg/v1.0/removebg", {
+    method: "POST",
+    headers: { "X-Api-Key": REMOVEBG_KEY },
+    body: formData,
+  });
+  if (!res.ok) throw new Error("remove.bg failed");
+  return res.blob();
+}
 import ClothingCard from "@/components/wardrobe/ClothingCard";
 import AddClothingModal from "@/components/wardrobe/AddClothingModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -77,10 +91,15 @@ export default function Wardrobe() {
         existing_image_urls: [imgSrc],
       });
       
-      // Upload the generated image
-      const response = await fetch(generatedUrl);
-      const blob = await response.blob();
-      const file = new File([blob], "generated.png", { type: "image/png" });
+      // Remove background from the generated image
+      let processedBlob;
+      try {
+        processedBlob = await removeBackground(generatedUrl);
+      } catch {
+        const response = await fetch(generatedUrl);
+        processedBlob = await response.blob();
+      }
+      const file = new File([processedBlob], "generated.png", { type: "image/png" });
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
       // Create new clothing item
