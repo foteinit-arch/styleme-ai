@@ -83,7 +83,7 @@ export default function Avatar() {
     if (!form.avatar_photo_url) return;
     setGenerating(true);
     const { url } = await base44.integrations.Core.GenerateImage({
-      prompt: `Edit this photo: keep the person completely identical — same face, same hair, same skin, same body proportions. Only change: 1) replace whatever they are wearing with a plain neutral-colored form-fitting outfit (leggings and fitted top) so the body shape is clearly visible, 2) make the background plain white. Do NOT change the person's face, hair, or any physical features at all. Full body visible from head to toe.`,
+      prompt: `Edit this photo of a person. Keep everything about them identical — same face (very lightly airbrushed, 10% smoothing only, no dramatic retouching), same hair, same skin tone, same body shape and proportions. Make these specific changes: 1) dress them in a seamless nude/skin-tone form-fitting bodysuit — no patterns, no texture, smooth and minimal, 2) remove all accessories (jewelry, bags, belts, hats, glasses etc.), 3) plain white background. Full body visible from head to toe, relaxed standing pose facing forward.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
