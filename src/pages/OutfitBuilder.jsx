@@ -228,7 +228,7 @@ export default function OutfitBuilder() {
             )}
           </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
+          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleClear(); }} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowSuggest(true)} disabled={clothes.length === 0} className="text-purple-300 border-purple-500/40 bg-transparent hover:bg-purple-500/10 disabled:opacity-40">
