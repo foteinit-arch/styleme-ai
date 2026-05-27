@@ -29,7 +29,14 @@ async function describeGarments(garmentUrls) {
   if (!garmentUrls.length) return "casual outfit";
   const result = await base44.integrations.Core.InvokeLLM({
     model: "claude_sonnet_4_6",
-    prompt: `Look at these ${garmentUrls.length} clothing item image(s) and describe each one in detail: type of garment, exact color(s), pattern, cut, style, fabric appearance, and any notable details. Be concise but very specific about colors and style. Number each item.`,
+    prompt: `Look at these ${garmentUrls.length} clothing item image(s). For each item, provide an extremely detailed and precise fashion description including:
+- Exact garment type and silhouette
+- All colors (primary and secondary)
+- Fabric texture and appearance (lace, denim, sheer, knit, etc.)
+- ALL distinctive details: fringe, embroidery, cutouts, ruffles, buttons, asymmetry, prints, etc.
+- Neckline, sleeve type, hem style, length
+- Fit (oversized, fitted, relaxed, etc.)
+Number each item. Be exhaustive — miss nothing.`,
     file_urls: garmentUrls,
   });
   return typeof result === "string" ? result : JSON.stringify(result);
@@ -44,12 +51,13 @@ async function generateTryOnImage(avatarUrl, garmentUrls, avatarDescription, ext
 
   const prompt = `You are generating a fashion photo. The reference image shows a specific real person. You MUST reproduce that exact person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 
-The person should be shown wearing this specific outfit: ${garmentDescription}
+The person should be wearing EXACTLY this outfit — reproduce every detail faithfully: ${garmentDescription}
 
 Person description for reference: ${avatarDescription}
 
 Requirements:
-- The face and physical appearance MUST exactly match the reference image person
+- Face and physical appearance MUST exactly match the reference image person
+- Garments MUST match the description above precisely — do not simplify or omit distinctive details (fringe, lace, patterns, asymmetry, etc.)
 - Pure white background
 - Full body visible from top of head to feet, no cropping
 - Professional fashion photo style${emphasisBlock}`;
