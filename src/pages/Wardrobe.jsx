@@ -28,6 +28,20 @@ import WeatherFilter from "@/components/wardrobe/WeatherFilter";
 
 const CATEGORIES = ["all", "top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 
+// Display order and friendly labels for grouped category sections.
+const CATEGORY_ORDER = ["dress", "top", "bottom", "outerwear", "shoes", "bag", "accessory", "underwear"];
+const CATEGORY_LABELS = {
+  top: "Tops",
+  bottom: "Bottoms",
+  dress: "Dresses",
+  outerwear: "Outerwear",
+  shoes: "Shoes",
+  accessory: "Accessories",
+  underwear: "Underwear",
+  bag: "Bags",
+};
+const categoryLabel = (c) => CATEGORY_LABELS[c] || (c ? c.charAt(0).toUpperCase() + c.slice(1) : "Other");
+
 export default function Wardrobe() {
   const [user, setUser]       = useState(null);
   const [category, setCategory] = useState("all");
@@ -141,6 +155,17 @@ export default function Wardrobe() {
     (!hiddenWeatherCategories || !hiddenWeatherCategories.includes(i.category))
   );
 
+  // Group the filtered items by category so the wardrobe is organised into
+  // clear sections (Dresses, Tops, Bottoms, ...) instead of one mixed grid.
+  // Sections only render when the user is viewing "all" categories; selecting a
+  // specific category keeps the simple single-grid view.
+  const groupedCategories = (() => {
+    const known = CATEGORY_ORDER.filter(c => filtered.some(i => i.category === c));
+    const extras = Array.from(new Set(filtered.map(i => i.category)))
+      .filter(c => c && !CATEGORY_ORDER.includes(c));
+    return [...known, ...extras];
+  })();
+
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
@@ -178,7 +203,7 @@ export default function Wardrobe() {
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map(c => (
-                  <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
+                  <SelectItem key={c} value={c}>{c === "all" ? "All" : categoryLabel(c)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -210,6 +235,35 @@ export default function Wardrobe() {
               <Button onClick={() => setShowAdd(true)} className="bg-[#d4a017] hover:bg-[#c09010] text-[#373d47] font-semibold">
                 <Plus className="mr-2 w-4 h-4" /> Add Clothing
               </Button>
+            </div>
+          ) : category === "all" ? (
+            <div className="space-y-10">
+              {groupedCategories.map(cat => {
+                const group = filtered.filter(i => i.category === cat);
+                if (group.length === 0) return null;
+                return (
+                  <section key={cat}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="font-heading font-semibold text-lg text-white tracking-tight">
+                        {categoryLabel(cat)}
+                      </h2>
+                      <span className="text-xs font-medium text-[#373d47] bg-[#d4a017] rounded-full px-2 py-0.5">
+                        {group.length}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {group.map(item => (
+                        <ClothingCard
+                          key={item.id}
+                          item={item}
+                          onDelete={(id) => deleteMutation.mutate(id)}
+                          onGenerateSimilar={() => handleGenerateSimilar(item)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
