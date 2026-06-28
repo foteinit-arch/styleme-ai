@@ -95,6 +95,14 @@ function layeringGuidance(bodyItems) {
   return notes.join(" ");
 }
 
+// Collect the photo URLs of the garments worn on the body (for scoring/refs).
+export function wornGarmentUrls(picked) {
+  return picked
+    .filter(p => BODY_CATEGORIES.includes(p.category) || p.category === "shoes")
+    .map(i => i.processed_image_url || i.original_image_url)
+    .filter(Boolean);
+}
+
 // Generate the avatar wearing the current body+shoe selection.
 // `around` items are NOT painted on the body — they are returned for the
 // magazine-style layout in the UI.
@@ -133,6 +141,8 @@ export async function generateLook({ profile, picked, avatarDescription, extraEm
 REFERENCE IMAGE 1 is a specific real person. You MUST reproduce that EXACT person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 
 REFERENCE IMAGES 2 AND ONWARD are the EXACT garments the person must wear. Reproduce each garment FAITHFULLY and LITERALLY from its reference image — copy the precise shape, silhouette, color, pattern, print, fabric texture, fringe/embroidery/cutouts, neckline, sleeves, hem and all distinctive details EXACTLY as shown. Do NOT redesign, stylize, simplify, or invent a similar-looking garment. The garment in the output must be visually identical to the one in its reference image.
+
+TEXTURE AND PATTERN FIDELITY (critical): Reproduce the garment's surface EXACTLY as in its reference image. If the fabric has a lace, burnout, embroidered, beaded, sequinned, woven, or printed pattern, copy that SAME pattern with the same motif, scale, density and placement — do NOT smooth it into a plain fabric or substitute a generic texture. Match fringe/tassel length, density and the exact asymmetry of the hem. Match the precise shade and any tonal variation of the color. Preserve every distinctive construction detail (keyhole, slits, seams, panels) in the same position. Treat the garment reference like a fabric swatch to be copied, not reinterpreted.
 
 GARMENT MAPPING AND STRICT TYPE RULES (the cited reference image is the source of truth for each garment's appearance; the category rule governs how it sits on the body):
 ${categoryRules}
@@ -175,25 +185,30 @@ export async function generateAvatarDescription(avatarUrl) {
   return typeof result === "string" ? result : JSON.stringify(result);
 }
 
-// Quality gate (kept consistent with existing TryOnModal scoring).
-export async function scoreResult(avatarUrl, generatedUrl) {
+// Quality gate. Compares the result against BOTH the avatar (identity) and the
+// actual garment photos (garment fidelity), so a poor texture/pattern match can
+// trigger a targeted retry.
+export async function scoreResult(avatarUrl, generatedUrl, garmentUrls = []) {
   try {
+    const fileUrls = [avatarUrl, generatedUrl, ...garmentUrls];
+    const garmentNote = garmentUrls.length
+      ? ` Images 3 onward are the ACTUAL garment reference photos. Also score garment_match (1-10): how faithfully the clothing in image 2 reproduces the EXACT garments in images 3+ — same silhouette, color, and especially the same surface pattern/texture, fringe and distinctive details (10 = visually identical garment, not just similar).`
+      : "";
+    const props = {
+      identity_match: { type: "integer" },
+      garment_visible: { type: "integer" },
+      full_body_framing: { type: "integer" },
+    };
+    if (garmentUrls.length) props.garment_match = { type: "integer" };
     const scores = await base44.integrations.Core.InvokeLLM({
       model: "claude_sonnet_4_6",
-      prompt: `Compare image 1 (original avatar) and image 2 (AI-generated try-on result). Score each dimension from 1 to 10 as integers: identity_match (face/hair/skin/body — 10 identical), garment_visible (clothes clearly visible/well-rendered), full_body_framing (full body head to toe, no cropping). Return ONLY a JSON object with keys: identity_match, garment_visible, full_body_framing.`,
-      file_urls: [avatarUrl, generatedUrl],
-      response_json_schema: {
-        type: "object",
-        properties: {
-          identity_match: { type: "integer" },
-          garment_visible: { type: "integer" },
-          full_body_framing: { type: "integer" },
-        },
-      },
+      prompt: `Compare image 1 (original avatar) and image 2 (AI-generated try-on result). Score each dimension from 1 to 10 as integers: identity_match (face/hair/skin/body — 10 identical), garment_visible (clothes clearly visible/well-rendered), full_body_framing (full body head to toe, no cropping).${garmentNote} Return ONLY a JSON object with keys: identity_match, garment_visible, full_body_framing${garmentUrls.length ? ", garment_match" : ""}.`,
+      file_urls: fileUrls,
+      response_json_schema: { type: "object", properties: props },
     });
     return scores;
   } catch {
-    return { identity_match: 10, garment_visible: 10, full_body_framing: 10 };
+    return { identity_match: 10, garment_visible: 10, full_body_framing: 10, garment_match: 10 };
   }
 }
 
@@ -202,5 +217,6 @@ export function buildEmphasis(scores) {
   if ((scores?.identity_match ?? 10) < 7) failing.push("CRITICAL: The output person MUST have the identical face, hair, and skin tone as the person in the reference image. Do not change any facial features.");
   if ((scores?.garment_visible ?? 10) < 7) failing.push("Make sure the outfit is clearly visible and well-rendered on the person.");
   if ((scores?.full_body_framing ?? 10) < 7) failing.push("Show the complete full body from head to feet without any cropping.");
+  if ((scores?.garment_match ?? 10) < 8) failing.push("CRITICAL GARMENT FIDELITY: The clothing did NOT closely enough match the garment reference photos. Reproduce the EXACT garment from its reference image — copy the precise surface pattern/texture (lace, burnout, embroidery, weave or print) with the same motif, scale and density, the exact fringe length and hem asymmetry, the precise color shade, and every distinctive detail. Do NOT smooth, simplify, or substitute a generic fabric.");
   return failing.join(" ");
 }
