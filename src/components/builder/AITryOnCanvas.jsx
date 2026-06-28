@@ -7,6 +7,7 @@ import {
   generateAvatarDescription,
   scoreResult,
   buildEmphasis,
+  wornGarmentUrls,
 } from "@/components/builder/tryOnEngine";
 
 // Estimated seconds for a single AI generation pass (used for the countdown).
@@ -63,13 +64,19 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
       if (!descriptionRef.current) {
         descriptionRef.current = await generateAvatarDescription(avatarUrl);
       }
+      const garmentUrls = wornGarmentUrls(picked);
       const firstUrl = await generateLook({
         profile,
         picked,
         avatarDescription: descriptionRef.current,
       });
-      const scores = await scoreResult(avatarUrl, firstUrl);
-      const passed = (scores.identity_match ?? 10) >= 7 && (scores.garment_visible ?? 10) >= 7;
+      const scores = await scoreResult(avatarUrl, firstUrl, garmentUrls);
+      // Pass requires good identity, visible garments, AND a close garment match
+      // to the actual reference photos (texture/pattern fidelity).
+      const passed =
+        (scores.identity_match ?? 10) >= 7 &&
+        (scores.garment_visible ?? 10) >= 7 &&
+        (scores.garment_match ?? 10) >= 8;
       if (passed) {
         setGenUrl(firstUrl);
       } else {
@@ -77,9 +84,14 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
         const retryUrl = await generateLook({
           profile, picked, avatarDescription: descriptionRef.current, extraEmphasis: emphasis,
         });
-        const retryScores = await scoreResult(avatarUrl, retryUrl);
-        setGenUrl(retryUrl);
-        if ((retryScores.identity_match ?? 10) < 7) setWarn(true);
+        const retryScores = await scoreResult(avatarUrl, retryUrl, garmentUrls);
+        // Keep whichever pass scored better on garment fidelity.
+        const firstGarment = scores.garment_match ?? 0;
+        const retryGarment = retryScores.garment_match ?? 0;
+        const bestUrl = retryGarment >= firstGarment ? retryUrl : firstUrl;
+        setGenUrl(bestUrl);
+        const bestScores = retryGarment >= firstGarment ? retryScores : scores;
+        if ((bestScores.identity_match ?? 10) < 7) setWarn(true);
       }
     } catch (err) {
       setError(err.message || "Couldn't generate your look. Tap retry.");
@@ -146,9 +158,11 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
                 <Sparkles style={{ position: "absolute", inset: 0, margin: "auto", width: 22, height: 22, color: "#e8b820" }} />
               </div>
               <div style={{ textAlign: "center" }}>
-                <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, fontWeight: 600, margin: 0 }}>Placing your garment…</p>
+                <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, fontWeight: 600, margin: 0 }}>
+                  {secondsLeft > 1 ? "Placing your garment…" : "Refining the fit…"}
+                </p>
                 <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, margin: "4px 0 0" }}>
-                  About {secondsLeft}s remaining
+                  {secondsLeft > 1 ? `About ${secondsLeft}s remaining` : "Almost there — matching the details"}
                 </p>
               </div>
             </div>
