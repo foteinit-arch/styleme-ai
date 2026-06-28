@@ -107,23 +107,38 @@ export async function generateLook({ profile, picked, avatarDescription, extraEm
   const measurements = measurementsBlock(profile);
   const emphasisBlock = extraEmphasis ? ` ${extraEmphasis}` : "";
 
+  // Collect the actual garment photos so the image model can copy each garment
+  // visually (image-to-image), instead of relying on a text description alone.
+  // Reference image 1 is always the person (identity); references 2+ are the
+  // exact garments, in the same order as the rules below.
+  const garmentUrls = wornItems
+    .map(i => i.processed_image_url || i.original_image_url)
+    .filter(Boolean);
+  const referenceImages = avatarUrl ? [avatarUrl, ...garmentUrls] : [...garmentUrls];
+
   // Explicit per-item category enforcement so the model never reinterprets
   // a garment as a different type (e.g. a long top rendered as a dress).
+  // Each rule cites the exact reference image the garment is shown in.
+  const refOffset = avatarUrl ? 2 : 1; // first garment ref index
   const categoryRules = wornItems
-    .map((i, n) => `Item ${n + 1} (${i.category}): ${CATEGORY_LENGTH_RULE[i.category] || ""}`)
+    .map((i, n) => `Item ${n + 1} — ${i.category}${i.name ? ` ("${i.name}")` : ""}, shown in REFERENCE IMAGE ${refOffset + n}: ${CATEGORY_LENGTH_RULE[i.category] || ""}`)
     .join("\n");
 
   // Generation only runs on a COMPLETE look (a dress, or top+bottom), so there
   // is no "missing layer" to fill. Keep an explicit no-invention instruction.
   const missingLayerRule = "Render ONLY the garments described above. Do NOT add, invent, or substitute any garment that was not provided.";
 
-  const prompt = `You are generating a professional fashion photo. The reference image shows a specific real person. You MUST reproduce that exact person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
+  const prompt = `You are generating a professional fashion photo by combining several reference images.
 
-The person should be wearing EXACTLY this outfit — reproduce every detail faithfully:
-${garmentDescription}
+REFERENCE IMAGE 1 is a specific real person. You MUST reproduce that EXACT person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 
-STRICT GARMENT-TYPE RULES (these override anything that looks different in the photos):
+REFERENCE IMAGES 2 AND ONWARD are the EXACT garments the person must wear. Reproduce each garment FAITHFULLY and LITERALLY from its reference image — copy the precise shape, silhouette, color, pattern, print, fabric texture, fringe/embroidery/cutouts, neckline, sleeves, hem and all distinctive details EXACTLY as shown. Do NOT redesign, stylize, simplify, or invent a similar-looking garment. The garment in the output must be visually identical to the one in its reference image.
+
+GARMENT MAPPING AND STRICT TYPE RULES (the cited reference image is the source of truth for each garment's appearance; the category rule governs how it sits on the body):
 ${categoryRules}
+
+Supplementary written descriptions (use only to reinforce, never to override the reference photos):
+${garmentDescription}
 
 ${missingLayerRule}
 
@@ -131,12 +146,12 @@ ${layering}
 
 ${measurements}
 
-${avatarDescription ? `Person description for reference: ${avatarDescription}` : ""}
+${avatarDescription ? `Person description for reference image 1: ${avatarDescription}` : ""}
 
 Requirements:
-- Face and physical appearance MUST exactly match the reference image person
+- The person's face and physical appearance MUST exactly match REFERENCE IMAGE 1
+- Each garment MUST visually match its cited reference image precisely — same exact garment, not a lookalike
 - Each garment MUST be rendered as its stated category/type and length — NEVER convert a top into a dress, never extend a top below the hip, never merge separate garments into a one-piece
-- Garments MUST match the descriptions precisely — do not simplify or omit distinctive details
 - Garments MUST be fitted to the person's real body proportions, draping naturally
 - Pure white background
 - Full body visible from top of head to feet, no cropping
@@ -144,7 +159,7 @@ Requirements:
 
   const { url } = await base44.integrations.Core.GenerateImage({
     prompt,
-    existing_image_urls: avatarUrl ? [avatarUrl] : [],
+    existing_image_urls: referenceImages,
   });
   return url;
 }
