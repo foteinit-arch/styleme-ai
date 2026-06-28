@@ -113,20 +113,9 @@ export async function generateLook({ profile, picked, avatarDescription, extraEm
     .map((i, n) => `Item ${n + 1} (${i.category}): ${CATEGORY_LENGTH_RULE[i.category] || ""}`)
     .join("\n");
 
-  const cats = wornItems.map(i => i.category);
-  const hasDress = cats.includes("dress");
-  const hasTop = cats.includes("top");
-  const hasBottom = cats.includes("bottom");
-  // Tell the model how to handle a not-yet-complete look so it never invents a
-  // dress to fill the gap.
-  let missingLayerRule = "";
-  if (!hasDress) {
-    if (hasTop && !hasBottom) {
-      missingLayerRule = "The user has selected ONLY a top so far. Render the top on the upper body exactly as a top. For the lower body, show plain, simple, neutral light-grey basics (e.g. simple fitted trousers/leggings) so the figure is decent \u2014 do NOT turn the top into a dress and do NOT invent a statement bottom.";
-    } else if (hasBottom && !hasTop) {
-      missingLayerRule = "The user has selected ONLY a bottom so far. Render the bottom on the lower body exactly as a bottom. For the upper body, show a plain, simple, neutral light-grey fitted top/tee \u2014 do NOT invent a statement top and do NOT merge into a dress.";
-    }
-  }
+  // Generation only runs on a COMPLETE look (a dress, or top+bottom), so there
+  // is no "missing layer" to fill. Keep an explicit no-invention instruction.
+  const missingLayerRule = "Render ONLY the garments described above. Do NOT add, invent, or substitute any garment that was not provided.";
 
   const prompt = `You are generating a professional fashion photo. The reference image shows a specific real person. You MUST reproduce that exact person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 

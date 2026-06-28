@@ -38,6 +38,8 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
 
   const { complete, hint } = getCompletionState(picked);
   const aroundItems = picked.filter(p => isAround(p.category));
+  // Body garments the user has picked so far (shown in a tray while incomplete).
+  const bodyItems = picked.filter(p => WORN.has(p.category));
 
   // Countdown timer while loading.
   useEffect(() => {
@@ -86,21 +88,34 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
     }
   }, [avatarUrl, profile, picked]);
 
-  // Auto-trigger whenever the set of WORN items changes.
+  // Auto-trigger only when the look is COMPLETE (a dress, or top+bottom).
+  // While incomplete we never generate — we show the base avatar plus a tray
+  // of the picked items and a hint to finish the look.
   useEffect(() => {
     const sig = wornSignature(picked);
-    if (sig === lastSigRef.current) return;
-    lastSigRef.current = sig;
 
     if (!sig) {
       // No worn garments — reset to base avatar.
+      lastSigRef.current = "";
       setGenUrl(null);
       return;
     }
+
+    if (!complete) {
+      // Look not complete yet: clear any previous generated look and wait.
+      lastSigRef.current = sig;
+      setGenUrl(null);
+      return;
+    }
+
+    // Complete look: only regenerate if the worn set actually changed.
+    if (sig === lastSigRef.current) return;
+    lastSigRef.current = sig;
     runGeneration();
-  }, [picked]);
+  }, [picked, complete]);
 
   const displayUrl = genUrl || avatarUrl;
+  const showTray = !complete && bodyItems.length > 0;
 
   if (!avatarUrl) {
     return (
@@ -171,6 +186,27 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
           </div>
         )}
       </div>
+
+      {/* Picked-items tray while the look is incomplete (no generation yet) */}
+      {showTray && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+          {bodyItems.map(item => {
+            const img = item.processed_image_url || item.original_image_url;
+            return (
+              <div key={item.placedId} style={{ position: "relative", width: 56, height: 56, borderRadius: 10, background: "rgba(255,255,255,0.95)", boxShadow: "0 3px 10px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", padding: 5 }}>
+                {img ? <img src={img} alt={item.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : <span style={{ fontSize: 22 }}>👕</span>}
+                <button
+                  onClick={() => onRemove(item.placedId)}
+                  title="Remove"
+                  style={{ position: "absolute", top: -7, right: -7, width: 20, height: 20, borderRadius: "50%", background: "#ef4444", color: "white", border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                >
+                  <X style={{ width: 11, height: 11 }} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Completion hint */}
       {hint && (
