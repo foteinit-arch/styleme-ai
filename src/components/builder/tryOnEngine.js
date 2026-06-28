@@ -59,14 +59,24 @@ function measurementsBlock(profile) {
   return `The person's real body measurements are: ${parts.join(", ")}. The garments MUST be sized and fitted to match these exact body proportions — drape and fit naturally as real clothes would on this body.`;
 }
 
+// Human-readable rule describing how long/where each category sits on the body.
+const CATEGORY_LENGTH_RULE = {
+  top: "This is a TOP: it covers ONLY the upper body and ends around the waist or hip. It is NOT a dress and must NEVER be rendered as a dress or extended below the hip, no matter how long it looks in the product photo.",
+  bottom: "This is a BOTTOM (pants/skirt/shorts): it covers ONLY the lower body from the waist down. It must NEVER be rendered as a top or a full dress.",
+  dress: "This is a DRESS: a single one-piece garment covering the torso and extending downward as its photo shows.",
+  outerwear: "This is OUTERWEAR: a jacket/coat/cardigan layered OVER other clothing. It is NOT a dress.",
+  underwear: "This is UNDERWEAR/base layer worn closest to the body.",
+  shoes: "These are SHOES worn on the feet only.",
+};
+
 // Describe garments in text (avoids passing garment photos as identity references).
 async function describeGarments(items) {
   const urls = items.map(i => i.processed_image_url || i.original_image_url).filter(Boolean);
   if (!urls.length) return "";
-  const list = items.map((i, n) => `${n + 1}. ${i.category}${i.color ? ` in ${i.color}` : ""}${i.name ? ` — "${i.name}"` : ""}`).join("\n");
+  const list = items.map((i, n) => `${n + 1}. category="${i.category}"${i.color ? `, color ${i.color}` : ""}${i.name ? `, name "${i.name}"` : ""} — ${CATEGORY_LENGTH_RULE[i.category] || ""}`).join("\n");
   const result = await base44.integrations.Core.InvokeLLM({
     model: "claude_sonnet_4_6",
-    prompt: `Look at these ${urls.length} clothing item image(s). They correspond to:\n${list}\n\nFor each item, provide an extremely detailed and precise fashion description including: exact garment type and silhouette, all colors, fabric texture, ALL distinctive details (fringe, embroidery, cutouts, ruffles, buttons, asymmetry, prints), neckline, sleeve type, hem style, length, and fit. Number each item. Be exhaustive — miss nothing.`,
+    prompt: `Look at these ${urls.length} clothing item image(s). They correspond to:\n${list}\n\nFor each item, provide an extremely detailed and precise fashion description including: exact garment type and silhouette, all colors, fabric texture, ALL distinctive details (fringe, embroidery, cutouts, ruffles, buttons, asymmetry, prints), neckline, sleeve type, hem style, length, and fit.\n\nCRITICAL: Respect the stated category for each item. The category is authoritative — describe the item strictly as that category type. A "top" must be described as a top that ends at the waist or hip (never a dress), a "bottom" only as lower-body wear, etc. If a product photo is ambiguous or appears longer than its category, still describe it according to its declared category. Number each item. Be exhaustive — miss nothing.`,
     file_urls: urls,
   });
   return typeof result === "string" ? result : JSON.stringify(result);
@@ -97,10 +107,36 @@ export async function generateLook({ profile, picked, avatarDescription, extraEm
   const measurements = measurementsBlock(profile);
   const emphasisBlock = extraEmphasis ? ` ${extraEmphasis}` : "";
 
+  // Explicit per-item category enforcement so the model never reinterprets
+  // a garment as a different type (e.g. a long top rendered as a dress).
+  const categoryRules = wornItems
+    .map((i, n) => `Item ${n + 1} (${i.category}): ${CATEGORY_LENGTH_RULE[i.category] || ""}`)
+    .join("\n");
+
+  const cats = wornItems.map(i => i.category);
+  const hasDress = cats.includes("dress");
+  const hasTop = cats.includes("top");
+  const hasBottom = cats.includes("bottom");
+  // Tell the model how to handle a not-yet-complete look so it never invents a
+  // dress to fill the gap.
+  let missingLayerRule = "";
+  if (!hasDress) {
+    if (hasTop && !hasBottom) {
+      missingLayerRule = "The user has selected ONLY a top so far. Render the top on the upper body exactly as a top. For the lower body, show plain, simple, neutral light-grey basics (e.g. simple fitted trousers/leggings) so the figure is decent \u2014 do NOT turn the top into a dress and do NOT invent a statement bottom.";
+    } else if (hasBottom && !hasTop) {
+      missingLayerRule = "The user has selected ONLY a bottom so far. Render the bottom on the lower body exactly as a bottom. For the upper body, show a plain, simple, neutral light-grey fitted top/tee \u2014 do NOT invent a statement top and do NOT merge into a dress.";
+    }
+  }
+
   const prompt = `You are generating a professional fashion photo. The reference image shows a specific real person. You MUST reproduce that exact person — identical face structure, skin tone, hair color and style, eye color, and body proportions. Do NOT substitute a different person or model.
 
 The person should be wearing EXACTLY this outfit — reproduce every detail faithfully:
 ${garmentDescription}
+
+STRICT GARMENT-TYPE RULES (these override anything that looks different in the photos):
+${categoryRules}
+
+${missingLayerRule}
 
 ${layering}
 
@@ -110,6 +146,7 @@ ${avatarDescription ? `Person description for reference: ${avatarDescription}` :
 
 Requirements:
 - Face and physical appearance MUST exactly match the reference image person
+- Each garment MUST be rendered as its stated category/type and length — NEVER convert a top into a dress, never extend a top below the hip, never merge separate garments into a one-piece
 - Garments MUST match the descriptions precisely — do not simplify or omit distinctive details
 - Garments MUST be fitted to the person's real body proportions, draping naturally
 - Pure white background
