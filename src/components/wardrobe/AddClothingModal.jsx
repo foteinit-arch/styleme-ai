@@ -9,40 +9,6 @@ import { X, Upload, Sparkles, FolderOpen, CheckCircle, AlertCircle, Loader2 } fr
 
 const CATEGORIES = ["top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
 
-// TODO: ROTATE THIS KEY. Move to a Base44 secret / server function.
-// Client-side keys are extractable from the JS bundle.
-const REMOVEBG_KEY = import.meta.env.VITE_REMOVEBG_KEY || "REPLACE_WITH_ROTATED_KEY";
-const MAX_BYTES = 24 * 1024 * 1024; // remove.bg free tier ~25MB
-
-async function removeBackgroundFromFile(file) {
-  if (!REMOVEBG_KEY || REMOVEBG_KEY === "REPLACE_WITH_ROTATED_KEY") {
-    throw new Error("remove.bg API key is not configured.");
-  }
-  if (file.size > MAX_BYTES) {
-    throw new Error(`Image is ${(file.size / 1024 / 1024).toFixed(1)}MB; remove.bg limit is 25MB.`);
-  }
-  const formData = new FormData();
-  formData.append("image_file", file);
-  formData.append("size", "auto");
-  formData.append("format", "png"); // ensure transparent PNG output
-  const res = await fetch("https://api.remove.bg/v1.0/removebg", {
-    method: "POST",
-    headers: { "X-Api-Key": REMOVEBG_KEY },
-    body: formData,
-  });
-  if (!res.ok) {
-    let detail = "";
-    try {
-      const errJson = await res.json();
-      detail = errJson?.errors?.[0]?.title || JSON.stringify(errJson);
-    } catch {
-      detail = await res.text().catch(() => "");
-    }
-    throw new Error(`remove.bg ${res.status}: ${detail || "request failed"}`);
-  }
-  return res.blob();
-}
-
 const convertAvifToJpeg = (f) =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -119,9 +85,8 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   // Core single-item pipeline:
   // 1. Normalize (AVIF -> JPEG)
   // 2. Upload original to Base44 storage
-  // 3. Send the SAME normalized file directly to remove.bg -> transparent PNG
-  // 4. Upload that PNG to Base44 storage as processed
-  // 5. Create ClothingItem entity
+  // 3. Call the removeBackground backend function with the original URL -> processed URL
+  // 4. Create ClothingItem entity
   async function pipelineProcess({ rawFile, itemName, itemCategory, itemBrand }) {
     const normalized = await normalizeUpload(rawFile);
 
@@ -130,10 +95,12 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
     let processedUrl = originalUrl;
     let bgWarning = "";
     try {
-      const cutoutBlob = await removeBackgroundFromFile(normalized);
-      const cutoutFile = new File([cutoutBlob], "cutout.png", { type: "image/png" });
-      const { file_url: pUrl } = await base44.integrations.Core.UploadFile({ file: cutoutFile });
-      processedUrl = pUrl;
+      const response = await base44.functions.invoke("removeBackground", { image_url: originalUrl });
+      if (response.data?.file_url) {
+        processedUrl = response.data.file_url;
+      } else {
+        throw new Error(response.data?.error || "Background removal failed");
+      }
     } catch (e) {
       // Don't block the upload, but surface why background removal failed.
       bgWarning = e?.message || "Background removal failed";

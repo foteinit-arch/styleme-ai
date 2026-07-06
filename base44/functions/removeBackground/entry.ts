@@ -52,10 +52,9 @@ Deno.serve(async (req) => {
 
     const blob = await res.blob();
     const buffer = await blob.arrayBuffer();
-    return new Response(buffer, {
-      status: 200,
-      headers: { 'Content-Type': blob.type || 'image/png' },
-    });
+    const file = new File([buffer], "cutout.png", { type: blob.type || "image/png" });
+    const { file_url } = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+    return Response.json({ file_url });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
