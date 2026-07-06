@@ -42,6 +42,8 @@ async function isDirectImageUrl(url) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const { image_url } = await req.json();
 
     if (!image_url) {

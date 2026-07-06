@@ -26,38 +26,46 @@ export default function Explore() {
     queryFn: () => base44.entities.Outfit.filter({ is_public: true }, "-created_date", 50),
   });
 
-  // Track which outfits the current user has liked (local session state)
-  const [likedIds, setLikedIds] = useState({});
+  // Likes are the server-trusted source of truth — derive counts and user's liked outfits from OutfitLike records
+  const { data: likes = [] } = useQuery({
+    queryKey: ["explore-likes"],
+    queryFn: () => base44.entities.OutfitLike.filter({}),
+  });
+
+  const likeCounts = {};
+  const userLikedIds = {};
+  likes.forEach(l => {
+    likeCounts[l.outfit_id] = (likeCounts[l.outfit_id] || 0) + 1;
+    if (user && l.user_email === user.email) userLikedIds[l.outfit_id] = true;
+  });
 
   const likeMutation = useMutation({
     mutationFn: async ({ outfit }) => {
       await base44.entities.OutfitLike.create({ outfit_id: outfit.id, user_email: user.email });
-      await base44.entities.Outfit.update(outfit.id, { likes_count: (outfit.likes_count || 0) + 1 });
     },
     onMutate: async ({ outfit }) => {
       if (!user) { base44.auth.redirectToLogin(window.location.href); return; }
-      if (likedIds[outfit.id]) return;
+      if (userLikedIds[outfit.id]) return;
 
-      await queryClient.cancelQueries({ queryKey: ["explore-outfits"] });
-      const prev = queryClient.getQueryData(["explore-outfits"]);
+      await queryClient.cancelQueries({ queryKey: ["explore-likes"] });
+      const prev = queryClient.getQueryData(["explore-likes"]);
 
-      // Optimistic update
-      setLikedIds(l => ({ ...l, [outfit.id]: true }));
-      queryClient.setQueryData(["explore-outfits"], old =>
-        (old || []).map(o => o.id === outfit.id ? { ...o, likes_count: (o.likes_count || 0) + 1 } : o)
-      );
+      // Optimistic update — add like locally
+      queryClient.setQueryData(["explore-likes"], old => [
+        ...(old || []),
+        { outfit_id: outfit.id, user_email: user.email },
+      ]);
       return { prev };
     },
-    onError: (_err, { outfit }, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(["explore-outfits"], ctx.prev);
-      setLikedIds(l => { const n = { ...l }; delete n[outfit.id]; return n; });
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(["explore-likes"], ctx.prev);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["explore-outfits"] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["explore-likes"] }),
   });
 
   const handleLike = (outfit) => {
     if (!user) { base44.auth.redirectToLogin(window.location.href); return; }
-    if (likedIds[outfit.id]) return;
+    if (userLikedIds[outfit.id]) return;
     likeMutation.mutate({ outfit });
   };
 
@@ -124,10 +132,10 @@ export default function Explore() {
                       <p className="text-xs text-white/30">{format(new Date(outfit.created_date), "MMM d")}</p>
                       <button
                         onClick={() => handleLike(outfit)}
-                        className={`flex items-center gap-1 text-xs transition ${likedIds[outfit.id] ? "text-yellow-300" : "text-white/30 hover:text-yellow-300"}`}
+                        className={`flex items-center gap-1 text-xs transition ${userLikedIds[outfit.id] ? "text-yellow-300" : "text-white/30 hover:text-yellow-300"}`}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${likedIds[outfit.id] ? "fill-yellow-300 text-yellow-300" : ""}`} />
-                        {outfit.likes_count || 0}
+                        <Heart className={`w-3.5 h-3.5 ${userLikedIds[outfit.id] ? "fill-yellow-300 text-yellow-300" : ""}`} />
+                        {likeCounts[outfit.id] || 0}
                       </button>
                     </div>
                   </div>
