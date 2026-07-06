@@ -68,11 +68,11 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    base44.auth.loginWithProvider("google", window.location.origin + "/");
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/");
+    base44.auth.loginWithProvider("apple", window.location.origin + "/");
   };
 
   if (showOtp) {
