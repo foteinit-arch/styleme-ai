@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isToday, isSameDay } from "date-fns";
 
 export default function WardrobeCalendar() {
@@ -10,8 +11,10 @@ export default function WardrobeCalendar() {
   const [scheduled, setScheduled] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dragOutfit, setDragOutfit] = useState(null);
+  const [selectedOutfit, setSelectedOutfit] = useState(null);
   const [draggingScheduled, setDraggingScheduled] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     base44.auth.me().then(async (u) => {
@@ -38,7 +41,7 @@ export default function WardrobeCalendar() {
   };
 
   const handleDropOnDay = async (day) => {
-    if (!dragOutfit && !draggingScheduled) return;
+    if (!dragOutfit && !draggingScheduled && !selectedOutfit) return;
     const dateStr = format(day, "yyyy-MM-dd");
 
     // If dragging an already-scheduled item to a new date
@@ -49,21 +52,39 @@ export default function WardrobeCalendar() {
       return;
     }
 
+    // Resolve which outfit to place — supports both drag-and-drop and tap-to-place
+    const outfitToPlace = draggingScheduled
+      ? outfits.find(o => o.id === draggingScheduled.outfit_id)
+      : (dragOutfit || selectedOutfit);
+    if (!outfitToPlace) return;
+
     // Check if there's already something on this day
     const existing = scheduled.find(s => isSameDay(new Date(s.date), day));
     if (existing) {
       // Replace it
-      await base44.entities.ScheduledOutfit.update(existing.id, { outfit_id: dragOutfit.id });
-      setScheduled(prev => prev.map(s => s.id === existing.id ? { ...s, outfit_id: dragOutfit.id } : s));
+      await base44.entities.ScheduledOutfit.update(existing.id, { outfit_id: outfitToPlace.id });
+      setScheduled(prev => prev.map(s => s.id === existing.id ? { ...s, outfit_id: outfitToPlace.id } : s));
     } else {
       const created = await base44.entities.ScheduledOutfit.create({
         user_email: user.email,
-        outfit_id: dragOutfit.id,
+        outfit_id: outfitToPlace.id,
         date: dateStr,
       });
       setScheduled(prev => [...prev, created]);
     }
     setDragOutfit(null);
+    setSelectedOutfit(null);
+  };
+
+  // Tap-to-place: on mobile, tapping an outfit selects it, tapping a date places it
+  const handleOutfitTap = (outfit) => {
+    if (!isMobile) return;
+    setSelectedOutfit(prev => prev?.id === outfit.id ? null : outfit);
+  };
+
+  const handleDayTap = (day) => {
+    if (!isMobile || !selectedOutfit) return;
+    handleDropOnDay(day);
   };
 
   const handleRemove = async (scheduledId) => {
@@ -78,7 +99,9 @@ export default function WardrobeCalendar() {
       {/* Sidebar: outfit list */}
       <aside className="w-full md:w-56 bg-[#111] border-b md:border-b-0 md:border-r border-white/10 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-3">
         <h2 className="font-heading font-bold text-white text-lg mb-1">Your Outfits</h2>
-        <p className="text-white/30 text-xs mb-2">Drag onto a date to plan</p>
+        <p className="text-white/30 text-xs mb-2">
+          {isMobile ? "Tap an outfit, then tap a date to plan" : "Drag onto a date to plan"}
+        </p>
         {loading ? (
           Array(4).fill(0).map((_, i) => <div key={i} className="h-16 bg-white/10 rounded-xl animate-pulse" />)
         ) : (
@@ -86,10 +109,15 @@ export default function WardrobeCalendar() {
             {outfits.map(outfit => (
               <div
                 key={outfit.id}
-                draggable
+                draggable={!isMobile}
                 onDragStart={() => setDragOutfit(outfit)}
                 onDragEnd={() => setDragOutfit(null)}
-                className="flex-shrink-0 w-20 md:w-full flex md:flex-row items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-2 cursor-grab active:cursor-grabbing transition"
+                onClick={() => handleOutfitTap(outfit)}
+                className={`flex-shrink-0 w-20 md:w-full flex md:flex-row items-center gap-2 bg-white/5 hover:bg-white/10 border rounded-xl p-2 cursor-grab active:cursor-grabbing transition ${
+                  isMobile && selectedOutfit?.id === outfit.id
+                    ? "border-yellow-300/60 bg-yellow-300/10"
+                    : "border-white/10"
+                }`}
               >
                 <div className="w-10 h-10 md:w-10 md:h-10 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
                   {outfit.magazine_url || outfit.outfit_snapshot_url ? (
@@ -144,11 +172,13 @@ export default function WardrobeCalendar() {
                 key={i}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDropOnDay(day)}
+                onClick={() => handleDayTap(day)}
                 className={`
                   min-h-[80px] md:min-h-[100px] rounded-xl border p-1.5 transition relative
                   ${inMonth ? "bg-white/5 border-white/10 hover:border-yellow-300/40" : "bg-transparent border-transparent opacity-30"}
                   ${today ? "border-yellow-300/60 bg-yellow-300/5" : ""}
-                  ${dragOutfit || draggingScheduled ? "hover:bg-white/10" : ""}
+                  ${dragOutfit || draggingScheduled || (isMobile && selectedOutfit) ? "hover:bg-white/10" : ""}
+                  ${isMobile && selectedOutfit && inMonth ? "border-yellow-300/30" : ""}
                 `}
               >
                 <span className={`text-xs font-body ${today ? "text-yellow-300 font-bold" : "text-white/40"}`}>

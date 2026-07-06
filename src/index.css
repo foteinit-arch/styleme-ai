@@ -86,6 +86,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-overflow-scrolling: touch;
   }
 
   body {

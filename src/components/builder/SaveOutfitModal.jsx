@@ -157,7 +157,9 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-900">{isEditing ? "Edit Outfit" : "Save Outfit"}</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5" /></Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2">
+            <X className="w-5 h-5" />
+          </Button>
         </div>
         <div
           className="p-5 space-y-4 overflow-y-auto"

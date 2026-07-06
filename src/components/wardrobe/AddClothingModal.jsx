@@ -214,7 +214,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           <h2 className="text-lg font-bold text-gray-900">
             {tab === "bulk" ? "Bulk Upload" : "Add Clothing Item"}
           </h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2">
             <X className="w-5 h-5" />
           </Button>
         </div>
