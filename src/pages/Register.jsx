@@ -8,6 +8,7 @@ import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
+import AppleIcon from "@/components/AppleIcon";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Register() {
@@ -68,6 +69,10 @@ export default function Register() {
 
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", "/");
+  };
+
+  const handleApple = () => {
+    base44.auth.loginWithProvider("apple", "/");
   };
 
   if (showOtp) {
@@ -145,6 +150,15 @@ export default function Register() {
       >
         <GoogleIcon className="w-5 h-5 mr-2" />
         Continue with Google
+      </Button>
+
+      <Button
+        variant="outline"
+        className="w-full h-12 text-sm font-medium mb-6 bg-black text-white border-black hover:bg-black/90 hover:text-white"
+        onClick={handleApple}
+      >
+        <AppleIcon className="w-5 h-5 mr-2" />
+        Continue with Apple
       </Button>
 
       <div className="relative mb-6">
