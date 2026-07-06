@@ -7,9 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { AnimatePresence, motion } from "framer-motion";
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import WardrobeCalendar from './pages/WardrobeCalendar';
-import WardrobeStats from './pages/WardrobeStats';
-import PackingLists from './pages/PackingLists';
+import PreservedTabs, { TAB_PATHS } from '@/components/PreservedTabs';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -52,7 +50,7 @@ const AuthenticatedApp = () => {
   // Render the main app with auth-gated routes
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={TAB_PATHS.includes(location.pathname) ? '__tabs__' : location.pathname}>
         {/* Public auth routes */}
         <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
         <Route path="/register" element={<AnimatedPage><Register /></AnimatedPage>} />
@@ -66,21 +64,33 @@ const AuthenticatedApp = () => {
               <AnimatedPage><MainPage /></AnimatedPage>
             </LayoutWrapper>
           } />
-          {Object.entries(Pages).map(([path, Page]) => (
+          {/* Tab pages — state preserved across tab switches via PreservedTabs */}
+          {TAB_PATHS.map((tabPath) => (
             <Route
-              key={path}
-              path={`/${path}`}
+              key={tabPath}
+              path={tabPath}
               element={
-                <LayoutWrapper currentPageName={path}>
-                  <AnimatedPage><Page /></AnimatedPage>
+                <LayoutWrapper currentPageName={tabPath.slice(1)}>
+                  <PreservedTabs />
                 </LayoutWrapper>
               }
             />
           ))}
+          {/* Non-tab pages from config */}
+          {Object.entries(Pages)
+            .filter(([path]) => path !== mainPageKey && !TAB_PATHS.includes(`/${path}`))
+            .map(([path, Page]) => (
+              <Route
+                key={path}
+                path={`/${path}`}
+                element={
+                  <LayoutWrapper currentPageName={path}>
+                    <AnimatedPage><Page /></AnimatedPage>
+                  </LayoutWrapper>
+                }
+              />
+            ))}
           <Route path="/privacy-policy" element={<AnimatedPage><PrivacyPolicy /></AnimatedPage>} />
-          <Route path="/WardrobeCalendar" element={<LayoutWrapper currentPageName="WardrobeCalendar"><AnimatedPage><WardrobeCalendar /></AnimatedPage></LayoutWrapper>} />
-          <Route path="/WardrobeStats" element={<LayoutWrapper currentPageName="WardrobeStats"><AnimatedPage><WardrobeStats /></AnimatedPage></LayoutWrapper>} />
-          <Route path="/PackingLists" element={<LayoutWrapper currentPageName="PackingLists"><AnimatedPage><PackingLists /></AnimatedPage></LayoutWrapper>} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

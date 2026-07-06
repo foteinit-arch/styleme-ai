@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Shirt, User, Sparkles, Globe, LogOut, BookOpen, ChevronLeft, CalendarDays, BarChart2, Luggage } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TAB_PATHS } from "@/components/PreservedTabs";
 
 const NAV = [
   { label: "Wardrobe", page: "Wardrobe", icon: Shirt },
@@ -30,9 +31,11 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Preserve scroll position per tab across navigation
+  // Preserve scroll position per page across navigation
+  // (Tab pages handle their own scroll inside PreservedTabs)
   useEffect(() => {
     const path = location.pathname;
+    if (TAB_PATHS.includes(path)) return;
     const saved = tabScrollPositions[path];
     if (saved !== undefined && saved > 0) {
       requestAnimationFrame(() => window.scrollTo(0, saved));

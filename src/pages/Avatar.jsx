@@ -27,6 +27,8 @@ export default function Avatar() {
   const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving]       = useState(false);
+  const [deleting, setDeleting]   = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     height_cm: 165,
@@ -102,6 +104,18 @@ export default function Avatar() {
       const updated = { ...profile, avatar_generated_url: "" };
       await base44.entities.UserProfile.update(profile.id, { avatar_generated_url: "" });
       window.dispatchEvent(new CustomEvent('avatar-updated', { detail: updated }));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await base44.functions.invoke('deleteAccount', {});
+      await base44.auth.logout(createPageUrl("Home"));
+    } catch (error) {
+      toast.error("Failed to delete account: " + (error?.message || "Unknown error"));
+      setDeleting(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -255,7 +269,7 @@ export default function Avatar() {
             </Button>
 
             {/* Delete Account */}
-            <AlertDialog>
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 bg-transparent mt-2">
                   <Trash2 className="mr-2 w-4 h-4" /> Delete Account
@@ -269,12 +283,13 @@ export default function Avatar() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20" disabled={deleting}>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     className="bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => base44.auth.logout(createPageUrl ? createPageUrl("Home") : "/")}
+                    disabled={deleting}
+                    onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
                   >
-                    Delete Account
+                    {deleting ? "Deleting..." : "Delete Account"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
