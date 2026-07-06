@@ -221,7 +221,10 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
 
         <div
           className="p-5 space-y-4 overflow-y-auto"
-          style={{ maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+          style={{
+            maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+            paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
+          }}
         >
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="w-full">

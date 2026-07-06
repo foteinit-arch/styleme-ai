@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Shirt, User, Sparkles, Globe, LogOut, BookOpen, ChevronLeft, CalendarDays, BarChart2, Luggage } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import useSystemDarkMode from "@/hooks/useSystemDarkMode";
 import { TAB_PATHS } from "@/components/PreservedTabs";
 
 const NAV = [
@@ -23,6 +24,7 @@ const ROOT_PAGES = ["Home", "Wardrobe", "OutfitBuilder", "MyOutfits", "Explore",
 const tabScrollPositions = {};
 
 export default function Layout({ children, currentPageName }) {
+  useSystemDarkMode();
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,18 +54,18 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#373d47]">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#373d47]">
       {/* Top header — safe area aware */}
-      <nav className="bg-[#1a1a1a] border-b border-transparent sticky top-0 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <nav className="bg-white dark:bg-[#1a1a1a] border-b border-gray-200 dark:border-transparent sticky top-0 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           {/* Logo or back button */}
           {isRootPage ? (
             <Link to={createPageUrl("Home")} className="flex items-center gap-2">
               <Shirt className="w-5 h-5 text-white" />
-              <span className="font-heading font-bold uppercase text-white text-lg tracking-tight">Virtually Dressed</span>
+              <span className="font-heading font-bold uppercase text-gray-900 dark:text-white text-lg tracking-tight">Virtually Dressed</span>
             </Link>
           ) : (
-            <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-white/70 hover:text-white p-2 -ml-2">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white p-2 -ml-2">
               <ChevronLeft className="w-5 h-5" />
               <span className="text-sm font-body">Back</span>
             </button>
@@ -76,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "text-[#e8b820]" : "text-white/50 hover:text-white hover:bg-white/10"}
+                  className={currentPageName === page ? "text-[#e8b820]" : "text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10"}
                 >
                   <Icon className="w-4 h-4" />
                   {label}
@@ -89,8 +91,8 @@ export default function Layout({ children, currentPageName }) {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                <span className="text-sm text-white/50 font-body">{user.full_name || user.email}</span>
-                <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="text-white/40 hover:text-white hover:bg-white/10">
+                <span className="text-sm text-gray-500 dark:text-white/50 font-body">{user.full_name || user.email}</span>
+                <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10">
                   <LogOut className="w-4 h-4" />
                 </Button>
               </>
@@ -108,7 +110,7 @@ export default function Layout({ children, currentPageName }) {
       <main className="flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-white/10 flex"
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#1a1a1a] border-t border-gray-200 dark:border-white/10 flex"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {NAV.map(({ label, page, icon: Icon }) => {
           const isActive = currentPageName === page;
@@ -120,8 +122,8 @@ export default function Layout({ children, currentPageName }) {
               replace={isActive}
               className="flex-1 flex flex-col items-center justify-center py-2 min-h-[44px]"
             >
-              <Icon className={`w-5 h-5 ${isActive ? "text-[#e8b820]" : "text-white/40"}`} />
-              <span className={`text-[10px] mt-0.5 font-body ${isActive ? "text-[#e8b820]" : "text-white/40"}`}>{label}</span>
+              <Icon className={`w-5 h-5 ${isActive ? "text-[#e8b820]" : "text-gray-400 dark:text-white/40"}`} />
+              <span className={`text-[10px] mt-0.5 font-body ${isActive ? "text-[#e8b820]" : "text-gray-400 dark:text-white/40"}`}>{label}</span>
             </Link>
           );
         })}

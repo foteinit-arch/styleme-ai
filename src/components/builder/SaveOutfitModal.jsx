@@ -96,8 +96,6 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
       <div
         className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center"
         style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
           paddingLeft: 'env(safe-area-inset-left)',
           paddingRight: 'env(safe-area-inset-right)',
         }}
@@ -114,7 +112,11 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
           <div className="w-full h-full flex flex-col">
             <div
               className="flex items-center justify-between px-5 py-3 bg-black/80 border-b border-white/10"
-              style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
+              style={{
+                paddingTop: 'calc(0.75rem + env(safe-area-inset-top))',
+                paddingLeft: 'calc(1.25rem + env(safe-area-inset-left))',
+                paddingRight: 'calc(1.25rem + env(safe-area-inset-right))',
+              }}
             >
               <span className="text-white font-heading font-bold text-lg tracking-tight">Your Editorial</span>
               <div className="flex gap-2">
@@ -130,6 +132,8 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
               className="flex-1 flex items-center justify-center p-4 overflow-auto"
               style={{
                 paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+                paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
+                paddingRight: 'calc(1rem + env(safe-area-inset-right))',
               }}
             >
               <img src={magazineUrl} alt="Magazine editorial" className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
