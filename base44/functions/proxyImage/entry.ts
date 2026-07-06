@@ -17,18 +17,6 @@ async function assertSafeUrl(url) {
   if (PRIVATE_PATTERNS.some(p => p.test(hostname))) {
     throw new Error('Blocked private host');
   }
-  // Resolve DNS and check the IP isn't private — prevents DNS rebinding tricks
-  try {
-    const addrs = await Deno.resolveDns(hostname, 'A');
-    const ipv6 = await Deno.resolveDns(hostname, 'AAAA').catch(() => []);
-    const allIps = [...addrs, ...ipv6];
-    if (allIps.some(ip => BLOCKED_HOSTS.includes(ip) || PRIVATE_PATTERNS.some(p => p.test(ip)))) {
-      throw new Error('Resolved to private IP');
-    }
-  } catch (e) {
-    if (e.message.startsWith('Blocked') || e.message.startsWith('Resolved') || e.message === 'Invalid URL') throw e;
-    // DNS resolution failed — let fetch handle it
-  }
   return parsed.href;
 }
 
@@ -54,17 +42,43 @@ Deno.serve(async (req) => {
 
     // Try to fetch directly first
     const tryFetch = async (rawUrl) => {
-      const url = await assertSafeUrl(rawUrl);
-      const res = await fetch(url, {
-        headers: {
+      let currentUrl = await assertSafeUrl(rawUrl);
+      for (let hop = 0; hop < 5; hop++) {
+        const parsed = new URL(currentUrl);
+        const hostname = parsed.hostname.replace(/^\[|\]$/g, '');
+        // Resolve DNS immediately before fetch and validate every resolved IP
+        const aRecs = await Deno.resolveDns(hostname, 'A').catch(() => []);
+        const aaaaRecs = await Deno.resolveDns(hostname, 'AAAA').catch(() => []);
+        const ips = [...aRecs, ...aaaaRecs];
+        if (ips.length > 0 && ips.some(ip => BLOCKED_HOSTS.includes(ip) || PRIVATE_PATTERNS.some(p => p.test(ip)))) {
+          throw new Error('Resolved to private IP');
+        }
+        // Pin the validated IP for HTTP so fetch uses the exact IP we checked — blocks DNS rebinding
+        let fetchUrl = currentUrl;
+        const headers = {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
           'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-        },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.startsWith('image/')) throw new Error('not-image');
-      return res;
+        };
+        const safeIp = ips.find(ip => !BLOCKED_HOSTS.includes(ip) && !PRIVATE_PATTERNS.some(p => p.test(ip)));
+        if (safeIp && parsed.protocol === 'http:') {
+          const port = parsed.port || '80';
+          fetchUrl = `http://${safeIp}:${port}${parsed.pathname}${parsed.search}`;
+          headers['Host'] = parsed.hostname;
+        }
+        // Follow redirects manually, re-validating each hop to prevent SSRF via redirect to internal hosts
+        const res = await fetch(fetchUrl, { redirect: 'manual', headers });
+        if (res.status >= 300 && res.status < 400) {
+          const location = res.headers.get('location');
+          if (!location) throw new Error('Redirect without location');
+          currentUrl = await assertSafeUrl(new URL(location, currentUrl).href);
+          continue;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.startsWith('image/')) throw new Error('not-image');
+        return res;
+      }
+      throw new Error('Too many redirects');
     };
 
     let imageRes = null;
