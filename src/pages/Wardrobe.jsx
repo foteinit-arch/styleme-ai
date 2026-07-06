@@ -4,18 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter, Palette, Sparkles, Loader2, X } from "lucide-react";
 
-const REMOVEBG_KEY = "dx2dhWT2m31UEp3NvgxYMivt";
 async function removeBackground(imageUrl) {
-  const formData = new FormData();
-  formData.append("image_url", imageUrl);
-  formData.append("size", "auto");
-  const res = await fetch("https://api.remove.bg/v1.0/removebg", {
-    method: "POST",
-    headers: { "X-Api-Key": REMOVEBG_KEY },
-    body: formData,
-  });
-  if (!res.ok) throw new Error("remove.bg failed");
-  return res.blob();
+  const res = await base44.functions.invoke("removeBackground", { image_url: imageUrl });
+  return new Blob([res.data], { type: res.headers?.["content-type"] || "image/png" });
 }
 import ClothingCard from "@/components/wardrobe/ClothingCard";
 import AddClothingModal from "@/components/wardrobe/AddClothingModal";
