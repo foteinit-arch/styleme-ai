@@ -93,7 +93,15 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
 
   if (generatingMagazine || magazineUrl) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+      <div
+        className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)',
+        }}
+      >
         {generatingMagazine ? (
           <div className="flex flex-col items-center gap-5">
             <div className="relative">
@@ -104,7 +112,10 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
           </div>
         ) : (
           <div className="w-full h-full flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3 bg-black/80 border-b border-white/10">
+            <div
+              className="flex items-center justify-between px-5 py-3 bg-black/80 border-b border-white/10"
+              style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
+            >
               <span className="text-white font-heading font-bold text-lg tracking-tight">Your Editorial</span>
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleDownload} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
@@ -115,7 +126,12 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
                 </Button>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+            <div
+              className="flex-1 flex items-center justify-center p-4 overflow-auto"
+              style={{
+                paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+              }}
+            >
               <img src={magazineUrl} alt="Magazine editorial" className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
             </div>
           </div>
@@ -125,13 +141,27 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style={{
+        paddingTop: 'calc(1rem + env(safe-area-inset-top))',
+        paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+        paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
+        paddingRight: 'calc(1rem + env(safe-area-inset-right))',
+      }}
+    >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-900">{isEditing ? "Edit Outfit" : "Save Outfit"}</h2>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="w-5 h-5" /></Button>
         </div>
-        <div className="p-5 space-y-4">
+        <div
+          className="p-5 space-y-4 overflow-y-auto"
+          style={{
+            maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+            paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
+          }}
+        >
           <div>
             <Label>Outfit Name</Label>
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Summer wedding look" className="mt-1" />

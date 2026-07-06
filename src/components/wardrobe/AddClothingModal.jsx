@@ -233,7 +233,15 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style={{
+        paddingTop: 'calc(1rem + env(safe-area-inset-top))',
+        paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+        paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
+        paddingRight: 'calc(1rem + env(safe-area-inset-right))',
+      }}
+    >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">
@@ -244,7 +252,10 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           </Button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div
+          className="p-5 space-y-4 overflow-y-auto"
+          style={{ maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+        >
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="w-full">
               <TabsTrigger value="upload" className="flex-1">
@@ -306,7 +317,10 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="max-h-48 overflow-y-auto space-y-1 border border-gray-100 rounded-lg p-2">
+                  <div
+                    className="max-h-48 overflow-y-auto space-y-1 border border-gray-100 rounded-lg p-2"
+                    style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+                  >
                     {bulkFiles.map((f, i) => (
                       <div key={i} className="flex items-center gap-2 text-sm py-1">
                         {bulkProgress[i] === "pending" && (
