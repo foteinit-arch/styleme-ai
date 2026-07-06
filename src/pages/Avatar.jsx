@@ -110,7 +110,7 @@ export default function Avatar() {
   );
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] p-4 md:p-8">
+    <div className="min-h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] bg-[#1a1a1a] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-8">
       <div className="max-w-5xl mx-auto">
         <h1 className="font-heading font-bold text-2xl text-white tracking-tight mb-1 flex items-center gap-3">
           <User className="text-[#e8b820] w-5 h-5 shrink-0" /> My avatar

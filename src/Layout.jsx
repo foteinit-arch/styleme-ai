@@ -18,13 +18,29 @@ const NAV = [
 
 const ROOT_PAGES = ["Home", "Wardrobe", "OutfitBuilder", "MyOutfits", "Explore", "Avatar", "WardrobeCalendar", "WardrobeStats", "PackingLists"];
 
+// Module-level scroll position store — survives Layout unmount/remount on route change
+const tabScrollPositions = {};
+
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Preserve scroll position per tab across navigation
+  useEffect(() => {
+    const path = location.pathname;
+    const saved = tabScrollPositions[path];
+    if (saved !== undefined && saved > 0) {
+      requestAnimationFrame(() => window.scrollTo(0, saved));
+    }
+    return () => {
+      tabScrollPositions[path] = window.scrollY;
+    };
+  }, [location.pathname]);
 
   const isRootPage = ROOT_PAGES.includes(currentPageName);
 

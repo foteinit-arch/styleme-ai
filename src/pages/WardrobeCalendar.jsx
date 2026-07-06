@@ -74,9 +74,9 @@ export default function WardrobeCalendar() {
   const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] flex flex-col md:flex-row gap-0">
+    <div className="min-h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] bg-[#1a1a1a] flex flex-col md:flex-row gap-0">
       {/* Sidebar: outfit list */}
-      <aside className="w-full md:w-56 bg-[#111] border-b md:border-b-0 md:border-r border-white/10 p-4 flex flex-col gap-3">
+      <aside className="w-full md:w-56 bg-[#111] border-b md:border-b-0 md:border-r border-white/10 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-3">
         <h2 className="font-heading font-bold text-white text-lg mb-1">Your Outfits</h2>
         <p className="text-white/30 text-xs mb-2">Drag onto a date to plan</p>
         {loading ? (
@@ -106,7 +106,7 @@ export default function WardrobeCalendar() {
       </aside>
 
       {/* Calendar */}
-      <main className="flex-1 p-4 md:p-6">
+      <main className="flex-1 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h1 className="font-heading font-bold text-white text-2xl tracking-tight">

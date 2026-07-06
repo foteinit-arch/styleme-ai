@@ -173,7 +173,7 @@ export default function OutfitBuilder() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top)-4rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] bg-[#1a1a1a] flex flex-col">
       {/* Header */}
       <div className="bg-[#1a1a1a] border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <div>
@@ -197,7 +197,7 @@ export default function OutfitBuilder() {
 
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
-        <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto">
+        <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           <ClothingPicker clothes={clothes} onPick={handlePick} pickedIds={picked.map(p => p.id)} />
         </div>
 
