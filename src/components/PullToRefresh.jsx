@@ -97,10 +97,11 @@ export default function PullToRefresh({ onRefresh, children }) {
       className="relative overflow-y-auto h-full"
       style={{ overscrollBehavior: "none", touchAction: "pan-y" }}
     >
-      {/* Pull indicator */}
+      {/* Pull indicator — offset by sticky header height (56px) so it never renders behind it */}
       <div
-        className="absolute top-0 left-0 right-0 flex items-center justify-center z-10 pointer-events-none overflow-hidden"
+        className="absolute left-0 right-0 flex items-center justify-center z-10 pointer-events-none overflow-hidden"
         style={{
+          top: '3.5rem',
           height: pullY > 0 || refreshing ? (refreshing ? THRESHOLD : pullY) : 0,
           transition: pullY === 0 && !refreshing ? "height 0.3s ease" : "none",
         }}
