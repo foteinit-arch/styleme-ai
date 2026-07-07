@@ -197,7 +197,7 @@ export default function OutfitBuilder() {
 
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left: clothing picker */}
-        <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+        <div className="md:w-72 border-r border-white/10 bg-[#111] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)]">
           <ClothingPicker clothes={clothes} onPick={handlePick} pickedIds={picked.map(p => p.id)} />
         </div>
 
@@ -215,7 +215,16 @@ export default function OutfitBuilder() {
       </div>
 
       {showSuggest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => !suggesting && setShowSuggest(false)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          style={{
+            paddingTop: 'calc(1rem + env(safe-area-inset-top))',
+            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+            paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
+            paddingRight: 'calc(1rem + env(safe-area-inset-right))',
+          }}
+          onClick={() => !suggesting && setShowSuggest(false)}
+        >
           <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
               <Wand2 className="w-5 h-5 text-purple-400" />

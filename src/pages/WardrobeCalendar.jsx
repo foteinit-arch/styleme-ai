@@ -105,7 +105,7 @@ export default function WardrobeCalendar() {
         {loading ? (
           Array(4).fill(0).map((_, i) => <div key={i} className="h-16 bg-white/10 rounded-xl animate-pulse" />)
         ) : (
-          <div className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto pb-1">
+          <div className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto no-scrollbar pb-1 px-1">
             {outfits.map(outfit => (
               <div
                 key={outfit.id}
