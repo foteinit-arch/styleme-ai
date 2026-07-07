@@ -45,10 +45,12 @@ export default function PrivacyPolicy() {
             body: `You have the right to:
 • Access the personal data we hold about you.
 • Correct inaccurate or incomplete data.
-• Delete your account and associated data at any time from the "My Avatar" settings page.
+• Permanently delete your account and all associated data at any time, yourself, without contacting support.
 • Withdraw consent for any optional data processing.
 
-To exercise these rights, please contact us at the email below.`,
+Account Deletion: You can instantly and permanently delete your account and all associated data (including your profile, measurements, avatar, wardrobe items, outfits, and scheduling information) at any time using the self-service "Delete Account" button located inside the in-app "My Avatar" page. This action is immediate, cannot be undone, and requires no assistance from our support team.
+
+To exercise any of the other rights listed above, please contact us at the email below.`,
           },
           {
             title: "7. Cookies",
