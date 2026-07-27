@@ -84,8 +84,33 @@ export default function Avatar() {
   const handleGenerateAvatar = async () => {
     if (!form.avatar_photo_url) return;
     setGenerating(true);
+    const m = [];
+    if (form.height_cm) m.push(`height ${form.height_cm} cm`);
+    if (form.bust_cm)   m.push(`bust ${form.bust_cm} cm`);
+    if (form.waist_cm)  m.push(`waist ${form.waist_cm} cm`);
+    if (form.hips_cm)   m.push(`hips ${form.hips_cm} cm`);
+    if (form.body_shape) m.push(`${form.body_shape} body shape`);
+    if (form.weight_kg) m.push(`weight ${form.weight_kg} kg`);
+    const measurements = m.length ? `The person's real body measurements are: ${m.join(", ")}. Scale the generated body to match these exact proportions.` : "";
+
     const { url } = await base44.integrations.Core.GenerateImage({
-      prompt: `Edit this photo of a person. CRITICAL: preserve the face 100% exactly as-is — same expression, same features, same skin, only apply 10% subtle smoothing, absolutely no other facial changes. Keep same hair, same skin tone, same body proportions. Make ONLY these changes: 1) zoom out so the FULL body is visible head to toe — feet and top of head must NOT be cropped, 2) dress them in a seamless beige/skin-tone form-fitting athletic bodysuit — no patterns, no texture, smooth and minimal, 3) remove all accessories (jewelry, bags, belts, hats, glasses), 4) plain white background. Same forward-facing pose as original photo.`,
+      prompt: `You are editing a real photo into a full-body avatar mannequin. This is an IDENTITY-PRESERVATION task — the output MUST look like the EXACT same person, not a similar or idealized version.
+
+ABSOLUTE IDENTITY RULES (highest priority — do not violate for any reason):
+- The face MUST be pixel-for-pixel identical to the source: exact face shape, jawline, cheekbones, nose, lip shape and fullness, eye color, eye shape, eyebrow shape and thickness, any freckles/moles/scars, facial hair if present. Do NOT beautify, slim, age, de-age, or change any facial feature. Do NOT alter the expression.
+- Skin tone MUST match EXACTLY — same shade, same undertone, same texture. Do not lighten or smooth beyond a 10% subtle retouch.
+- Hair MUST match EXACTLY: same color, same shade, same length, same style, same parting, same texture (straight/wavy/curly), same volume. Do not restyle or recolor.
+- Body proportions MUST match the source person's build and these real measurements. Do not slim, lengthen, or alter the figure.
+${measurements}
+
+ONLY these changes are allowed, nothing else:
+1. Zoom out / re-frame so the FULL body is visible from the top of the head to the soles of the feet — nothing may be cropped at top or bottom.
+2. Dress the person in a seamless beige/skin-tone form-fitting athletic bodysuit (like a unitard) — smooth, matte, no patterns, no texture, no seams, no logos. It should read as a near-skin neutral base layer, NOT clothing with fashion.
+3. Remove ALL accessories: jewelry, watches, bags, belts, hats, glasses, hair accessories. Leave nothing but the bodysuit.
+4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
+5. Keep the SAME forward-facing neutral pose and lighting direction as the original.
+
+Do NOT change the person's identity, face, hair, skin, or proportions. If any instruction conflicts with preserving identity, identity wins.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
