@@ -143,11 +143,11 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
     <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
       {/* Avatar + around-items stage */}
       <div style={{ position: "relative", width: "100%", maxWidth: 360 }}>
-        <div style={{ position: "relative", width: "100%", maxWidth: 320, height: 600, margin: "0 auto", borderRadius: 24, overflow: "hidden", isolation: "isolate", background: "#111" }}>
+        <div style={{ position: "relative", width: "100%", maxWidth: 320, margin: "0 auto", borderRadius: 24, overflow: "hidden", isolation: "isolate", background: "#ffffff" }}>
           <img
             src={displayUrl}
             alt="avatar"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center" }}
+            style={{ display: "block", width: "100%", height: "auto", maxHeight: 600, objectFit: "contain", objectPosition: "top center" }}
           />
 
           {/* Loading overlay with time estimate */}
