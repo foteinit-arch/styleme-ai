@@ -96,11 +96,16 @@ export default function Avatar() {
     const { url } = await base44.integrations.Core.GenerateImage({
       prompt: `You are editing a real photo into a full-body avatar mannequin. This is an IDENTITY-PRESERVATION task — the output MUST look like the EXACT same person, not a similar or idealized version.
 
-ABSOLUTE IDENTITY RULES (highest priority — do not violate for any reason):
-- The face MUST be pixel-for-pixel identical to the source: exact face shape, jawline, cheekbones, nose, lip shape and fullness, eye color, eye shape, eyebrow shape and thickness, any freckles/moles/scars, facial hair if present. Do NOT beautify, slim, age, de-age, or change any facial feature. Do NOT alter the expression.
-- Skin tone MUST match EXACTLY — same shade, same undertone, same texture. Do not lighten or smooth beyond a 10% subtle retouch.
-- Hair MUST match EXACTLY: same color, same shade, same length, same style, same parting, same texture (straight/wavy/curly), same volume. Do not restyle or recolor.
-- Body proportions MUST match the source person's build and these real measurements. Do not slim, lengthen, or alter the figure.
+IDENTITY RULES (highest priority — do not violate for any reason):
+- The face MUST be recognizably the same person: same face shape, jawline, cheekbones, nose, lip shape and fullness, eye color, eye shape, eyebrow shape and thickness, any freckles/moles/scars, facial hair if present. Keep the same expression direction.
+- Skin tone MUST match — same shade, same undertone. Do not drastically lighten.
+- Hair MUST match: same color, same shade, same length and style, same texture (straight/wavy/curly). Do not restyle or recolor.
+
+YOUTHFUL APPEARANCE ADJUSTMENT (this is the one intentional change):
+- Make the person look noticeably YOUNGER — approximately 18–22 years old — while keeping them recognizably the same person.
+- Smooth the skin to a fresh, youthful complexion (fewer lines, refined pores, subtle glow), soften any facial sagginess, tighten the jawline slightly, and lift the cheek area for a youthful fullness.
+- Keep the SAME hair color and style but make the hair look healthy, full, and youthful (more body and shine).
+- Preserve the body's proportions but give the figure a youthful, toned vitality (slightly firmer, smoother skin).
 ${measurements}
 
 ONLY these changes are allowed, nothing else:
@@ -110,7 +115,7 @@ ONLY these changes are allowed, nothing else:
 4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
 5. Keep the SAME forward-facing neutral pose and lighting direction as the original.
 
-Do NOT change the person's identity, face, hair, skin, or proportions. If any instruction conflicts with preserving identity, identity wins.`,
+Keep the person recognizably the same individual, but clearly younger (around 18–22). Identity (same person) takes priority; youthfulness is the intentional adjustment.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
