@@ -14,7 +14,7 @@ import {
 const EST_SECONDS = 45;
 
 // Items whose change should re-trigger an avatar regeneration (worn on body).
-const WORN = new Set(["top", "bottom", "dress", "outerwear", "underwear", "shoes"]);
+const WORN = new Set(["top", "bottom", "dress", "outerwear", "underwear", "shoes", "bag"]);
 
 function wornSignature(picked) {
   return picked

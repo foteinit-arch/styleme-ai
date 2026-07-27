@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 // Builder/entity categories: top, bottom, dress, outerwear, shoes, accessory, underwear, bag
 export const BODY_CATEGORIES   = ["top", "bottom", "dress", "outerwear", "underwear"];
 export const ON_BODY_EXTRA     = ["shoes"]; // worn on the avatar, not "around" it
-export const AROUND_CATEGORIES = ["accessory", "bag"]; // magazine-style around the avatar
+export const AROUND_CATEGORIES = ["accessory"]; // magazine-style around the avatar
+export const HELD_CATEGORIES = ["bag"]; // held in the hand / carried — rendered onto the avatar
 
 export function isDress(category)     { return category === "dress"; }
 export function isTop(category)       { return category === "top"; }
@@ -67,6 +68,7 @@ const CATEGORY_LENGTH_RULE = {
   outerwear: "This is OUTERWEAR: a jacket/coat/cardigan layered OVER other clothing. It is NOT a dress.",
   underwear: "This is UNDERWEAR/base layer worn closest to the body.",
   shoes: "These are SHOES worn on the feet only.",
+  bag: "This is a HANDBAG or purse. The person must be HOLDING it in one hand or carrying it by its strap (shoulder or crossbody, exactly as the bag's design dictates), resting naturally at the side around hip level. It is an accessory held in the hand — NOT worn as clothing and NOT floating beside the body.",
 };
 
 // Describe garments in text (avoids passing garment photos as identity references).
@@ -98,7 +100,7 @@ function layeringGuidance(bodyItems) {
 // Collect the photo URLs of the garments worn on the body (for scoring/refs).
 export function wornGarmentUrls(picked) {
   return picked
-    .filter(p => BODY_CATEGORIES.includes(p.category) || p.category === "shoes")
+    .filter(p => BODY_CATEGORIES.includes(p.category) || p.category === "shoes" || HELD_CATEGORIES.includes(p.category))
     .map(i => i.processed_image_url || i.original_image_url)
     .filter(Boolean);
 }
@@ -109,7 +111,7 @@ export function wornGarmentUrls(picked) {
 export async function generateLook({ profile, picked, avatarDescription, extraEmphasis = "" }) {
   const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
 
-  const wornItems = picked.filter(p => BODY_CATEGORIES.includes(p.category) || p.category === "shoes");
+  const wornItems = picked.filter(p => BODY_CATEGORIES.includes(p.category) || p.category === "shoes" || HELD_CATEGORIES.includes(p.category));
   const garmentDescription = await describeGarments(wornItems);
   const layering = layeringGuidance(wornItems);
   const measurements = measurementsBlock(profile);
