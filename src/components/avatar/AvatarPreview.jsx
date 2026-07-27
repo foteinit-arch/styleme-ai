@@ -16,7 +16,7 @@ export default function AvatarPreview({ profile }) {
       <img
         src={photoUrl}
         alt="avatar"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
       />
     </div>
   );
