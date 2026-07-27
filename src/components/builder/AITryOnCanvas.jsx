@@ -147,7 +147,7 @@ export default function AITryOnCanvas({ profile, picked, onRemove }) {
           <img
             src={displayUrl}
             alt="avatar"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", objectPosition: "top center" }}
           />
 
           {/* Loading overlay with time estimate */}
