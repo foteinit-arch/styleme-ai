@@ -96,11 +96,14 @@ export default function Avatar() {
     const { url } = await base44.integrations.Core.GenerateImage({
       prompt: `You are editing a real photo into a full-body avatar mannequin. This is an IDENTITY-PRESERVATION task — the output MUST look like the EXACT same person, not a similar or idealized version.
 
-IDENTITY RULES (highest priority — the output MUST look like the EXACT same person in the source photo, not a similar or idealized version):
-- The face MUST be a faithful match to the source: same face shape, jawline, cheekbones, nose, lip shape and fullness, eye color, eye shape, eyebrow shape and thickness, any freckles/moles/scars, facial hair if present. Keep the same expression direction. Do NOT beautify, slim, age, de-age, or change any facial feature.
-- Skin tone MUST match EXACTLY — same shade, same undertone, same texture. Do not lighten or smooth beyond a subtle retouch.
-- Hair MUST match EXACTLY: same color, same shade, same length, same style, same parting, same texture (straight/wavy/curly), same volume. Do not restyle or recolor.
+IDENTITY RULES (absolute highest priority — treat the source photo as the ground truth; reproduce that exact person):
+- The face MUST be a near-pixel-accurate match to the source: identical face shape, jawline, cheekbones, nose shape and size, lip shape and fullness, eye color, eye shape, eyelid shape, eyebrow shape/thickness/arch, any freckles/moles/scars, facial hair if present. Do NOT beautify, slim, age, de-age, or alter any facial feature. The viewer should instantly recognize this as the same person.
+- Skin tone MUST match EXACTLY — same shade, same undertone, same freckling/pigmentation, same skin texture. Do not lighten or smooth beyond a barely-there retouch.
+- Hair MUST match EXACTLY: same color, same shade/highlights, same length, same style, same parting, same texture (straight/wavy/curly), same volume and density. Do not restyle or recolor.
 - Body proportions MUST match the source person's build and these real measurements. Do not slim, lengthen, or alter the figure.
+
+EXPRESSION (the one intentional facial change):
+- Give the person a WARM, NATURAL SMILE — a relaxed, genuine closed or slightly open smile with the eyes softly engaged (a subtle Duchenne smile). The smile must suit THIS person's actual mouth and face; do not stretch or distort the lips beyond their natural shape. Everything else about the face stays identical to the source.
 
 SUBTLE YOUTHFUL TOUCH (keep minimal — identity match takes priority over this):
 - Apply only a light, natural skin smoothing and a healthy glow so the avatar looks fresh — but do NOT change the person's apparent age, face shape, or features. The result must still clearly look like the same person at the same age.
@@ -111,9 +114,9 @@ ONLY these changes are allowed, nothing else:
 2. Dress the person in a seamless beige/skin-tone form-fitting athletic bodysuit (like a unitard) — smooth, matte, no patterns, no texture, no seams, no logos. It should read as a near-skin neutral base layer, NOT clothing with fashion.
 3. Remove ALL accessories: jewelry, watches, bags, belts, hats, glasses, hair accessories. Leave nothing but the bodysuit.
 4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
-5. Keep the SAME forward-facing neutral pose and lighting direction as the original.
+5. Keep the SAME forward-facing pose and lighting direction as the original.
 
-The output MUST look like the EXACT same person as the source photo — identical face, skin, hair, and proportions — with only a light fresh-skin retouch. Identity match always wins.`,
+The output MUST look like the EXACT same person as the source photo — identical face, skin, hair, and proportions — now wearing a warm natural smile, with only a light fresh-skin retouch. Identity match always wins; the smile is the only facial change.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
