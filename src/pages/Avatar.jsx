@@ -103,7 +103,7 @@ IDENTITY RULES (absolute highest priority — treat the source photo as the grou
 - Body proportions MUST match the source person's build and these real measurements. Do not slim, lengthen, or alter the figure.
 
 EXPRESSION (the one intentional facial change):
-- Give the person a BROAD, JOYFUL SMILE — a wide, bright, beaming smile showing teeth, with the eyes happily engaged (crinkled, full Duchenne smile). Make it noticeably bigger and more expressive than a polite smile, but keep it natural and suited to THIS person's actual mouth and face; do not stretch or distort the lips beyond a believable wide grin. Everything else about the face stays identical to the source.
+- Give the person a BROAD, JOYFUL CLOSED-MOUTH SMILE — a wide, warm, beaming smile with the LIPS CLOSED (NO teeth visible at all), corners of the mouth lifted high, cheeks raised, and the eyes happily engaged (crinkled, full Duchenne smile). Make it noticeably bigger and more expressive than a polite smile, but keep the lips gently closed and natural, suited to THIS person's actual mouth and face; do not stretch or distort the lips beyond a believable wide closed grin. Everything else about the face stays identical to the source.
 
 SUBTLE YOUTHFUL TOUCH (keep minimal — identity match takes priority over this):
 - Apply only a light, natural skin smoothing and a healthy glow so the avatar looks fresh — but do NOT change the person's apparent age, face shape, or features. The result must still clearly look like the same person at the same age.
@@ -116,7 +116,7 @@ ONLY these changes are allowed, nothing else:
 4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
 5. Keep the SAME forward-facing pose and lighting direction as the original.
 
-The output MUST look like the EXACT same person as the source photo — identical face, skin, hair, and proportions — now wearing a broad, joyful beaming smile, with only a light fresh-skin retouch. Identity match always wins; the wide smile is the only facial change.`,
+The output MUST look like the EXACT same person as the source photo — identical face, skin, hair, and proportions — now wearing a broad, joyful beaming closed-mouth smile (no teeth), with only a light fresh-skin retouch. Identity match always wins; the wide closed smile is the only facial change.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
