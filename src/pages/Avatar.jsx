@@ -110,8 +110,10 @@ EXPRESSION (the one intentional facial change) — CRITICAL NO-TEETH RULE:
 - Everything else about the face stays identical to the source.
 - REPEAT: CLOSED MOUTH, LIPS SEALED, ZERO TEETH VISIBLE.
 
-SUBTLE YOUTHFUL TOUCH (keep minimal — identity match takes priority over this):
-- Apply only a light, natural skin smoothing and a healthy glow so the avatar looks fresh — but do NOT change the person's apparent age, face shape, or features. The result must still clearly look like the same person at the same age.
+YOUTHFUL, WARM APPEARANCE (identity still recognizable, but visibly younger and warmer):
+- Make the person look YOUNGER — around 18–22 years old — while keeping the same recognizable identity: same face shape, features, and hair. Soften any fine lines, smooth the skin, add a plump fresh firmness to the cheeks, and give a bright youthful vitality. The viewer should still instantly recognize the same person, just at a younger, fresher age.
+- Add a WARM, radiant, healthy glow to the skin — a sun-kissed, luminous warmth with soft golden undertones and a natural flush on the cheeks. The complexion should look vibrant, alive, and warmly lit, not flat or cool.
+- Keep the result natural and believable — not over-smoothed, not plastic, not cartoonish. A real, fresh-faced, warmly glowing younger version of this exact person.
 ${measurements}
 
 ONLY these changes are allowed, nothing else:
@@ -121,7 +123,7 @@ ONLY these changes are allowed, nothing else:
 4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
 5. Keep the SAME forward-facing pose and lighting direction as the original.
 
-The output MUST look like the EXACT same person as the source photo — identical face, skin, hair, and proportions — now wearing a broad, joyful beaming CLOSED-MOUTH smile with the lips sealed and ABSOLUTELY NO TEETH VISIBLE, with only a light fresh-skin retouch. Identity match always wins; the wide closed smile (zero teeth) is the only facial change. The mouth must be closed and lips sealed — no teeth under any circumstance.`,
+The output MUST look like the EXACT same person as the source photo — recognizable identity, same face shape, features, and hair — now appearing YOUNGER (around 18–22) with a WARM, radiant, sun-kissed glow, and wearing a broad, joyful beaming CLOSED-MOUTH smile with the lips sealed and ABSOLUTELY NO TEETH VISIBLE. Identity stays recognizable; the younger age, warm glow, and wide closed smile (zero teeth) are the intentional changes. The mouth must be closed and lips sealed — no teeth under any circumstance.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
