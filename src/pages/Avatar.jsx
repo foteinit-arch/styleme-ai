@@ -321,8 +321,10 @@ The output MUST look like the EXACT same person as the source photo — recogniz
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-white">Delete your account?</AlertDialogTitle>
                     <AlertDialogDescription className="text-white/50">
-                      Your avatar, wardrobe items, outfits, planner entries, packing lists and your account itself
-                      will be permanently deleted. This cannot be undone.
+                      This permanently deletes your account, wardrobe, outfits and avatar. Uploaded image files are
+                      fully removed from our servers within 30 days. If you signed in with Apple, you can also go to
+                      Settings &gt; [your name] &gt; Sign in with Apple on your iPhone and stop using Apple ID with
+                      Virtually Dressed.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
