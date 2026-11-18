@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Thermometer, Loader2, Shirt, X } from "lucide-react";
+import { toast } from "sonner";
 
 // Weather bands matching WeatherFilter component
 const WEATHER_BANDS = [
@@ -36,6 +37,10 @@ export default function Home() {
   const [weatherError, setWeatherError] = useState(null);
 
   useEffect(() => {
+    if (sessionStorage.getItem('account_deleted')) {
+      sessionStorage.removeItem('account_deleted');
+      toast.success("Your account has been deleted.");
+    }
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 

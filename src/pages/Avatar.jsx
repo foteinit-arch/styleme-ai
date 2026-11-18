@@ -149,6 +149,7 @@ The output MUST look like the EXACT same person as the source photo — recogniz
     setDeleting(true);
     try {
       await base44.functions.invoke('deleteAccount', {});
+      sessionStorage.setItem('account_deleted', '1');
       await base44.auth.logout(createPageUrl("Home"));
     } catch (error) {
       toast.error("Failed to delete account: " + (error?.message || "Unknown error"));
@@ -306,32 +307,37 @@ The output MUST look like the EXACT same person as the source photo — recogniz
               <Save className="mr-2 w-5 h-5" /> {saving ? "Saving..." : "Save Avatar"}
             </Button>
 
-            {/* Delete Account */}
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 bg-transparent mt-2">
-                  <Trash2 className="mr-2 w-4 h-4" /> Delete Account
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-white">Delete your account?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-white/50">
-                    This will permanently delete your account and all your data. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20" disabled={deleting}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                    disabled={deleting}
-                    onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
-                  >
-                    {deleting ? "Deleting..." : "Delete Account"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {/* Account / Settings */}
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <h2 className="font-heading font-bold uppercase text-white text-xl mb-1">Account</h2>
+              <p className="text-xs text-white/40 mb-4 font-body">Permanently delete your account and everything in it.</p>
+              <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 bg-transparent">
+                    <Trash2 className="mr-2 w-4 h-4" /> Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-white">Delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-white/50">
+                      Your avatar, wardrobe items, outfits, planner entries, packing lists and your account itself
+                      will be permanently deleted. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20" disabled={deleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      disabled={deleting}
+                      onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
+                    >
+                      {deleting ? "Deleting..." : "Delete Account"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
 
           {/* Right: preview */}
