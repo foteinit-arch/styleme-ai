@@ -29,6 +29,7 @@ export default function Avatar() {
   const [saving, setSaving]       = useState(false);
   const [deleting, setDeleting]   = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isMeConfirmed, setIsMeConfirmed] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     height_cm: 165,
@@ -82,7 +83,7 @@ export default function Avatar() {
   };
 
   const handleGenerateAvatar = async () => {
-    if (!form.avatar_photo_url) return;
+    if (!form.avatar_photo_url || !isMeConfirmed) return;
     setGenerating(true);
     const m = [];
     if (form.height_cm) m.push(`height ${form.height_cm} cm`);
@@ -110,20 +111,16 @@ EXPRESSION (the one intentional facial change) — CRITICAL NO-TEETH RULE:
 - Everything else about the face stays identical to the source.
 - REPEAT: CLOSED MOUTH, LIPS SEALED, ZERO TEETH VISIBLE.
 
-YOUTHFUL, WARM APPEARANCE (identity still recognizable, but visibly younger and warmer):
-- Make the person look YOUNGER — around 18–22 years old — while keeping the same recognizable identity: same face shape, features, and hair. Soften any fine lines, smooth the skin, add a plump fresh firmness to the cheeks, and give a bright youthful vitality. The viewer should still instantly recognize the same person, just at a younger, fresher age.
-- Add a WARM, radiant, healthy glow to the skin — a sun-kissed, luminous warmth with soft golden undertones and a natural flush on the cheeks. The complexion should look vibrant, alive, and warmly lit, not flat or cool.
-- Keep the result natural and believable — not over-smoothed, not plastic, not cartoonish. A real, fresh-faced, warmly glowing younger version of this exact person.
 ${measurements}
 
 ONLY these changes are allowed, nothing else:
 1. Zoom out / re-frame so the FULL body is visible from the top of the head to the soles of the feet — nothing may be cropped at top or bottom.
-2. Dress the person in a seamless beige/skin-tone form-fitting athletic bodysuit (like a unitard) — smooth, matte, no patterns, no texture, no seams, no logos. It should read as a near-skin neutral base layer, NOT clothing with fashion.
-3. Remove ALL accessories: jewelry, watches, bags, belts, hats, glasses, hair accessories. Leave nothing but the bodysuit.
+2. Dress the person in a plain, clearly visible outfit: a fitted white crew-neck T-shirt and black ankle-length leggings. The clothing must be opaque and unmistakably fabric — absolutely no skin-tone, beige, nude or flesh-colored clothing of any kind.
+3. Remove ALL accessories: jewelry, watches, bags, belts, hats, glasses, hair accessories. Leave nothing but the white T-shirt and black leggings.
 4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
 5. Keep the SAME forward-facing pose and lighting direction as the original.
 
-The output MUST look like the EXACT same person as the source photo — recognizable identity, same face shape, features, and hair — now appearing YOUNGER (around 18–22) with a WARM, radiant, sun-kissed glow, and wearing a broad, joyful beaming CLOSED-MOUTH smile with the lips sealed and ABSOLUTELY NO TEETH VISIBLE. Identity stays recognizable; the younger age, warm glow, and wide closed smile (zero teeth) are the intentional changes. The mouth must be closed and lips sealed — no teeth under any circumstance.`,
+The output MUST look like the EXACT same person as the source photo — recognizable identity, same face shape, features, hair, AGE and SKIN TONE, wearing a fitted white crew-neck T-shirt and black ankle-length leggings, with a broad, joyful beaming CLOSED-MOUTH smile with the lips sealed and ABSOLUTELY NO TEETH VISIBLE. The outfit, the white background and the full-body framing are the only intentional changes: the person's age and skin must stay exactly as in the photo. The mouth must be closed and lips sealed — no teeth under any circumstance.`,
       existing_image_urls: [form.avatar_photo_url],
     });
     const updatedForm = { ...form, avatar_generated_url: url };
@@ -242,9 +239,18 @@ The output MUST look like the EXACT same person as the source photo — recogniz
               {uploading && <p className="text-sm text-yellow-300 mt-2 text-center">Uploading...</p>}
               {form.avatar_photo_url && (
                 <div className="space-y-2 mt-3">
+                  <label className="flex items-start gap-2 text-xs text-white/60 font-body cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isMeConfirmed}
+                      onChange={(e) => setIsMeConfirmed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 shrink-0 accent-[#d4a017] cursor-pointer"
+                    />
+                    <span>This is a photo of me, and I'm 18 or older.</span>
+                  </label>
                   <Button
                     onClick={handleGenerateAvatar}
-                    disabled={generating}
+                    disabled={generating || !isMeConfirmed}
                     variant="outline"
                     className="w-full border-white/20 text-white hover:bg-white/10 bg-transparent"
                   >
