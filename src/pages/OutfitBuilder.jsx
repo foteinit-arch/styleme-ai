@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Wand2, Save } from "lucide-react";
-import AITryOnCanvas from "@/components/builder/AITryOnCanvas";
+import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
 import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
-import { isDress } from "@/components/builder/tryOnEngine";
+import { isDress, defaultPlacement } from "@/components/builder/outfitLayout";
 
 export default function OutfitBuilder() {
   const [user, setUser]       = useState(null);
@@ -37,11 +37,11 @@ export default function OutfitBuilder() {
       const matched = names.map(name =>
         clothes.find(c => c.name?.toLowerCase() === name?.toLowerCase())
       ).filter(Boolean);
-      // Replace the current selection in one go so AI generates the full look once.
+      // Replace the current selection in one go with the suggested look.
       setPicked(matched.map((item, i) => ({
         ...item,
         placedId: Date.now() + i,
-        z_index: i + 1,
+        ...defaultPlacement(item.category),
       })));
       setShowSuggest(false);
     } catch (err) {
@@ -75,6 +75,10 @@ export default function OutfitBuilder() {
               return {
                 ...clothingItem,
                 placedId: Date.now() + idx,
+                x: itemData.x ?? 50,
+                y: itemData.y ?? 50,
+                scale: itemData.scale ?? 1,
+                rotation: itemData.rotation ?? 0,
                 z_index: itemData.z_index || idx + 1,
               };
             }).filter(Boolean);
@@ -126,13 +130,17 @@ export default function OutfitBuilder() {
       return [...next, {
         ...item,
         placedId: Date.now() + Math.random(),
-        z_index: next.length + 1,
+        ...defaultPlacement(item.category),
       }];
     });
   };
 
   const handleRemovePicked = (placedId) => {
     setPicked(prev => prev.filter(p => p.placedId !== placedId));
+  };
+
+  const handleUpdatePicked = (placedId, changes) => {
+    setPicked(prev => prev.map(p => (p.placedId === placedId ? { ...p, ...changes } : p)));
   };
 
   const handleClear = (e) => {
@@ -201,12 +209,13 @@ export default function OutfitBuilder() {
           <ClothingPicker clothes={clothes} onPick={handlePick} pickedIds={picked.map(p => p.id)} />
         </div>
 
-        {/* Center: AI try-on canvas */}
+        {/* Center: manual outfit canvas */}
         <div className="flex-1 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-            <AITryOnCanvas
+            <AvatarCanvas
               profile={profile}
               picked={picked}
+              onUpdate={handleUpdatePicked}
               onRemove={handleRemovePicked}
             />
           </div>
