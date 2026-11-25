@@ -232,6 +232,14 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
             paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
           }}
         >
+          <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 p-3">
+            <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-800 leading-relaxed">
+              <span className="font-semibold">Upload the garment on its own.</span> Flat lay, hanger or
+              mannequin photos give clean cutouts. Clothes worn by a person keep the body in the image.
+            </p>
+          </div>
+
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="w-full">
               <TabsTrigger value="upload" className="flex-1">
