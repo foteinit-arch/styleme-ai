@@ -38,6 +38,11 @@ export default function ClothingCard({ item, onDelete, onGenerateSimilar }) {
       </div>
       <div className="p-3 flex-1 flex flex-col justify-between">
         <p className="font-medium text-gray-800 text-sm truncate">{item.name}</p>
+        {item.created_date && (
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            Added {new Date(item.created_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        )}
         <div className="flex items-center justify-between mt-1">
           <Badge variant="outline" className="text-xs capitalize bg-[#e8b820] text-[#373d47] font-semibold border-0">
             {item.category}
