@@ -6,6 +6,7 @@ import { Plus, Trash2, ChevronRight, Luggage, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import PackingListDetail from "@/components/packing/PackingListDetail";
+import { portal } from "@/components/ModalPortal";
 
 export default function PackingLists() {
   const [user, setUser] = useState(null);
@@ -81,7 +82,7 @@ export default function PackingLists() {
         </div>
 
         {/* Create modal */}
-        {showCreate && (
+        {showCreate && portal(
           <div
             className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"
             style={{

@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter, Palette, Sparkles, Loader2, X } from "lucide-react";
+import { portal } from "@/components/ModalPortal";
 
 async function removeBackground(imageUrl) {
   const res = await base44.functions.invoke("removeBackground", { image_url: imageUrl });
@@ -286,11 +287,11 @@ export default function Wardrobe() {
           </div>
         )}
 
-        {showAdd && user && (
+        {showAdd && user && portal(
           <AddClothingModal userEmail={user.email} onClose={() => setShowAdd(false)} onAdded={handleAdded} />
         )}
 
-        {showGenerateModal && generatingFor && (
+        {showGenerateModal && generatingFor && portal(
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60" onClick={() => setShowGenerateModal(false)}>
             <div
               className="w-full max-w-md mx-4 overflow-y-auto overscroll-contain rounded-2xl bg-white p-6 shadow-2xl"

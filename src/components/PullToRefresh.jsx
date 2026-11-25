@@ -115,10 +115,11 @@ export default function PullToRefresh({ onRefresh, children }) {
         />
       </div>
 
-      {/* Content shifted down while pulling */}
+      {/* Content shifted down while pulling — transform only while active, since a
+          transform on this wrapper would break position: fixed for its descendants */}
       <div
         style={{
-          transform: `translateY(${refreshing ? THRESHOLD : pullY}px)`,
+          transform: refreshing || pullY > 0 ? `translateY(${refreshing ? THRESHOLD : pullY}px)` : "none",
           transition: pullY === 0 ? "transform 0.3s ease" : "none",
         }}
       >

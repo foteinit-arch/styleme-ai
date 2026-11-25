@@ -6,6 +6,7 @@ import { RotateCcw, Wand2, Save, Sparkles, Image as ImageIcon } from "lucide-rea
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
+import { portal } from "@/components/ModalPortal";
 import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
 import { isDress, defaultPlacement } from "@/components/builder/outfitLayout";
 import { measureImage, detectBody, fitItem } from "@/components/builder/autoFit";
@@ -363,7 +364,7 @@ export default function OutfitBuilder() {
         </div>
       </div>
 
-      {showSuggest && (
+      {showSuggest && portal(
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60"
           style={{
@@ -403,7 +404,7 @@ export default function OutfitBuilder() {
         </div>
       )}
 
-      {showSave && (
+      {showSave && portal(
         <SaveOutfitModal
           userEmail={user?.email}
           placed={picked}
