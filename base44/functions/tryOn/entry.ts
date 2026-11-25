@@ -26,6 +26,9 @@ Deno.serve(async (req) => {
     // The avatar is always the user's own saved photo — never one sent by the app.
     const profiles = await base44.asServiceRole.entities.UserProfile.filter({ user_email: user.email });
     const ownProfile = profiles[0];
+    if (ownProfile?.photo_consent !== true) {
+      return Response.json({ error: 'Set up your avatar first.' }, { status: 400 });
+    }
     const avatar_url = ownProfile?.avatar_generated_url || ownProfile?.avatar_photo_url;
     if (!avatar_url) {
       return Response.json({ error: 'Set up your avatar first.' }, { status: 400 });
