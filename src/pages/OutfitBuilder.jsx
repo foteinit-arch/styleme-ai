@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Wand2, Save, Sparkles, Image as ImageIcon } from "lucide-react";
@@ -24,6 +25,8 @@ export default function OutfitBuilder() {
   const [renderUrl, setRenderUrl] = useState(null);
   const [showRender, setShowRender] = useState(false);
   const [renderError, setRenderError] = useState(null);
+  // Try On needs the 18+ photo confirmation ticked on My Avatar.
+  const [consentNotice, setConsentNotice] = useState(false);
   // Body landmarks of the avatar photo, used to auto-fit garments with no manual tweaking.
   const [fitCtx, setFitCtx] = useState(null);
   const fitReadyRef = useRef(Promise.resolve(null));
@@ -217,6 +220,11 @@ export default function OutfitBuilder() {
   // which returns a photo of the person actually wearing the look.
   const handleTryOn = async () => {
     if (!avatarUrl || picked.length === 0 || rendering) return;
+    if (!profile?.photo_consent) {
+      setConsentNotice(true);
+      return;
+    }
+    setConsentNotice(false);
     setRendering(true);
     setRenderError(null);
     try {
@@ -324,6 +332,12 @@ export default function OutfitBuilder() {
                 >
                   <ImageIcon className="w-4 h-4 mr-1" /> Canvas
                 </Button>
+                <a
+                  href={`mailto:hello@virtuallydressed.app?subject=${encodeURIComponent("Report image")}&body=${encodeURIComponent(`Please review this try-on image: ${renderUrl}\n\nAccount: ${user?.email || "unknown"}`)}`}
+                  className="absolute bottom-2 right-2 text-[11px] font-body text-white/60 underline underline-offset-2 bg-black/40 hover:bg-black/70 hover:text-white backdrop-blur px-2 py-1 rounded"
+                >
+                  Report image
+                </a>
               </div>
             ) : (
               <AvatarCanvas
@@ -336,6 +350,14 @@ export default function OutfitBuilder() {
           </div>
           {renderError && (
             <p className="text-red-400 text-xs text-center pb-2 font-body">{renderError}</p>
+          )}
+          {consentNotice && (
+            <p className="text-yellow-300 text-xs text-center pb-2 font-body">
+              Set up your avatar first.{" "}
+              <Link to="/Avatar" className="underline underline-offset-2 hover:text-yellow-200">
+                Go to My Avatar
+              </Link>
+            </p>
           )}
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
         </div>

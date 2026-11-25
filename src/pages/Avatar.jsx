@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Save, User, Ruler, AlertCircle, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -40,6 +41,7 @@ export default function Avatar() {
     body_shape: "hourglass",
     avatar_photo_url: "",
     avatar_generated_url: "",
+    photo_consent: false,
   });
 
   useEffect(() => {
@@ -232,6 +234,20 @@ export default function Avatar() {
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>
               {uploading && <p className="text-sm text-yellow-300 mt-2 text-center">Uploading and removing background...</p>}
+
+              <label className="flex items-start gap-3 mt-4 cursor-pointer">
+                <Checkbox
+                  checked={!!form.photo_consent}
+                  onCheckedChange={(v) => set("photo_consent", v === true)}
+                  className="mt-0.5 border-white/40 data-[state=checked]:bg-[#e8b820] data-[state=checked]:border-[#e8b820] data-[state=checked]:text-black"
+                />
+                <span className="text-xs text-white/60 font-body leading-relaxed">
+                  This is a photo of me, and I'm 18 or older
+                </span>
+              </label>
+              {form.photo_consent && (
+                <p className="text-xs text-white/30 font-body mt-1">Save your avatar to keep this confirmation.</p>
+              )}
               {form.avatar_photo_url && (
                 <Button
                   onClick={handleClearAvatar}

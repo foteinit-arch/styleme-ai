@@ -17,6 +17,10 @@
     "avatar_description": {
       "type": "string"
     },
+    "photo_consent": {
+      "type": "boolean",
+      "default": false
+    },
     "height_cm": {
       "type": "number"
     },
