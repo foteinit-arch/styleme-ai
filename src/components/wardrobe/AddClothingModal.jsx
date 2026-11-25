@@ -94,10 +94,29 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
 
     const { file_url: originalUrl } = await base44.integrations.Core.UploadFile({ file: normalized });
 
-    let processedUrl = originalUrl;
+    // Turn the photo into an "invisible mannequin" product shot so no body stays in the cutout.
+    let garmentUrl = originalUrl;
+    try {
+      const { url } = await base44.integrations.Core.GenerateImage({
+        prompt: `Convert this photo into a clean e-commerce "ghost mannequin" product image of the garment alone.
+
+- Show ONLY the garment, shaped as if worn by an invisible mannequin: no person, no face, no head, no hair, no hands, no arms, no legs, no feet, no visible skin anywhere.
+- Keep the garment itself EXACTLY as it is: same design, cut, color, fabric, pattern, print, buttons, seams, labels, trims and proportions. Do not restyle, recolor, recrop the design or invent details.
+- Fill any opening where a body would show (neckline, sleeves, hems) with the garment's own fabric or empty white space — never with skin.
+- Shoes and bags: show the item alone, nothing inside or around it.
+- Place it centered on a pure white (#ffffff) background, soft even studio lighting, no shadows, no props, no text, no watermarks.`,
+        existing_image_urls: [originalUrl],
+      });
+      if (url) garmentUrl = url;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[AddClothingModal] garment clean-up failed, using original photo:", e?.message);
+    }
+
+    let processedUrl = garmentUrl;
     let bgWarning = "";
     try {
-      const response = await base44.functions.invoke("removeBackground", { image_url: originalUrl });
+      const response = await base44.functions.invoke("removeBackground", { image_url: garmentUrl });
       if (response.data?.file_url) {
         processedUrl = response.data.file_url;
       } else {
@@ -235,8 +254,9 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 p-3">
             <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
             <p className="text-xs text-amber-800 leading-relaxed">
-              <span className="font-semibold">Upload the garment on its own.</span> Flat lay, hanger or
-              mannequin photos give clean cutouts. Clothes worn by a person keep the body in the image.
+              <span className="font-semibold">Garment on its own works best.</span> Flat lay, hanger or
+              mannequin photos give the cleanest cutouts. Worn photos are re-drawn as an invisible-mannequin
+              product shot, which can slightly change the fit.
             </p>
           </div>
 
