@@ -333,7 +333,7 @@ export default function OutfitBuilder() {
                   <ImageIcon className="w-4 h-4 mr-1" /> Canvas
                 </Button>
                 <a
-                  href={`mailto:hello@virtuallydressed.app?subject=${encodeURIComponent("Report image")}&body=${encodeURIComponent(`Please review this try-on image: ${renderUrl}\n\nAccount: ${user?.email || "unknown"}`)}`}
+                  href={`mailto:msrokkos@hotmail.com?subject=${encodeURIComponent("Report image")}&body=${encodeURIComponent(`Please review this try-on image: ${renderUrl}\n\nAccount: ${user?.email || "unknown"}`)}`}
                   className="absolute bottom-2 right-2 text-[11px] font-body text-white/60 underline underline-offset-2 bg-black/40 hover:bg-black/70 hover:text-white backdrop-blur px-2 py-1 rounded"
                 >
                   Report image
