@@ -237,18 +237,24 @@ export function fitPlacement({ category, garment, avatar, body }) {
     const band = Math.max(bandWidth(garment, rule.band[0], rule.band[1]) ?? cw, cw * 0.3);
     const target = (body[rule.ref] ?? body.shoulder_width) * rule.factor;
     frameW = target / Math.max(0.05, band);
-    frameH = frameW * avatarAspect * imgRatio;
+  } else {
+    const contentW = clamp(body[rule.ref] * rule.factor, 5, 90);
+    frameW = contentW / cw;
+  }
 
+  // A narrow cutout needs a large scale. The frame is taken from the scale we end up
+  // with, so the clamp can never shrink the garment after it has been sized.
+  const scale = Number(clamp(frameW / baseWidth, 0.1, 12).toFixed(2));
+  frameW = baseWidth * scale;
+  frameH = frameW * avatarAspect * imgRatio;
+
+  if (rule.by === "band") {
     // Cutouts are drawn on a hanger, so a floor-length piece is often far longer and
     // narrower than it is when worn. Width comes from the chest or waistband; the
     // height is stretched to the body span so the garment ends where it should.
     const naturalH = frameH * ch;
     const wantedH = Math.max(8, (body[rule.span[1]] - body[rule.span[0]]) * (rule.spanFactor ?? 1));
     stretch = Number(clamp(wantedH / naturalH, 0.6, 1.6).toFixed(3));
-  } else {
-    const contentW = clamp(body[rule.ref] * rule.factor, 5, 90);
-    frameW = contentW / cw;
-    frameH = frameW * avatarAspect * imgRatio;
   }
 
   const contentH = frameH * ch * stretch;
@@ -270,7 +276,7 @@ export function fitPlacement({ category, garment, avatar, body }) {
   return {
     x: round1(clamp(x, 2, 98)),
     y: round1(clamp(y, 0, 100)),
-    scale: Number(clamp(frameW / baseWidth, 0.25, 4).toFixed(2)),
+    scale,
     rotation: 0,
     stretch,
   };

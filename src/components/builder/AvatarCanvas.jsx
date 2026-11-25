@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { CATEGORY_BASE_WIDTH } from "@/components/builder/outfitLayout";
+import { measureImage } from "@/components/builder/autoFit";
 
-const MIN_SCALE = 0.25;
-const MAX_SCALE = 4;
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 12;
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
 export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
@@ -14,6 +15,34 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
   const pickedRef = useRef(picked);
   pickedRef.current = picked;
   const [activeId, setActiveId] = useState(null);
+  const [avatarAspect, setAvatarAspect] = useState(null);
+  // Visible bounds of each garment cutout, so the handles sit on the clothes and
+  // never out in the transparent margin of the image.
+  const [boxes, setBoxes] = useState({});
+  const measuredRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!avatarUrl) return;
+    const img = new Image();
+    img.onload = () => setAvatarAspect(img.naturalWidth / img.naturalHeight || 1);
+    img.src = avatarUrl;
+  }, [avatarUrl]);
+
+  useEffect(() => {
+    const urls = Array.from(new Set(
+      picked.map(p => p.processed_image_url || p.original_image_url).filter(Boolean)
+    ));
+    urls.forEach(async (url) => {
+      if (measuredRef.current.has(url)) return;
+      measuredRef.current.add(url);
+      const m = await measureImage(url).catch(() => null);
+      if (!m) return;
+      setBoxes(prev => ({
+        ...prev,
+        [url]: { box: m.content, ratio: (m.height || 1) / (m.width || 1) },
+      }));
+    });
+  }, [picked]);
 
   if (!avatarUrl) {
     return (
@@ -136,6 +165,35 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
     }
   };
 
+  // Where the visible garment sits on the stage, in percentages of the stage.
+  const contentRect = (item) => {
+    if (!item) return null;
+    const url = item.processed_image_url || item.original_image_url;
+    const measured = boxes[url];
+    const box = measured?.box || { left: 0, top: 0, right: 1, bottom: 1 };
+    const ratio = measured?.ratio ?? 1;
+    const baseWidth = CATEGORY_BASE_WIDTH[item.category] ?? 30;
+    const scale = item.scale ?? 1;
+    const stretch = item.stretch ?? 1;
+    const frameW = baseWidth * scale;
+    const frameH = frameW * (avatarAspect || 0.66) * ratio;
+    const width = (box.right - box.left) * frameW;
+    const height = (box.bottom - box.top) * frameH * stretch;
+    const centerX = (item.x ?? 50) + (0.5 - (box.left + box.right) / 2) * frameW;
+    const centerY = (item.y ?? 50) + (0.5 - (box.top + box.bottom) / 2) * frameH * stretch;
+    const left = clamp(centerX - width / 2, 0, 100);
+    const top = clamp(centerY - height / 2, 0, 100);
+    return {
+      left,
+      top,
+      width: Math.min(width, 100 - left),
+      height: Math.min(height, 100 - top),
+    };
+  };
+
+  const activeItem = picked.find(p => p.placedId === activeId) || null;
+  const activeRect = contentRect(activeItem);
+
   return (
     <div className="w-full max-w-[340px] mx-auto flex flex-col items-center gap-3">
       <div
@@ -168,8 +226,6 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
                 transformOrigin: "center",
                 zIndex: 10 + (item.z_index || 0),
                 touchAction: "none",
-                outline: isActive ? "1px dashed rgba(232,184,32,0.9)" : "none",
-                outlineOffset: 4,
               }}
             >
               {img ? (
@@ -177,34 +233,45 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
               ) : (
                 <div className="w-full aspect-square rounded-lg bg-gray-100 flex items-center justify-center text-3xl pointer-events-none">👗</div>
               )}
-
-              {isActive && (
-                <>
-                  <button
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); onRemove(item.placedId); }}
-                    title="Remove"
-                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white border-2 border-white flex items-center justify-center"
-                    style={{ transform: `scale(${1 / scale}) scaleY(${1 / stretch})`, transformOrigin: "top right" }}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                  <div
-                    data-handle="true"
-                    onPointerDown={(e) => startGesture(e, item)}
-                    onPointerMove={moveGesture}
-                    onPointerUp={endGesture}
-                    onPointerCancel={endGesture}
-                    title="Resize"
-                    className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-[#e8b820] border-2 border-white cursor-nwse-resize"
-                    style={{ transform: `scale(${1 / scale}) scaleY(${1 / stretch})`, transformOrigin: "bottom right", touchAction: "none" }}
-                  />
-                </>
-              )}
             </div>
           );
         })}
+
+        {/* Handles for the selected piece, pinned to the visible garment so they
+            always stay inside the builder. */}
+        {activeItem && activeRect && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${activeRect.left}%`,
+              top: `${activeRect.top}%`,
+              width: `${activeRect.width}%`,
+              height: `${activeRect.height}%`,
+              zIndex: 60,
+            }}
+          >
+            <div className="absolute inset-0 rounded-md border border-dashed border-[#e8b820]/70" />
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); onRemove(activeItem.placedId); }}
+              title="Remove"
+              className="absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-red-500 text-white border-2 border-white flex items-center justify-center pointer-events-auto"
+            >
+              <X className="w-3 h-3" />
+            </button>
+            <div
+              data-handle="true"
+              onPointerDown={(e) => startGesture(e, activeItem)}
+              onPointerMove={moveGesture}
+              onPointerUp={endGesture}
+              onPointerCancel={endGesture}
+              title="Resize"
+              className="absolute -bottom-2.5 -right-2.5 w-5 h-5 rounded-full bg-[#e8b820] border-2 border-white cursor-nwse-resize pointer-events-auto"
+              style={{ touchAction: "none" }}
+            />
+          </div>
+        )}
       </div>
 
       <p className="text-white/40 text-xs font-body text-center">

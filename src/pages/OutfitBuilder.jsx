@@ -22,6 +22,11 @@ export default function OutfitBuilder() {
   // Body landmarks of the avatar photo, used to auto-fit garments with no manual tweaking.
   const [fitCtx, setFitCtx] = useState(null);
   const fitReadyRef = useRef(Promise.resolve(null));
+  const pickedRef = useRef([]);
+  pickedRef.current = picked;
+  // An outfit opened from the wardrobe was saved before the current fit rules, so it
+  // gets re-fitted to the body as soon as the avatar's proportions are known.
+  const refitOnLoadRef = useRef(false);
 
   // Suggest outfit
   const [showSuggest, setShowSuggest] = useState(false);
@@ -89,6 +94,7 @@ export default function OutfitBuilder() {
                 z_index: itemData.z_index || idx + 1,
               };
             }).filter(Boolean);
+            refitOnLoadRef.current = reconstructed.length > 0;
             setPicked(reconstructed);
           }
         }
@@ -132,6 +138,17 @@ export default function OutfitBuilder() {
     fitReadyRef.current = ready;
     return () => { cancelled = true; };
   }, [avatarUrl]);
+
+  useEffect(() => {
+    if (!fitCtx || !refitOnLoadRef.current) return;
+    refitOnLoadRef.current = false;
+    const items = pickedRef.current;
+    if (items.length === 0) return;
+    Promise.all(items.map(async (p) => {
+      const fit = await fitItem(p, fitCtx);
+      return fit ? { ...p, ...fit } : p;
+    })).then(setPicked);
+  }, [fitCtx]);
 
   // ── Pick / remove ───────────────────────────────────────────────────────────
   // Picking a garment adds it to the look. A dress is a one-piece: picking one
