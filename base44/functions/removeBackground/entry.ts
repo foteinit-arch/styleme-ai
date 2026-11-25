@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     const formData = new FormData();
     formData.append("image_url", safeUrl);
-    formData.append("size", "auto");
+    formData.append("size", "preview");
 
     const res = await fetch("https://api.remove.bg/v1.0/removebg", {
       method: "POST",
