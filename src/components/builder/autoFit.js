@@ -25,10 +25,7 @@ function loadImage(url, cors) {
   });
 }
 
-// Visible bounds of the non-transparent pixels, as fractions of the frame, plus the
-// width of the garment row by row. Row widths are what let us size a garment by the
-// part that actually meets the body (neckline, waistband) instead of by its widest
-// point, which on a floor-length dress is the hem.
+// Visible bounds of the non-transparent pixels, as fractions of the frame.
 function scanVisible(img) {
   const width = img.naturalWidth;
   const height = img.naturalHeight;
@@ -57,39 +54,19 @@ function scanVisible(img) {
       }
     }
   }
-  if (maxY < 0) return { box: FULL_BOX, rows: [] };
+  if (maxY < 0) return { box: FULL_BOX };
 
   let minX = w;
   let maxX = -1;
-  const rows = [];
   for (let y = minY; y <= maxY; y++) {
-    if (rowMax[y] < 0) {
-      rows.push(null);
-      continue;
-    }
+    if (rowMin[y] < 0) continue;
     if (rowMin[y] < minX) minX = rowMin[y];
     if (rowMax[y] > maxX) maxX = rowMax[y];
-    rows.push({ left: rowMin[y] / w, right: (rowMax[y] + 1) / w });
   }
 
   return {
     box: { left: minX / w, top: minY / h, right: (maxX + 1) / w, bottom: (maxY + 1) / h },
-    rows,
   };
-}
-
-// Widest visible span of the garment between two heights of its content (0 = top).
-function bandWidth(garment, from, to) {
-  const rows = garment?.rows || [];
-  if (!rows.length) return null;
-  const start = Math.max(0, Math.floor(from * rows.length));
-  const end = Math.min(rows.length, Math.max(start + 1, Math.ceil(to * rows.length)));
-  let widest = 0;
-  for (let i = start; i < end; i++) {
-    const row = rows[i];
-    if (row) widest = Math.max(widest, row.right - row.left);
-  }
-  return widest > 0 ? widest : null;
 }
 
 // Natural size of an image plus the box its visible content occupies.
@@ -99,16 +76,15 @@ export async function measureImage(url) {
 
   let img = null;
   let content = FULL_BOX;
-  let rows = [];
   try {
     img = await loadImage(url, true);
-    ({ box: content, rows } = scanVisible(img));
+    ({ box: content } = scanVisible(img));
   } catch (e) {
     // CORS or decode trouble: measure the frame only.
     img = await loadImage(url, false).catch(() => null);
   }
   if (!img) {
-    const size = { width: 1, height: 1, aspect: 1, content: FULL_BOX, rows: [] };
+    const size = { width: 1, height: 1, aspect: 1, content: FULL_BOX };
     sizeCache.set(url, size);
     return size;
   }
@@ -118,7 +94,6 @@ export async function measureImage(url) {
     height: img.naturalHeight || 1,
     aspect: (img.naturalWidth || 1) / (img.naturalHeight || 1),
     content,
-    rows,
   };
   sizeCache.set(url, size);
   return size;
@@ -201,15 +176,15 @@ Estimate carefully from the actual photo. Do not default every value.`,
   return body;
 }
 
-// How each category is anchored on the body. `band` rules size the garment from the
-// width of its top section, which is the part that wraps the chest or the waist, so a
-// flared hem can never make the shoulders of a dress too wide. The span keeps the
-// garment from running past the feet.
+// How each category is anchored on the body. Short pieces are sized by a body width
+// (shoulders, hips). Long pieces (dresses, trousers) are sized by how much of the body
+// they cover: the hem lands on the ankle and the width follows the cutout's own shape,
+// so nothing gets squashed into a narrow strip.
 const FIT_RULES = {
   top:       { by: "width",  ref: "shoulder_width", factor: 1.2,  anchor: "shoulder_y", offset: 0 },
   outerwear: { by: "width",  ref: "shoulder_width", factor: 1.35, anchor: "shoulder_y", offset: -1 },
-  dress:     { by: "band", band: [0.05, 0.28], ref: "shoulder_width", factor: 0.9, anchor: "shoulder_y", span: ["shoulder_y", "ankle_y"], spanFactor: 1.0 },
-  bottom:    { by: "band", band: [0, 0.08],    ref: "waist_width",    factor: 1.0, anchor: "waist_y",    span: ["waist_y", "ankle_y"],    spanFactor: 1.0 },
+  dress:     { by: "height", span: ["shoulder_y", "ankle_y"], anchor: "shoulder_y", maxW: 1.8,  minW: 0.95 },
+  bottom:    { by: "height", span: ["waist_y", "ankle_y"],    anchor: "waist_y",    maxW: 1.6,  minW: 0.9 },
   underwear: { by: "width",  ref: "hip_width",      factor: 0.95, anchor: "waist_y",    offset: -1 },
   shoes:     { by: "width",  ref: "hip_width",      factor: 0.55, anchor: "ankle_y",    offset: 1, bottom: true },
   bag:       { by: "width",  ref: "shoulder_width", factor: 0.42, anchor: "waist_y",    offset: 12 },
@@ -230,13 +205,27 @@ export function fitPlacement({ category, garment, avatar, body }) {
   // Sizes are for the whole image frame, as percentages of the stage.
   let frameW;
   let frameH;
-  let stretch = 1;
+  const stretch = 1;
 
-  if (rule.by === "band") {
-    // Never let a thin strap define the whole size of the garment.
-    const band = Math.max(bandWidth(garment, rule.band[0], rule.band[1]) ?? cw, cw * 0.3);
-    const target = (body[rule.ref] ?? body.shoulder_width) * rule.factor;
-    frameW = target / Math.max(0.05, band);
+  if (rule.by === "height") {
+    // Height first: the piece covers the body from its anchor down to the ankle. The
+    // width then comes from the cutout's own shape, so a dress keeps its real
+    // silhouette instead of being stretched or squeezed to hit a width.
+    const shape = cw / (ch * imgRatio); // visible width / height of the garment
+    let spanH = Math.max(8, body[rule.span[1]] - body[rule.span[0]]);
+    let spanW = (spanH * shape) / avatarAspect;
+
+    // Guard rails: nothing wider than a generous skirt, nothing thinner than the waist.
+    const maxW = body.hip_width * rule.maxW;
+    const minW = (body.waist_width ?? body.hip_width * 0.8) * rule.minW;
+    if (spanW > maxW) {
+      spanW = maxW;
+      spanH = (spanW * avatarAspect) / shape;
+    } else if (spanW < minW) {
+      spanW = minW;
+      spanH = (spanW * avatarAspect) / shape;
+    }
+    frameW = spanW / cw;
   } else {
     const contentW = clamp(body[rule.ref] * rule.factor, 5, 90);
     frameW = contentW / cw;
@@ -248,19 +237,10 @@ export function fitPlacement({ category, garment, avatar, body }) {
   frameW = baseWidth * scale;
   frameH = frameW * avatarAspect * imgRatio;
 
-  if (rule.by === "band") {
-    // Cutouts are drawn on a hanger, so a floor-length piece is often far longer and
-    // narrower than it is when worn. Width comes from the chest or waistband; the
-    // height is stretched to the body span so the garment ends where it should.
-    const naturalH = frameH * ch;
-    const wantedH = Math.max(8, (body[rule.span[1]] - body[rule.span[0]]) * (rule.spanFactor ?? 1));
-    stretch = Number(clamp(wantedH / naturalH, 0.6, 1.6).toFixed(3));
-  }
-
   const contentH = frameH * ch * stretch;
   const contentX = category === "bag" ? body.center_x + body.shoulder_width * 0.55 : body.center_x;
   let contentY;
-  if (rule.by === "band" || rule.by === "height") {
+  if (rule.by === "height") {
     // Top of the garment sits on its body landmark.
     contentY = body[rule.anchor] + contentH / 2;
   } else {
