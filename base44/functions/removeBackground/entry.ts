@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     // Validate before delegating to remove.bg to prevent blind SSRF
     const safeUrl = assertSafeUrl(image_url);
 
-    const apiKey = Deno.env.get("REMOVEBG_API_KEY");
+    const apiKey = Deno.env.get("REMOVEBG_API_KEY") || Deno.env.get("VirtuallyDressedKey");
     if (!apiKey) return Response.json({ error: 'remove.bg key not configured' }, { status: 500 });
 
     const formData = new FormData();
