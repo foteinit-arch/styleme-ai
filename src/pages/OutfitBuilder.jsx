@@ -84,6 +84,7 @@ export default function OutfitBuilder() {
                 x: itemData.x ?? 50,
                 y: itemData.y ?? 50,
                 scale: itemData.scale ?? 1,
+                stretch: itemData.stretch ?? 1,
                 rotation: itemData.rotation ?? 0,
                 z_index: itemData.z_index || idx + 1,
               };
@@ -178,6 +179,17 @@ export default function OutfitBuilder() {
     setPicked([]);
   };
 
+  // Re-fit everything currently on the canvas to the body in one tap.
+  const handleRefit = async () => {
+    const ctx = fitCtx || (await fitReadyRef.current);
+    if (!ctx?.body || picked.length === 0) return;
+    const fitted = await Promise.all(picked.map(async (p) => {
+      const fit = await fitItem(p, ctx);
+      return fit ? { ...p, ...fit } : p;
+    }));
+    setPicked(fitted);
+  };
+
   // ── Snapshots ─────────────────────────────────────────────────────────────
   const handleSaveOutfitFromSnapshot = (snapshot) => {
     setSavingSnapshot(snapshot);
@@ -223,6 +235,9 @@ export default function OutfitBuilder() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear} onTouchEnd={handleClear} className="text-white/60 border-white/20 bg-transparent hover:bg-white/10">
             <RotateCcw className="w-4 h-4 mr-1" /> Clear
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefit} disabled={picked.length === 0} className="text-[#e8b820] border-[#e8b820]/40 bg-transparent hover:bg-[#e8b820]/10 disabled:opacity-40">
+            <Wand2 className="w-4 h-4 mr-1" /> Fit
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowSuggest(true)} disabled={clothes.length === 0} className="text-purple-300 border-purple-500/40 bg-transparent hover:bg-purple-500/10 disabled:opacity-40">
             <Wand2 className="w-4 h-4 mr-1" /> Suggest Outfit

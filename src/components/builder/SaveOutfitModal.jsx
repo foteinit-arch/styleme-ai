@@ -29,6 +29,7 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
         x: p.x,
         y: p.y,
         scale: p.scale,
+        stretch: p.stretch ?? 1,
         rotation: p.rotation,
         z_index: p.z_index,
       }));

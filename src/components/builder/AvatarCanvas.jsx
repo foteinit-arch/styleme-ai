@@ -149,6 +149,7 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
         {picked.map(item => {
           const img = item.processed_image_url || item.original_image_url;
           const scale = item.scale ?? 1;
+          const stretch = item.stretch ?? 1;
           const isActive = activeId === item.placedId;
           return (
             <div
@@ -163,7 +164,7 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
                 left: `${item.x ?? 50}%`,
                 top: `${item.y ?? 50}%`,
                 width: `${CATEGORY_BASE_WIDTH[item.category] ?? 30}%`,
-                transform: `translate(-50%, -50%) scale(${scale})`,
+                transform: `translate(-50%, -50%) scale(${scale}) scaleY(${stretch})`,
                 transformOrigin: "center",
                 zIndex: 10 + (item.z_index || 0),
                 touchAction: "none",
@@ -185,7 +186,7 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
                     onClick={(e) => { e.stopPropagation(); onRemove(item.placedId); }}
                     title="Remove"
                     className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white border-2 border-white flex items-center justify-center"
-                    style={{ transform: `scale(${1 / scale})`, transformOrigin: "top right" }}
+                    style={{ transform: `scale(${1 / scale}) scaleY(${1 / stretch})`, transformOrigin: "top right" }}
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -197,7 +198,7 @@ export default function AvatarCanvas({ profile, picked, onUpdate, onRemove }) {
                     onPointerCancel={endGesture}
                     title="Resize"
                     className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-[#e8b820] border-2 border-white cursor-nwse-resize"
-                    style={{ transform: `scale(${1 / scale})`, transformOrigin: "bottom right", touchAction: "none" }}
+                    style={{ transform: `scale(${1 / scale}) scaleY(${1 / stretch})`, transformOrigin: "bottom right", touchAction: "none" }}
                   />
                 </>
               )}
