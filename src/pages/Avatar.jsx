@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Save, User, Ruler, Sparkles, AlertCircle, Trash2 } from "lucide-react";
+import { Upload, Save, User, Ruler, AlertCircle, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,11 +25,9 @@ export default function Avatar() {
   const [user, setUser]           = useState(null);
   const [profile, setProfile]     = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [generating, setGenerating] = useState(false);
   const [saving, setSaving]       = useState(false);
   const [deleting, setDeleting]   = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isMeConfirmed, setIsMeConfirmed] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     height_cm: 165,
@@ -57,13 +55,48 @@ export default function Avatar() {
     }).catch(() => base44.auth.redirectToLogin(window.location.href));
   }, []);
 
+  // Upload the body photo, cut out the background, and keep the result as the
+  // avatar. If background removal fails we simply keep the original photo.
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setForm((f) => ({ ...f, avatar_photo_url: file_url }));
-    setUploading(false);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+
+      let avatarUrl = file_url;
+      try {
+        const res = await base44.functions.invoke("removeBackground", { image_url: file_url });
+        if (!res.data?.file_url) throw new Error(res.data?.error || "Background removal failed");
+        const cutout = await fetch(res.data.file_url);
+        const blob = await cutout.blob();
+        const uploaded = await base44.integrations.Core.UploadFile({
+          file: new File([blob], "avatar.png", { type: blob.type || "image/png" }),
+        });
+        avatarUrl = uploaded.file_url;
+      } catch {
+        avatarUrl = file_url;
+      }
+
+      const next = { ...form, avatar_photo_url: avatarUrl, avatar_generated_url: avatarUrl };
+      setForm(next);
+
+      const data = { ...next, user_email: user.email };
+      let savedProfile;
+      if (profile) {
+        await base44.entities.UserProfile.update(profile.id, data);
+        savedProfile = { ...profile, ...data };
+      } else {
+        savedProfile = await base44.entities.UserProfile.create(data);
+        setProfile(savedProfile);
+      }
+      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: savedProfile }));
+      toast.success("Your photo is now your avatar");
+    } catch (error) {
+      toast.error("Upload failed: " + (error?.message || "Unknown error"));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -80,25 +113,6 @@ export default function Avatar() {
     window.dispatchEvent(new CustomEvent('avatar-updated', { detail: savedProfile }));
     setSaving(false);
     toast.success("Avatar saved!");
-  };
-
-  // The avatar is the user's own uploaded photo — no AI re-drawing.
-  const handleGenerateAvatar = async () => {
-    if (!form.avatar_photo_url || !isMeConfirmed) return;
-    setGenerating(true);
-    const url = form.avatar_photo_url;
-    setForm((f) => ({ ...f, avatar_generated_url: url }));
-    let savedProfile;
-    if (profile) {
-      await base44.entities.UserProfile.update(profile.id, { avatar_generated_url: url });
-      savedProfile = { ...profile, ...form, avatar_generated_url: url };
-    } else {
-      savedProfile = await base44.entities.UserProfile.create({ ...form, avatar_generated_url: url, user_email: user.email });
-      setProfile(savedProfile);
-    }
-    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: savedProfile }));
-    setGenerating(false);
-    toast.success("Your photo is now your avatar");
   };
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -192,6 +206,17 @@ export default function Avatar() {
                 <span>Body Photo</span>
                 <span className="ml-auto text-xs font-body font-medium bg-white/10 text-white/50 px-2 py-0.5 rounded-full">Step 2</span>
               </h2>
+
+              {/* What makes a photo work well for try-on */}
+              <div className="mb-4 rounded-xl bg-white/5 border border-white/10 p-4">
+                <p className="text-sm font-semibold text-white mb-2 font-body">For the best fit</p>
+                <ul className="space-y-1.5 text-xs text-white/60 font-body list-disc pl-4">
+                  <li>Wear fitted, plain clothes: a black long-sleeve top and black leggings, or a black unitard, work best</li>
+                  <li>Stand straight, facing the camera, arms slightly away from your body</li>
+                  <li>Full body in frame, head to feet, plain wall behind you</li>
+                </ul>
+              </div>
+
               <label className="block cursor-pointer">
                 <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:bg-white/5 transition">
                   {form.avatar_photo_url ? (
@@ -206,36 +231,16 @@ export default function Avatar() {
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>
-              {uploading && <p className="text-sm text-yellow-300 mt-2 text-center">Uploading...</p>}
+              {uploading && <p className="text-sm text-yellow-300 mt-2 text-center">Uploading and removing background...</p>}
               {form.avatar_photo_url && (
-                <div className="space-y-2 mt-3">
-                  <label className="flex items-start gap-2 text-xs text-white/60 font-body cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isMeConfirmed}
-                      onChange={(e) => setIsMeConfirmed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 shrink-0 accent-[#d4a017] cursor-pointer"
-                    />
-                    <span>This is a photo of me, and I'm 18 or older.</span>
-                  </label>
-                  <Button
-                    onClick={handleGenerateAvatar}
-                    disabled={generating || !isMeConfirmed}
-                    variant="outline"
-                    className="w-full border-white/20 text-white hover:bg-white/10 bg-transparent"
-                  >
-                    <Sparkles className={`mr-2 w-4 h-4 ${generating ? "animate-spin" : ""}`} />
-                    {generating ? "Setting avatar..." : "Use My Photo as Avatar"}
-                  </Button>
-                  <Button
-                    onClick={handleClearAvatar}
-                    variant="outline"
-                    className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent"
-                  >
-                    <Trash2 className="mr-2 w-4 h-4" />
-                    Clear & Start Over
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleClearAvatar}
+                  variant="outline"
+                  className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 bg-transparent mt-3"
+                >
+                  <Trash2 className="mr-2 w-4 h-4" />
+                  Clear & Start Over
+                </Button>
               )}
               {form.avatar_generated_url && (
                 <div className="mt-3">
