@@ -94,7 +94,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   return (
     <div
       ref={containerRef}
-      className="relative overflow-y-auto h-full"
+      className="relative overflow-y-auto overflow-x-hidden h-full"
       style={{ overscrollBehavior: "none", touchAction: "pan-y" }}
     >
       {/* Pull indicator — offset by sticky header height (56px) so it never renders behind it */}

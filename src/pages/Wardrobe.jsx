@@ -168,7 +168,7 @@ export default function Wardrobe() {
               <h1 className="font-heading font-bold text-2xl text-white tracking-tight">My wardrobe</h1>
               <p className="text-white/50 mt-1 font-body">{items.length} items in your closet</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link to={createPageUrl("OutfitBuilder")}>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                   Try On →
@@ -190,7 +190,7 @@ export default function Wardrobe() {
               <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search items..." className="pl-9 bg-white/10 border-white/10 text-white placeholder:text-white/30 focus:border-yellow-300" />
             </div>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-40 bg-white/10 border-white/10 text-white">
+              <SelectTrigger className="w-full sm:w-40 bg-white/10 border-white/10 text-white">
                 <Filter className="mr-2 w-4 h-4" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -201,7 +201,7 @@ export default function Wardrobe() {
               </SelectContent>
             </Select>
             <Select value={color} onValueChange={setColor}>
-              <SelectTrigger className="w-40 bg-white/10 border-white/10 text-white">
+              <SelectTrigger className="w-full sm:w-40 bg-white/10 border-white/10 text-white">
                 <Palette className="mr-2 w-4 h-4" />
                 <SelectValue placeholder="Color" />
               </SelectTrigger>
@@ -274,7 +274,7 @@ export default function Wardrobe() {
 
         {/* Persistent generation progress banner */}
         {isGenerating && (
-          <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#1a1a1a] border border-purple-500/40 text-white px-5 py-3 rounded-2xl shadow-2xl shadow-purple-900/30 min-w-[280px]">
+          <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#1a1a1a] border border-purple-500/40 text-white px-5 py-3 rounded-2xl shadow-2xl shadow-purple-900/30 min-w-[280px] max-w-[calc(100vw-2rem)]">
             <Loader2 className="w-5 h-5 text-purple-400 animate-spin shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white leading-tight">

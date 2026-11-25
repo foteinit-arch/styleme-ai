@@ -374,7 +374,7 @@ export default function OutfitBuilder() {
           }}
           onClick={() => !suggesting && setShowSuggest(false)}
         >
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-80 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-4">
               <Wand2 className="w-5 h-5 text-purple-400" />
               <h2 className="text-white font-heading font-bold text-xl">Suggest Outfit</h2>
