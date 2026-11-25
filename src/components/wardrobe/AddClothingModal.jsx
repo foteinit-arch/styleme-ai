@@ -103,7 +103,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       }
     } catch (e) {
       // Don't block the upload, but surface why background removal failed.
-      bgWarning = e?.message || "Background removal failed";
+      bgWarning = e?.response?.data?.error || e?.message || "Background removal failed";
       // eslint-disable-next-line no-console
       console.warn("[AddClothingModal] background removal failed:", bgWarning);
     }

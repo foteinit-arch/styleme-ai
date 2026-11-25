@@ -6,7 +6,9 @@ import { Plus, Search, Filter, Palette, Sparkles, Loader2, X } from "lucide-reac
 
 async function removeBackground(imageUrl) {
   const res = await base44.functions.invoke("removeBackground", { image_url: imageUrl });
-  return new Blob([res.data], { type: res.headers?.["content-type"] || "image/png" });
+  if (!res.data?.file_url) throw new Error(res.data?.error || "Background removal failed");
+  const cutout = await fetch(res.data.file_url);
+  return await cutout.blob();
 }
 import ClothingCard from "@/components/wardrobe/ClothingCard";
 import AddClothingModal from "@/components/wardrobe/AddClothingModal";
