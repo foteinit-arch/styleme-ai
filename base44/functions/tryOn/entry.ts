@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.63';
 import OpenAI from 'npm:openai@6.45.0';
 
 // How each garment category is actually worn, so the render layers pieces correctly.
@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
       garmentLines,
       "Layer the pieces the way they would really be worn, in this order: base layer closest to the body, then top and bottom or dress, then outerwear, shoes on the feet, bags held at hip level.",
       "The garments must sit on the person's body with realistic proportions, drape and fabric folds. None of the person's own clothing may remain visible. Do not add any other clothing, logos or text.",
+      "The result must show exactly one person: the same person from IMAGE 1, once. Never keep a second body, a background figure, a reflection or a ghost of the original pose anywhere in the frame.",
       "Photorealistic, sharp focus, natural lighting, no illustration or CGI look.",
     ].join("\n");
 
