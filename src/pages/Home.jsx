@@ -125,9 +125,9 @@ export default function Home() {
       <div className="relative w-full min-h-screen flex flex-col">
 
         {/* Nav */}
-        <div className="px-8 py-6 flex items-center justify-between z-10">
-          <span className="text-gray-900 text-sm font-body tracking-widest uppercase font-medium">Virtually Dressed</span>
-          <div className="flex gap-6">
+        <div className="px-5 sm:px-8 py-6 flex items-center justify-between gap-4 z-10">
+          <span className="text-gray-900 text-xs sm:text-sm font-body tracking-widest uppercase font-medium whitespace-nowrap">Virtually Dressed</span>
+          <div className="flex gap-4 sm:gap-6 shrink-0">
             <Link to={createPageUrl("Explore")} className="text-gray-600 text-sm font-body tracking-wider uppercase hover:text-gray-900 transition-colors">Explore</Link>
             {user ? (
               <Link to={createPageUrl("Wardrobe")} className="text-gray-600 text-sm font-body tracking-wider uppercase hover:text-gray-900 transition-colors">Wardrobe</Link>

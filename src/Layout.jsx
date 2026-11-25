@@ -57,28 +57,28 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#373d47]">
       {/* Top header — safe area aware */}
       <nav className="bg-white dark:bg-[#1a1a1a] border-b border-gray-200 dark:border-transparent sticky top-0 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-3 h-14">
           {/* Logo or back button */}
           {isRootPage ? (
-            <Link to={createPageUrl("Home")} className="flex items-center gap-2">
-              <Shirt className="w-5 h-5 text-white" />
-              <span className="font-heading font-bold uppercase text-gray-900 dark:text-white text-lg tracking-tight">Virtually Dressed</span>
+            <Link to={createPageUrl("Home")} className="flex items-center gap-2 shrink-0 min-w-0">
+              <Shirt className="w-5 h-5 text-white shrink-0" />
+              <span className="font-heading font-bold uppercase text-gray-900 dark:text-white text-base lg:text-lg tracking-tight whitespace-nowrap">Virtually Dressed</span>
             </Link>
           ) : (
-            <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white p-2 -ml-2">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white p-2 -ml-2 shrink-0">
               <ChevronLeft className="w-5 h-5" />
               <span className="text-sm font-body">Back</span>
             </button>
           )}
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar">
             {NAV.map(({ label, page, icon: Icon }) => (
               <Link key={page} to={createPageUrl(page)}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={currentPageName === page ? "text-[#e8b820]" : "text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10"}
+                  className={`whitespace-nowrap ${currentPageName === page ? "text-[#e8b820]" : "text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10"}`}
                 >
                   <Icon className="w-4 h-4" />
                   {label}
@@ -88,10 +88,10 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Desktop auth */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2 shrink-0">
             {user ? (
               <>
-                <span className="text-sm text-gray-500 dark:text-white/50 font-body">{user.full_name || user.email}</span>
+                <span className="text-sm text-gray-500 dark:text-white/50 font-body truncate max-w-[120px] lg:max-w-[180px]">{user.full_name || user.email}</span>
                 <Button variant="ghost" size="sm" onClick={() => base44.auth.logout(createPageUrl("Home"))} className="text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10">
                   <LogOut className="w-4 h-4" />
                 </Button>
