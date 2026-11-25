@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import { X, Upload, Sparkles, FolderOpen, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 const CATEGORIES = ["top", "bottom", "dress", "outerwear", "shoes", "accessory", "underwear", "bag"];
@@ -58,6 +59,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
   const [bulkErrors, setBulkErrors] = useState([]);
   const [bulkRunning, setBulkRunning] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("top");
+  const { toast } = useToast();
 
   // Revoke preview object URL on change/unmount to avoid leaks.
   useEffect(() => {
@@ -188,7 +190,11 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
       });
       if (bgWarning) {
         // Item still saved, but warn the user the cutout step didn't run.
-        setError(`Saved, but background not removed: ${bgWarning}`);
+        toast({
+          title: "Background not removed",
+          description: bgWarning,
+          variant: "destructive",
+        });
       }
       onAdded(item);
     } catch (e) {
