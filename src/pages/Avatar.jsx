@@ -82,53 +82,23 @@ export default function Avatar() {
     toast.success("Avatar saved!");
   };
 
+  // The avatar is the user's own uploaded photo — no AI re-drawing.
   const handleGenerateAvatar = async () => {
     if (!form.avatar_photo_url || !isMeConfirmed) return;
     setGenerating(true);
-    const m = [];
-    if (form.height_cm) m.push(`height ${form.height_cm} cm`);
-    if (form.bust_cm)   m.push(`bust ${form.bust_cm} cm`);
-    if (form.waist_cm)  m.push(`waist ${form.waist_cm} cm`);
-    if (form.hips_cm)   m.push(`hips ${form.hips_cm} cm`);
-    if (form.body_shape) m.push(`${form.body_shape} body shape`);
-    if (form.weight_kg) m.push(`weight ${form.weight_kg} kg`);
-    const measurements = m.length ? `The person's real body measurements are: ${m.join(", ")}. Scale the generated body to match these exact proportions.` : "";
-
-    const { url } = await base44.integrations.Core.GenerateImage({
-      prompt: `You are editing a real photo into a full-body avatar mannequin. This is an IDENTITY-PRESERVATION task — the output MUST look like the EXACT same person, not a similar or idealized version.
-
-IDENTITY RULES (absolute highest priority — treat the source photo as the ground truth; reproduce that exact person):
-- The face MUST be a near-pixel-accurate match to the source: identical face shape, jawline, cheekbones, nose shape and size, lip shape and fullness, eye color, eye shape, eyelid shape, eyebrow shape/thickness/arch, any freckles/moles/scars, facial hair if present. Do NOT beautify, slim, age, de-age, or alter any facial feature. The viewer should instantly recognize this as the same person.
-- Skin tone MUST match EXACTLY — same shade, same undertone, same freckling/pigmentation, same skin texture. Do not lighten or smooth beyond a barely-there retouch.
-- Hair MUST match EXACTLY: same color, same shade/highlights, same length, same style, same parting, same texture (straight/wavy/curly), same volume and density. Do not restyle or recolor.
-- Body proportions MUST match the source person's build and these real measurements. Do not slim, lengthen, or alter the figure.
-
-EXPRESSION (the one intentional facial change) — CRITICAL NO-TEETH RULE:
-- Give the person a BROAD, JOYFUL CLOSED-MOUTH SMILE.
-- ABSOLUTELY NO TEETH MAY BE VISIBLE. The mouth MUST be fully closed — lips pressed together and sealed, covering the teeth completely. Do NOT show any teeth, do NOT part the lips, do NOT open the mouth even slightly. This is a hard, non-negotiable constraint: if any tooth is visible, the image is wrong.
-- It is a wide, warm, beaming smile with the LIPS CLOSED: corners of the mouth lifted high, cheeks raised, and the eyes happily engaged (crinkled, full Duchenne smile) — all the joy comes from the lifted corners and crinkled eyes, NOT from an open mouth.
-- Make it noticeably bigger and more expressive than a polite smile, but keep the lips gently closed and sealed together, natural and suited to THIS person's actual mouth and face; do not stretch or distort the lips beyond a believable wide closed grin.
-- Everything else about the face stays identical to the source.
-- REPEAT: CLOSED MOUTH, LIPS SEALED, ZERO TEETH VISIBLE.
-
-${measurements}
-
-ONLY these changes are allowed, nothing else:
-1. Zoom out / re-frame so the FULL body is visible from the top of the head to the soles of the feet — nothing may be cropped at top or bottom.
-2. Dress the person in a plain, clearly visible outfit: a fitted white crew-neck T-shirt and black ankle-length leggings. The clothing must be opaque and unmistakably fabric — absolutely no skin-tone, beige, nude or flesh-colored clothing of any kind.
-3. Remove ALL accessories: jewelry, watches, bags, belts, hats, glasses, hair accessories. Leave nothing but the white T-shirt and black leggings.
-4. Replace the background with a pure white (#ffffff) seamless studio backdrop.
-5. Keep the SAME forward-facing pose and lighting direction as the original.
-
-The output MUST look like the EXACT same person as the source photo — recognizable identity, same face shape, features, hair, AGE and SKIN TONE, wearing a fitted white crew-neck T-shirt and black ankle-length leggings, with a broad, joyful beaming CLOSED-MOUTH smile with the lips sealed and ABSOLUTELY NO TEETH VISIBLE. The outfit, the white background and the full-body framing are the only intentional changes: the person's age and skin must stay exactly as in the photo. The mouth must be closed and lips sealed — no teeth under any circumstance.`,
-      existing_image_urls: [form.avatar_photo_url],
-    });
-    const updatedForm = { ...form, avatar_generated_url: url };
-    setForm(updatedForm);
+    const url = form.avatar_photo_url;
+    setForm((f) => ({ ...f, avatar_generated_url: url }));
+    let savedProfile;
     if (profile) {
-      window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { ...profile, avatar_generated_url: url } }));
+      await base44.entities.UserProfile.update(profile.id, { avatar_generated_url: url });
+      savedProfile = { ...profile, ...form, avatar_generated_url: url };
+    } else {
+      savedProfile = await base44.entities.UserProfile.create({ ...form, avatar_generated_url: url, user_email: user.email });
+      setProfile(savedProfile);
     }
+    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: savedProfile }));
     setGenerating(false);
+    toast.success("Your photo is now your avatar");
   };
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -255,7 +225,7 @@ The output MUST look like the EXACT same person as the source photo — recogniz
                     className="w-full border-white/20 text-white hover:bg-white/10 bg-transparent"
                   >
                     <Sparkles className={`mr-2 w-4 h-4 ${generating ? "animate-spin" : ""}`} />
-                    {generating ? "Generating avatar..." : "Generate My Avatar"}
+                    {generating ? "Setting avatar..." : "Use My Photo as Avatar"}
                   </Button>
                   <Button
                     onClick={handleClearAvatar}
@@ -269,7 +239,7 @@ The output MUST look like the EXACT same person as the source photo — recogniz
               )}
               {form.avatar_generated_url && (
                 <div className="mt-3">
-                  <p className="text-xs text-white/30 mb-1 text-center">Generated Avatar</p>
+                  <p className="text-xs text-white/30 mb-1 text-center">Your Avatar</p>
                   <img src={form.avatar_generated_url} className="h-40 mx-auto object-contain rounded-lg border border-white/10" alt="generated avatar" />
                 </div>
               )}
