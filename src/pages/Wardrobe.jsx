@@ -291,8 +291,12 @@ export default function Wardrobe() {
         )}
 
         {showGenerateModal && generatingFor && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowGenerateModal(false)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e=>e.stopPropagation()}>
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60" onClick={() => setShowGenerateModal(false)}>
+            <div
+              className="w-full max-w-md mx-4 overflow-y-auto overscroll-contain rounded-2xl bg-white p-6 shadow-2xl"
+              style={{ maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+              onClick={e=>e.stopPropagation()}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-500" />

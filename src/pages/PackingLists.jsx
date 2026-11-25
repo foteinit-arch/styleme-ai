@@ -82,13 +82,24 @@ export default function PackingLists() {
 
         {/* Create modal */}
         {showCreate && (
-          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-            <div className="bg-[#232323] border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+          <div
+            className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"
+            style={{
+              paddingTop: 'calc(1rem + env(safe-area-inset-top))',
+              paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
+              paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
+              paddingRight: 'calc(1rem + env(safe-area-inset-right))',
+            }}
+          >
+            <div
+              className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#232323] p-6 shadow-2xl"
+              style={{ maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+            >
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-heading font-bold text-white text-xl">New Packing List</h2>
                 <button onClick={() => setShowCreate(false)} className="text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
               </div>
-              <div className="space-y-3">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain">
                 <Input placeholder="List name (e.g. Paris Trip)" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   className="bg-white/10 border-white/10 text-white placeholder:text-white/30" />
                 <Input placeholder="Destination (optional)" value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))}
@@ -105,9 +116,11 @@ export default function PackingLists() {
                       className="bg-white/10 border-white/10 text-white" />
                   </div>
                 </div>
-                <Button onClick={handleCreate} disabled={saving || !form.name} className="w-full bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold mt-2">
-                  {saving ? "Creating…" : "Create List"}
-                </Button>
+                <div className="sticky bottom-0 bg-[#232323] pt-3">
+                  <Button onClick={handleCreate} disabled={saving || !form.name} className="w-full bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold">
+                    {saving ? "Creating…" : "Create List"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

@@ -147,7 +147,7 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
       style={{
         paddingTop: 'calc(1rem + env(safe-area-inset-top))',
         paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
@@ -155,20 +155,17 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
         paddingRight: 'calc(1rem + env(safe-area-inset-right))',
       }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+      <div
+        className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        style={{ maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+      >
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-900">{isEditing ? "Edit Outfit" : "Save Outfit"}</h2>
           <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2">
             <X className="w-5 h-5" />
           </Button>
         </div>
-        <div
-          className="p-5 space-y-4 overflow-y-auto"
-          style={{
-            maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
-            paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
-          }}
-        >
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 space-y-4">
           <div>
             <Label>Outfit Name</Label>
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Summer wedding look" className="mt-1" />
@@ -193,9 +190,11 @@ export default function SaveOutfitModal({ userEmail, placed, snapshotUrl, editin
             </div>
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />
           </div>
-          <Button onClick={handleSave} disabled={saving || !name} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-            <Save className="mr-2 w-4 h-4" /> {saving ? "Saving..." : isEditing ? "Update Outfit" : "Save Outfit"}
-          </Button>
+          <div className="sticky bottom-0 border-t border-gray-100 bg-white pt-4">
+            <Button onClick={handleSave} disabled={saving || !name} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+              <Save className="mr-2 w-4 h-4" /> {saving ? "Saving..." : isEditing ? "Update Outfit" : "Save Outfit"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

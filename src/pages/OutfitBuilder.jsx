@@ -365,7 +365,7 @@ export default function OutfitBuilder() {
 
       {showSuggest && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60"
           style={{
             paddingTop: 'calc(1rem + env(safe-area-inset-top))',
             paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
@@ -374,7 +374,11 @@ export default function OutfitBuilder() {
           }}
           onClick={() => !suggesting && setShowSuggest(false)}
         >
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div
+            className="w-full max-w-sm overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-[#1a1a1a] p-6 shadow-2xl"
+            style={{ maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="flex items-center gap-2 mb-4">
               <Wand2 className="w-5 h-5 text-purple-400" />
               <h2 className="text-white font-heading font-bold text-xl">Suggest Outfit</h2>

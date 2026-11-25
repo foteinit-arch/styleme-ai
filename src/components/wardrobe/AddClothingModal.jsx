@@ -227,7 +227,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
       style={{
         paddingTop: 'calc(1rem + env(safe-area-inset-top))',
         paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
@@ -235,7 +235,10 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
         paddingRight: 'calc(1rem + env(safe-area-inset-right))',
       }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        style={{ maxHeight: 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))' }}
+      >
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">
             {tab === "bulk" ? "Bulk Upload" : "Add Clothing Item"}
@@ -245,13 +248,7 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
           </Button>
         </div>
 
-        <div
-          className="p-5 space-y-4 overflow-y-auto"
-          style={{
-            maxHeight: 'calc(85dvh - 4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
-            paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
-          }}
-        >
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 space-y-4">
           <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 p-3">
             <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
             <p className="text-xs text-amber-800 leading-relaxed">
@@ -410,25 +407,24 @@ export default function AddClothingModal({ userEmail, onClose, onAdded }) {
             />
           </div>
 
-          {error && tab === "upload" && <p className="text-sm text-red-500">{error}</p>}
-
           {tab !== "bulk" && (
-            <Button
-              onClick={handleSubmit}
-              disabled={processing}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              {processing ? (
-                <>
-                  <Sparkles className="mr-2 w-4 h-4 animate-spin" /> Processing...
-                </>
-              ) : (
-                "Add to Wardrobe"
-              )}
-            </Button>
-          )}
-          {tab !== "bulk" && processing && status && (
-            <p className="text-xs text-gray-500 text-center">{status}</p>
+            <div className="sticky bottom-0 space-y-2 border-t border-gray-100 bg-white pt-4">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button
+                onClick={handleSubmit}
+                disabled={processing}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                {processing ? (
+                  <>
+                    <Sparkles className="mr-2 w-4 h-4 animate-spin" /> Processing...
+                  </>
+                ) : (
+                  "Add to Wardrobe"
+                )}
+              </Button>
+              {processing && status && <p className="text-xs text-gray-500 text-center">{status}</p>}
+            </div>
           )}
         </div>
       </div>
