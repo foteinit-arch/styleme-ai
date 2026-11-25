@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Wand2, Save } from "lucide-react";
+import { RotateCcw, Wand2, Save, Sparkles, Image as ImageIcon } from "lucide-react";
 import AvatarCanvas from "@/components/builder/AvatarCanvas";
 import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
@@ -19,6 +19,11 @@ export default function OutfitBuilder() {
   const [savingSnapshot, setSavingSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingOutfit, setEditingOutfit] = useState(null);
+  // AI try-on: a rendered photo of the wearer actually wearing the picked garments.
+  const [rendering, setRendering] = useState(false);
+  const [renderUrl, setRenderUrl] = useState(null);
+  const [showRender, setShowRender] = useState(false);
+  const [renderError, setRenderError] = useState(null);
   // Body landmarks of the avatar photo, used to auto-fit garments with no manual tweaking.
   const [fitCtx, setFitCtx] = useState(null);
   const fitReadyRef = useRef(Promise.resolve(null));
@@ -207,6 +212,32 @@ export default function OutfitBuilder() {
     setPicked(fitted);
   };
 
+  // ── AI try-on ─────────────────────────────────────────────────────────────
+  // Sends the avatar photo plus the picked garment cutouts to the try-on renderer,
+  // which returns a photo of the person actually wearing the look.
+  const handleTryOn = async () => {
+    if (!avatarUrl || picked.length === 0 || rendering) return;
+    setRendering(true);
+    setRenderError(null);
+    try {
+      const items = picked
+        .map(p => ({
+          name: p.name,
+          category: p.category,
+          image_url: p.processed_image_url || p.original_image_url,
+        }))
+        .filter(i => i.image_url);
+      const res = await base44.functions.invoke("tryOn", { avatar_url: avatarUrl, items });
+      if (!res.data?.image_url) throw new Error(res.data?.error || "Try-on failed");
+      setRenderUrl(res.data.image_url);
+      setShowRender(true);
+    } catch (err) {
+      setRenderError(err?.response?.data?.error || err?.message || "Try-on failed");
+    } finally {
+      setRendering(false);
+    }
+  };
+
   // ── Snapshots ─────────────────────────────────────────────────────────────
   const handleSaveOutfitFromSnapshot = (snapshot) => {
     setSavingSnapshot(snapshot);
@@ -259,6 +290,9 @@ export default function OutfitBuilder() {
           <Button variant="outline" size="sm" onClick={() => setShowSuggest(true)} disabled={clothes.length === 0} className="text-purple-300 border-purple-500/40 bg-transparent hover:bg-purple-500/10 disabled:opacity-40">
             <Wand2 className="w-4 h-4 mr-1" /> Suggest Outfit
           </Button>
+          <Button onClick={handleTryOn} disabled={picked.length === 0 || rendering || !avatarUrl} className="bg-[#e8b820] hover:bg-[#d4a017] text-black font-semibold disabled:opacity-40" size="sm">
+            <Sparkles className="w-4 h-4 mr-1" /> Try On
+          </Button>
           <Button onClick={() => setShowSave(true)} disabled={picked.length === 0} variant="outline" className="text-white/60 border-white/20 bg-transparent hover:bg-white/10 disabled:opacity-40" size="sm">
             <Save className="w-4 h-4 mr-1" /> Save
           </Button>
@@ -274,13 +308,35 @@ export default function OutfitBuilder() {
         {/* Center: manual outfit canvas */}
         <div className="flex-1 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-            <AvatarCanvas
-              profile={profile}
-              picked={picked}
-              onUpdate={handleUpdatePicked}
-              onRemove={handleRemovePicked}
-            />
+            {rendering ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-[#e8b820] border-t-transparent rounded-full animate-spin" />
+                <p className="text-white/60 text-sm font-body">Dressing you in this look…</p>
+              </div>
+            ) : showRender && renderUrl ? (
+              <div className="relative h-full w-full flex items-center justify-center">
+                <img src={renderUrl} alt="AI try-on" className="max-h-full max-w-full object-contain rounded-3xl" />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowRender(false)}
+                  className="absolute top-2 left-2 text-white/80 border-white/20 bg-black/50 hover:bg-black/70 backdrop-blur"
+                >
+                  <ImageIcon className="w-4 h-4 mr-1" /> Canvas
+                </Button>
+              </div>
+            ) : (
+              <AvatarCanvas
+                profile={profile}
+                picked={picked}
+                onUpdate={handleUpdatePicked}
+                onRemove={handleRemovePicked}
+              />
+            )}
           </div>
+          {renderError && (
+            <p className="text-red-400 text-xs text-center pb-2 font-body">{renderError}</p>
+          )}
           <SnapshotsGallery snapshots={snapshots} onSaveOutfit={handleSaveOutfitFromSnapshot} onDelete={handleDeleteSnapshot} />
         </div>
       </div>
@@ -325,7 +381,7 @@ export default function OutfitBuilder() {
         <SaveOutfitModal
           userEmail={user?.email}
           placed={picked}
-          snapshotUrl={savingSnapshot?.snapshot_url}
+          snapshotUrl={savingSnapshot?.snapshot_url || (showRender ? renderUrl : null)}
           editingOutfit={savingSnapshot ? null : editingOutfit}
           onClose={() => {
             setShowSave(false);
