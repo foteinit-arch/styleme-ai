@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Wand2, Save } from "lucide-react";
@@ -7,6 +7,7 @@ import ClothingPicker from "@/components/builder/ClothingPicker";
 import SaveOutfitModal from "@/components/builder/SaveOutfitModal";
 import SnapshotsGallery from "@/components/builder/SnapshotsGallery";
 import { isDress, defaultPlacement } from "@/components/builder/outfitLayout";
+import { measureImage, detectBody, fitItem } from "@/components/builder/autoFit";
 
 export default function OutfitBuilder() {
   const [user, setUser]       = useState(null);
@@ -18,6 +19,9 @@ export default function OutfitBuilder() {
   const [savingSnapshot, setSavingSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingOutfit, setEditingOutfit] = useState(null);
+  // Body landmarks of the avatar photo, used to auto-fit garments with no manual tweaking.
+  const [fitCtx, setFitCtx] = useState(null);
+  const fitReadyRef = useRef(Promise.resolve(null));
 
   // Suggest outfit
   const [showSuggest, setShowSuggest] = useState(false);
@@ -37,11 +41,13 @@ export default function OutfitBuilder() {
       const matched = names.map(name =>
         clothes.find(c => c.name?.toLowerCase() === name?.toLowerCase())
       ).filter(Boolean);
-      // Replace the current selection in one go with the suggested look.
+      // Replace the current selection in one go with the suggested look, fitted to the body.
+      const ctx = fitCtx || (await fitReadyRef.current);
+      const placements = await Promise.all(matched.map((item) => fitItem(item, ctx)));
       setPicked(matched.map((item, i) => ({
         ...item,
         placedId: Date.now() + i,
-        ...defaultPlacement(item.category),
+        ...(placements[i] || defaultPlacement(item.category)),
       })));
       setShowSuggest(false);
     } catch (err) {
@@ -104,10 +110,34 @@ export default function OutfitBuilder() {
     return () => window.removeEventListener('avatar-updated', handleAvatarUpdate);
   }, [user]);
 
+  // Read the avatar's proportions once, so every garment can be placed on the body.
+  const avatarUrl = profile?.avatar_generated_url || profile?.avatar_photo_url;
+  useEffect(() => {
+    if (!avatarUrl) { setFitCtx(null); fitReadyRef.current = Promise.resolve(null); return; }
+    let cancelled = false;
+    const ready = (async () => {
+      const avatar = await measureImage(avatarUrl);
+      let body = null;
+      try {
+        body = await detectBody(avatarUrl);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn("[OutfitBuilder] body detection failed:", e?.message);
+      }
+      const ctx = { avatar, body };
+      if (!cancelled) setFitCtx(ctx);
+      return ctx;
+    })();
+    fitReadyRef.current = ready;
+    return () => { cancelled = true; };
+  }, [avatarUrl]);
+
   // ── Pick / remove ───────────────────────────────────────────────────────────
   // Picking a garment adds it to the look. A dress is a one-piece: picking one
   // clears any existing top/bottom; picking a top/bottom clears any dress.
-  const handlePick = (item) => {
+  const handlePick = async (item) => {
+    const ctx = fitCtx || (await fitReadyRef.current);
+    const fit = await fitItem(item, ctx);
     setPicked(prev => {
       let next = [...prev];
 
@@ -130,7 +160,7 @@ export default function OutfitBuilder() {
       return [...next, {
         ...item,
         placedId: Date.now() + Math.random(),
-        ...defaultPlacement(item.category),
+        ...(fit || defaultPlacement(item.category)),
       }];
     });
   };
